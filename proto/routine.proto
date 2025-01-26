@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package ac;
+
+import "position.proto";
+import "frame.proto";
+
+message Routine {
+  uint32 id = 1;              // metadata
+  string name = 2;            // metadata
+  string description = 3;     // metadata
+  repeated Frame frames = 4;  // indexed by id
+  repeated State states = 5;  // indexed by id
+  repeated Node nodes = 6;    // indexed by id
+
+  message State {
+    uint32 id = 1;
+    string name = 2;
+    string description = 3;
+    repeated uint32 samples = 4;  // samples for this state; indexes into frames
+  }
+
+  message Node {
+    uint32 id = 1;
+    string name = 2;
+    string description = 3;
+
+    uint32 state_id = 4;      // indexes into states (for recongition)
+    repeated Edge edges = 5;  // transitions
+  }
+
+  message Edge {
+    uint32 to_id = 1;          // id of next node; from node is edge's parent
+    Condition condition = 2;   // required before you can take it
+    oneof action {             // can be an action, or null action;
+      Point click = 3;         // click here
+      Rect click_region = 4;   // click anywhere here
+      PointSequence drag = 5;  // drag through these points
+    };
+  }
+}
+
+message Condition {
+  uint32 timeout = 1;  // after timeout, ignore condition; defaults to INF
+  uint32 wait = 2;     // defaults to 0; required time before considering
+  oneof condition {    // what to check; by default ALWAYS TRUE
+    Match match = 3;
+  }
+
+  message Match {
+    uint32 frame_id = 1;   // actual payload to check
+    double tolerance = 2;  // required similarity to pass; between 0.0 and 1.0
+    oneof region {
+      Point point = 10;  // check a single pixel
+      Rect rect = 11;    // check a rectangular region
+    }
+  }
+}

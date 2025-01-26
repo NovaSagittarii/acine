@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package ac;
+
+// represents an image frame in a sequence
+message Frame {
+  uint32 id = 1;   // sequence
+  bytes data = 2;  // frame data for screenshot; don't use high res
+}

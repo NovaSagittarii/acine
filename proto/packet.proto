@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package ac;
+
+import "frame.proto";
+import "routine.proto";
+
+message Packet {
+  oneof type {
+    FrameOperation frame_operation = 1;
+    Click click = 2;
+    Routine routine = 3;
+  }
+
+  message Click {
+    int32 x = 1;
+    int32 y = 2;
+  }
+}
+
+message FrameOperation {
+  Operation type = 1;
+  Frame frame = 2;
+  enum Operation {
+    FRAME_OP_UNSPECIFIED = 0;
+    FRAME_OP_SAVE = 1;  // make persist (data unused)
+    FRAME_OP_GET = 2;   // request frame (data will be filled on response)
+  }
+}

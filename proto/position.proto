@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package ac;
+
+message Point {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message Rect {
+  int32 left = 1;
+  int32 right = 2;
+  int32 top = 3;
+  int32 bottom = 4;
+}
+
+message PointSequence {
+  repeated Point points = 1;
+}
