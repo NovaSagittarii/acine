@@ -1,0 +1,1 @@
+../proto/dist/py --global-option="--no-cache-dir" --global-option="--no-binary=acine_proto_dist" --global-option="--force-reinstall"
