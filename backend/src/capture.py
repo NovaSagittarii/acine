@@ -1,5 +1,6 @@
 from asyncio import Lock, Semaphore
 import cv2
+from numpy import ndarray
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
 
@@ -7,14 +8,13 @@ class GameCapture:  # thanks joshua
     def __init__(self, window_name: str | None = None):
         self.framedata_png = None
         self.window_name = window_name
+        self.__first_frame = False
+        self.init()
+        self.want_frame = False
+        self.get_png_frame_lock = Lock()
+        self.capture_callback_semaphore = Semaphore(0)
 
-    capture_callback_flag = Semaphore(0)
-
-    def start(self) -> None:
-        """
-        Starts capturing
-        """
-        print(f"starting capture on {self.window_name}")
+    def init(self) -> None:
         self.capture = WindowsCapture(
             cursor_capture=False,
             draw_border=False,
@@ -22,43 +22,34 @@ class GameCapture:  # thanks joshua
             window_name=self.window_name,
         )
 
-        first_frame = True
-
         @self.capture.event
-        def on_frame_arrived(
-            frame: Frame, capture_control: InternalCaptureControl
-        ):
-            nonlocal first_frame
-            if first_frame:
-                first_frame = False
-            else:
-                return
+        def on_frame_arrived(frame: Frame, _: InternalCaptureControl):
+            # Note: when minimized, this does not run
+            if not self.want_frame:
+                return  # discard frame
+            self.want_frame = False
 
-            print("New Frame Arrived")
-            # frame.save_as_image("./yooo.png")
+            print("got frame")
+            frame.save_as_image("./yooo.png")
 
             _, framedata_png = cv2.imencode(".png", frame.frame_buffer)
             self.framedata_png = framedata_png
+            self.capture_callback_semaphore.release()
 
-            capture_control.stop()
-            GameCapture.capture_callback_flag.release()
-
+        # called when the window closes
         @self.capture.event
         def on_closed():
-            print("closed")
-            pass
+            print("Capture Session Closed")
 
-        self.capture.start()
+        self.capture.start_free_threaded()
 
-    get_png_frame_lock = Lock()
-
-    async def get_png_frame(self) -> None:
+    async def get_png_frame(self) -> ndarray:
         """
         Gets a png encoded frame
         """
-        async with GameCapture.get_png_frame_lock:
-            self.start()
-            await GameCapture.capture_callback_flag.acquire()
+        async with self.get_png_frame_lock:
+            self.want_frame = True
+            await self.capture_callback_semaphore.acquire()
         return self.framedata_png
 
 
