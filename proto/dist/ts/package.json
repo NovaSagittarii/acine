@@ -1,0 +1,15 @@
+{
+  "name": "acine-proto-dist",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "generated protobufs",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "NovaSagittarii",
+  "license": "ISC",
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.2.3"
+  }
+}
