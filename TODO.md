@@ -8,10 +8,12 @@ budget issue tracker
 - `PY` setup websocket communication (flask i guess?)
 - `PR` setup python protobuf + mypy; maybe bring the patch script over
 - `JS/PY` forward mouse movements
+- `JS` routine states
 
 ## Core Feature
 
-- `JS` routine states
+- `PY` decision tree generation
+- `JS` graph editor (not sure if react/pixi/p5js yet)
 
 ## High priority
 
