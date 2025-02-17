@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
-import Button from './components/Button';
+import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
+import { useEffect, useState } from 'react';
+
+import { $frames, $routine, $selectedState } from './state';
+import Button from './components/Button';
+import StateList from './components/StateList';
 
 const dimensions = [0, 0];
 const ws = new WebSocket('ws://localhost:9000');
@@ -39,10 +43,19 @@ function getFrame() {
   ws.send(pb.Packet.encode(packet).finish());
 }
 
+/**
+ * used to save the current frame to persistent storage (sort of)
+ * current implementation is keep a persistent objectURL
+ * in the future, actually save it (not just as objectURL)
+ *
+ * this is a callback overridden each time client receives new frame through ws
+ */
+let saveCurrentFrame = () => -1;
+
 function App() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  async function listen(ev: MessageEvent) {
+  const listen = async (ev: MessageEvent) => {
     // todo: turn this into a EventEmitter
     const { data }: { data: Blob } = ev;
 
@@ -53,6 +66,12 @@ function App() {
         const frameData = frameOperation.frame?.data;
         const blob = new Blob([frameData!]);
         const imageUrl = URL.createObjectURL(blob);
+        saveCurrentFrame = () => {
+          const persistentURL = URL.createObjectURL(blob);
+          let newId = $frames.get().length;
+          $frames.set([...$frames.get(), persistentURL]);
+          return newId;
+        };
         setImageUrl((prev) => {
           // revoke old url if it exists
           if (prev) URL.revokeObjectURL(prev);
@@ -61,7 +80,7 @@ function App() {
         // console.log(blob, imageUrl);
       }
     }
-  }
+  };
 
   useEffect(() => {
     ws.addEventListener('message', listen);
@@ -77,12 +96,27 @@ function App() {
     };
   }, []);
 
+  const selectedState = useStore($selectedState);
+
   return (
     <div className='w-screen h-screen p-8'>
       <div className='w-full h-full flex gap-4 rounded-sm border border-black/10'>
         <div className='w-full'>
           <div className='h-full p-8 flex flex-col gap-4'>
-            <Button className='bg-red-400'>CAPTURE</Button>
+            <Button
+              className='bg-red-400'
+              onClick={() => {
+                const frameId = saveCurrentFrame();
+                if (frameId < 0) {
+                  console.warn('tried to capture nonexistant frame');
+                  return;
+                }
+                selectedState?.samples.push(frameId);
+                $routine.set($routine.get());
+              }}
+            >
+              CAPTURE
+            </Button>
             <div className='flex gap-4'>
               <Button className='bg-blue-200 w-full'>Click</Button>
               <Button className='bg-blue-200 w-full'>Click (Region)</Button>
@@ -147,11 +181,8 @@ function App() {
             </div>
           </div>
         </div>
-        <div className='w-2/3 p-8 flex flex-col gap-4'>
-          <div className='h-full overflow-y-auto'>
-            <>state</>
-          </div>
-          <Button className='bg-black text-white'>Add State</Button>
+        <div className='w-2/3 h-full'>
+          <StateList />
         </div>
       </div>
     </div>
