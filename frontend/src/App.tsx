@@ -99,10 +99,10 @@ function App() {
   const selectedState = useStore($selectedState);
 
   return (
-    <div className='w-screen h-screen p-8'>
-      <div className='w-full h-full flex gap-4 rounded-sm border border-black/10'>
+    <div className='w-screen h-screen'>
+      <div className='w-full h-full flex gap-0 rounded-sm'>
         <div className='w-full'>
-          <div className='h-full p-8 flex flex-col gap-4'>
+          <div className='h-full p-4 flex flex-col gap-4'>
             <Button
               className='bg-red-400'
               onClick={() => {

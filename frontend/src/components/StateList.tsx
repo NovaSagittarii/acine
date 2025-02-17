@@ -17,8 +17,10 @@ function StateList() {
   const selectedState = useStore($selectedState);
 
   return (
-    <div className='w-full h-full p-8 flex flex-col gap-4'>
-      <div className='h-full overflow-y-auto'>
+    // pr pb padding is just so the "Add State" button doesnt
+    // cause overflow/overflow as much when hovered
+    <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
+      <div className='h-full overflow-y-scroll'>
         {routine.states.length === 0 && 'No states yet.'}
         {routine.states.map((state) => (
           <div key={state.id} onClick={() => $selectedState.set(state)}>
