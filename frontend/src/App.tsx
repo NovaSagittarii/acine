@@ -12,6 +12,13 @@ import {
 import Button from './components/Button';
 import StateList from './components/StateList';
 import { toOutCoordinates } from './components/MouseRegion';
+import NodeEditor from './components/NodeEditor';
+
+enum ActiveTab {
+  STATE,
+  NODE,
+  length, // keep this at the end to know how many tabs there are
+}
 
 const ws = new WebSocket('ws://localhost:9000');
 ws.onopen = () => {
@@ -103,6 +110,7 @@ function App() {
 
   const selectedState = useStore($selectedState);
   const dimensions = useStore($sourceDimensions);
+  const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.STATE);
 
   return (
     <div className='w-screen h-screen'>
@@ -181,8 +189,20 @@ function App() {
             </div>
           </div>
         </div>
-        <div className='w-2/3 h-full'>
-          <StateList />
+        <div className='w-2/3 h-full flex flex-col'>
+          <div className='w-full flex flex-row gap-2'>
+            {new Array(ActiveTab.length).fill(0).map((_, index) => (
+              <div
+                key={index}
+                onClick={() => setActiveTab(index)}
+                className={`hover:bg-amber-100 ${activeTab === index && 'font-bold'}`}
+              >
+                {['states', 'nodes'][index]}
+              </div>
+            ))}
+          </div>
+          {activeTab === ActiveTab.STATE && <StateList />}
+          {activeTab === ActiveTab.NODE && <NodeEditor />}
         </div>
       </div>
     </div>
