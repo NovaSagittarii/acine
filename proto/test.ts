@@ -1,4 +1,4 @@
-import * as a from "./dist/common";
+import * as a from "./dist/ts/frame";
 
 let x = a.Frame.create();
 x.data = new Uint8Array([1, 2, 3, 4]);
