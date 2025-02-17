@@ -1,1 +1,5 @@
 ../proto/dist/py --global-option="--no-cache-dir" --global-option="--no-binary=acine_proto_dist" --global-option="--force-reinstall"
+# NOTE: GLOBAL OPTION WILL BREAK DEPENDENCIES BEING INSTALLED!!
+# You will need to run this once before you can use requirements.pb.txt to
+# update the protobufs (need to install protobuf without these global options)
+# pip install ../proto/dist/py --no-cache-dir --no-binary=acine_proto_dist --force-reinstall
