@@ -26,6 +26,7 @@ budget issue tracker
 - `JS` move input listener into its own component
 - `JS` CollapseRegion.tsx -- implement collapseable region for viewing samples
 - `JS` allow zooming in on samples
+- `JS` don't flood the backend with image requests (don't cause backpressure)
 
 ## Low priority
 
@@ -36,3 +37,4 @@ budget issue tracker
 - `JS` EditableText.tsx -- improve UX
 - `JS` break up toOutCoordinates into two functions, probably shouldn't be one?
 - `JS` reset region of interest selection; back to default (entire screen)
+- `JS/PR/PY` improve stream FPS -- seems to be bottlenecked somewhere
