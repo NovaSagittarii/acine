@@ -18,6 +18,9 @@ message Routine {
     string name = 2;
     string description = 3;
     repeated uint32 samples = 4;  // samples for this state; indexes into frames
+
+    // region of interest; used to restrict area of interest in samples
+    ac.Rect region = 5;
   }
 
   message Node {

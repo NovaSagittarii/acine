@@ -11,6 +11,7 @@ import {
 } from './state';
 import Button from './components/Button';
 import StateList from './components/StateList';
+import { toOutCoordinates } from './components/MouseRegion';
 
 const ws = new WebSocket('ws://localhost:9000');
 ws.onopen = () => {
@@ -130,13 +131,7 @@ function App() {
             <div
               className='min-h-[12rem] bg-black'
               onMouseMove={(ev) => {
-                const { offsetLeft, offsetTop, offsetWidth, offsetHeight } =
-                  ev.target as HTMLDivElement;
-                const { pageX, pageY } = ev;
-                const x = pageX - offsetLeft;
-                const y = pageY - offsetTop;
-                const px = Math.floor((x / offsetWidth) * dimensions[0]);
-                const py = Math.floor((y / offsetHeight) * dimensions[1]);
+                const { x, y } = toOutCoordinates(...dimensions, ev);
                 const pkt = pb.Packet.create({
                   type: {
                     $case: 'mouseEvent',
@@ -144,8 +139,8 @@ function App() {
                       type: {
                         $case: 'move',
                         move: {
-                          x: px,
-                          y: py,
+                          x,
+                          y,
                         },
                       },
                     },

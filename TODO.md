@@ -24,6 +24,8 @@ budget issue tracker
   - maybe bring the patch script over; or submit PR to mypy proto
 - `JS` persistent websocket
 - `JS` move input listener into its own component
+- `JS` CollapseRegion.tsx -- implement collapseable region for viewing samples
+- `JS` allow zooming in on samples
 
 ## Low priority
 
@@ -32,3 +34,5 @@ budget issue tracker
 - `PR` fix the documentation on proto; js stuff lives in root and py stuff in dist/py
 - `JS` setup path alias
 - `JS` EditableText.tsx -- improve UX
+- `JS` break up toOutCoordinates into two functions, probably shouldn't be one?
+- `JS` reset region of interest selection; back to default (entire screen)

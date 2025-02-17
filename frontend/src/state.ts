@@ -24,7 +24,7 @@ export const $frames = atom<string[]>([]);
 
 /**
  * reference to currently selected state
- * 
+ *
  * need `$routine.set($routine.get())` to make changes appear
  */
 export const $selectedState = atom<Routine_State | null>(null);
