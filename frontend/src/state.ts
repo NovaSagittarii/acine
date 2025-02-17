@@ -28,3 +28,8 @@ export const $frames = atom<string[]>([]);
  * need `$routine.set($routine.get())` to make changes appear
  */
 export const $selectedState = atom<Routine_State | null>(null);
+
+/**
+ * [width, height] of the window you are controlling
+ */
+export const $sourceDimensions = atom<[number, number]>([0, 0]);

@@ -2,11 +2,16 @@ import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
 import { useEffect, useState } from 'react';
 
-import { $frames, $routine, $selectedState } from './state';
+import {
+  $frames,
+  $routine,
+  $selectedState,
+  $sourceDimensions, // used in useStore (function scope)
+  $sourceDimensions as dimensions, // used in global scope
+} from './state';
 import Button from './components/Button';
 import StateList from './components/StateList';
 
-const dimensions = [0, 0];
 const ws = new WebSocket('ws://localhost:9000');
 ws.onopen = () => {
   console.log('ws open');
@@ -25,9 +30,8 @@ ws.onmessage = async (data) => {
   );
   if (packet.type?.$case === 'configuration') {
     const conf = packet.type.configuration;
-    dimensions[0] = conf.width;
-    dimensions[1] = conf.height;
-    console.log('set dimensions', dimensions);
+    dimensions.set([conf.width, conf.height]);
+    console.log('set dimensions', dimensions.get());
   }
 };
 
@@ -97,6 +101,7 @@ function App() {
   }, []);
 
   const selectedState = useStore($selectedState);
+  const dimensions = useStore($sourceDimensions);
 
   return (
     <div className='w-screen h-screen'>
