@@ -4,17 +4,28 @@ package ac;
 
 import "frame.proto";
 import "routine.proto";
+import "position.proto";
 
 message Packet {
   oneof type {
     FrameOperation frame_operation = 1;
-    Click click = 2;
-    Routine routine = 3;
+    MouseEvent mouse_event = 2;
+    Configuration configuration = 3;
+    Routine routine = 4;
   }
 
-  message Click {
-    int32 x = 1;
-    int32 y = 2;
+  message MouseEvent {
+    oneof type {
+      ac.Point move = 1;           // mouse moved
+      MouseButton mouse_up = 2;    // mouse button released
+      MouseButton mouse_down = 3;  // mouse button down
+    }
+    enum MouseButton {
+      MOUSE_BUTTON_UNSPECIFIED = 0;
+      MOUSE_BUTTON_LEFT = 1;
+      MOUSE_BUTTON_MIDDLE = 2;
+      MOUSE_BUTTON_RIGHT = 4;
+    }
   }
 }
 
@@ -26,4 +37,9 @@ message FrameOperation {
     FRAME_OP_SAVE = 1;  // make persist (data unused)
     FRAME_OP_GET = 2;   // request frame (data will be filled on response)
   }
+}
+
+message Configuration {
+  int32 width = 1;
+  int32 height = 2;
 }

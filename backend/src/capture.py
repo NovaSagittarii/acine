@@ -8,11 +8,11 @@ class GameCapture:  # thanks joshua
     def __init__(self, window_name: str | None = None):
         self.framedata_png = None
         self.window_name = window_name
-        self.__first_frame = False
         self.init()
-        self.want_frame = False
+        self.want_frame = True
         self.get_png_frame_lock = Lock()
         self.capture_callback_semaphore = Semaphore(0)
+        self.dimensions: 'tuple[int, int]' = (0, 0)
 
     def init(self) -> None:
         self.capture = WindowsCapture(
@@ -29,11 +29,12 @@ class GameCapture:  # thanks joshua
                 return  # discard frame
             self.want_frame = False
 
-            print("got frame")
-            frame.save_as_image("./yooo.png")
+            # print("got frame")
+            # frame.save_as_image("./yooo.png")
 
             _, framedata_png = cv2.imencode(".png", frame.frame_buffer)
             self.framedata_png = framedata_png
+            self.dimensions = (frame.width, frame.height)
             self.capture_callback_semaphore.release()
 
         # called when the window closes

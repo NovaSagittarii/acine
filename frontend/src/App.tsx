@@ -2,10 +2,30 @@ import { useEffect, useState } from 'react';
 import Button from './components/Button';
 import * as pb from 'acine-proto-dist';
 
+const dimensions = [0, 0];
 const ws = new WebSocket('ws://localhost:9000');
-ws.onopen = () => console.log('ws open');
+ws.onopen = () => {
+  console.log('ws open');
+  const req = pb.Packet.create({
+    type: {
+      $case: 'configuration',
+      configuration: {},
+    },
+  });
+  ws.send(pb.Packet.encode(req).finish());
+};
 ws.onclose = () => console.log('ws close');
-ws.onmessage = (data) => console.log('data', data);
+ws.onmessage = async (data) => {
+  const packet = pb.Packet.decode(
+    new Uint8Array(await data.data.arrayBuffer()),
+  );
+  if (packet.type?.$case === 'configuration') {
+    const conf = packet.type.configuration;
+    dimensions[0] = conf.width;
+    dimensions[1] = conf.height;
+    console.log('set dimensions', dimensions);
+  }
+};
 
 function getFrame() {
   const frameOperation = pb.FrameOperation.create();
@@ -68,8 +88,62 @@ function App() {
               <Button className='bg-blue-200 w-full'>Click (Region)</Button>
               <Button className='bg-blue-200 w-full'>Drag</Button>
             </div>
-            <div className='min-h-[12rem] bg-black text-white'>
-              {imageUrl && <img src={imageUrl} />}
+            <div
+              className='min-h-[12rem] bg-black'
+              onMouseMove={(ev) => {
+                const { offsetLeft, offsetTop, offsetWidth, offsetHeight } =
+                  ev.target as HTMLDivElement;
+                const { pageX, pageY } = ev;
+                const x = pageX - offsetLeft;
+                const y = pageY - offsetTop;
+                const px = Math.floor((x / offsetWidth) * dimensions[0]);
+                const py = Math.floor((y / offsetHeight) * dimensions[1]);
+                const pkt = pb.Packet.create({
+                  type: {
+                    $case: 'mouseEvent',
+                    mouseEvent: {
+                      type: {
+                        $case: 'move',
+                        move: {
+                          x: px,
+                          y: py,
+                        },
+                      },
+                    },
+                  },
+                });
+                ws.send(pb.Packet.encode(pkt).finish());
+              }}
+              onMouseDown={() => {
+                const pkt = pb.Packet.create({
+                  type: {
+                    $case: 'mouseEvent',
+                    mouseEvent: {
+                      type: {
+                        $case: 'mouseDown',
+                        mouseDown: 0,
+                      },
+                    },
+                  },
+                });
+                ws.send(pb.Packet.encode(pkt).finish());
+              }}
+              onMouseUp={() => {
+                const pkt = pb.Packet.create({
+                  type: {
+                    $case: 'mouseEvent',
+                    mouseEvent: {
+                      type: {
+                        $case: 'mouseUp',
+                        mouseUp: 0,
+                      },
+                    },
+                  },
+                });
+                ws.send(pb.Packet.encode(pkt).finish());
+              }}
+            >
+              {imageUrl && <img src={imageUrl} draggable={false} />}
             </div>
           </div>
         </div>
