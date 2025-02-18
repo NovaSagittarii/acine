@@ -10,15 +10,17 @@ budget issue tracker
 - `JS/PY` forward mouse movements
 - `JS` routine states
 - `JS` persistent routine (persistent-nanostores)
+- `JS/PY` disk-persistent frame samples
 
 ## Core Feature
 
 - `PY` decision tree generation
-- `JS` graph editor (not sure if react/pixi/p5js yet)
+- `JS` graph editor, very basic (node and adjacent list editor haha)
 
 ## High priority
 
 - `PY` setup routine handling (running it; dependent on everything else working though)
+- `JS` graph editor visual (not sure if react/pixi/p5js yet)
 
 ## Medium priority
 
@@ -29,6 +31,8 @@ budget issue tracker
 - `JS` CollapseRegion.tsx -- implement collapseable region for viewing samples
 - `JS` allow zooming in on samples
 - `JS` don't flood the backend with image requests (don't cause backpressure)
+- `BE` setup compression on images (each one being 1MiB aint great)
+- `JS` state searchbar
 
 ## Low priority
 
@@ -40,3 +44,12 @@ budget issue tracker
 - `JS` break up toOutCoordinates into two functions, probably shouldn't be one?
 - `JS` reset region of interest selection; back to default (entire screen)
 - `JS/PR/PY` improve stream FPS -- seems to be bottlenecked somewhere
+- `PR` fix the build/lib/build/lib/... recursion (move `*_dist` to `src/*_dist`)
+- `JS/PR` region composition: union
+
+## No priority
+
+- `PY` figure out how to make mouseinput (raw input?) work with game applications
+  - currently AHK only works on Virtualbox and CROSVM based applications
+- `JS/PR` region composition: difference
+- `JS/PR` region composition: arbitrary selection

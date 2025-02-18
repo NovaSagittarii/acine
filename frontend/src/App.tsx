@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import {
   $frames,
   $routine,
-  $routineFrames,
   $selectedState,
   $sourceDimensions, // used in useStore (function scope)
   $sourceDimensions as dimensions,
@@ -16,6 +15,7 @@ import Button from './components/Button';
 import StateList from './components/StateList';
 import { toOutCoordinates } from './components/MouseRegion';
 import NodeEditor from './components/NodeEditor';
+import { frameToObjectURL } from './client/encoder';
 
 enum ActiveTab {
   STATE,
@@ -36,7 +36,8 @@ ws.onopen = () => {
   // autoload on connect (nice QoL)
   if ($frames.get().length === 0) {
     // but only when no frames exist (don't repeatedly fire on hot reload)
-    loadRoutine();
+    // ... doesn't seem to work properly ($frames cleared on hot reload)
+    loadRoutine(ws);
   }
 };
 ws.onclose = () => console.log('ws close');
@@ -44,16 +45,47 @@ ws.onmessage = async (data) => {
   const packet = pb.Packet.decode(
     new Uint8Array(await data.data.arrayBuffer()),
   );
-  if (packet.type?.$case === 'configuration') {
-    const conf = packet.type.configuration;
-    dimensions.set([conf.width, conf.height]);
-    console.log('set dimensions', dimensions.get());
+  switch (packet.type?.$case) {
+    case 'configuration': {
+      const conf = packet.type.configuration;
+      dimensions.set([conf.width, conf.height]);
+      console.log('set dimensions', dimensions.get());
+      break;
+    }
+    case 'frameOperation': {
+      const { frameOperation } = packet.type;
+      switch (frameOperation.type) {
+        case pb.FrameOperation_Operation.FRAME_OP_BATCH_GET: {
+          // an HTTP server would not have been a bad idea...
+          $frames.set(frameOperation.frames.map(frameToObjectURL));
+          break;
+        }
+      }
+      break;
+    }
   }
 };
 
-function getFrame() {
+function getFrame(id: number = -1) {
   const frameOperation = pb.FrameOperation.create();
   frameOperation.type = pb.FrameOperation_Operation.FRAME_OP_GET;
+  if (id >= 0) frameOperation.frame = pb.Frame.create({ id });
+  const packet = pb.Packet.create({
+    type: {
+      $case: 'frameOperation',
+      frameOperation,
+    },
+  });
+  ws.send(pb.Packet.encode(packet).finish());
+}
+
+/**
+ * save a frame on backend (disk)
+ */
+function persistFrame(frame: pb.Frame) {
+  const frameOperation = pb.FrameOperation.create();
+  frameOperation.frame = frame;
+  frameOperation.type = pb.FrameOperation_Operation.FRAME_OP_SAVE;
   const packet = pb.Packet.create({
     type: {
       $case: 'frameOperation',
@@ -83,15 +115,17 @@ function App() {
     if (packet.type?.$case === 'frameOperation') {
       const frameOperation = packet.type.frameOperation;
       if (frameOperation.type === pb.FrameOperation_Operation.FRAME_OP_GET) {
-        if (!frameOperation.frame) return;
-        const frameData = frameOperation.frame.data;
-        const blob = new Blob([frameData!]);
+        const { frame } = frameOperation;
+        if (!frame) return;
+        const { data } = frame;
+        const blob = new Blob([data!]);
         const imageUrl = URL.createObjectURL(blob);
         saveCurrentFrame = () => {
           const persistentURL = URL.createObjectURL(blob);
           let newId = $frames.get().length;
           $frames.set([...$frames.get(), persistentURL]);
-          $routineFrames.get().frames.push(frameOperation.frame!);
+          $routine.get().frames.push(pb.Frame.create({ id: frame.id }));
+          persistFrame(frame);
           return newId;
         };
         setImageUrl((prev) => {
@@ -213,7 +247,7 @@ function App() {
             <div className='hover:bg-amber-100' onClick={saveRoutine}>
               save
             </div>
-            <div className='hover:bg-amber-100' onClick={loadRoutine}>
+            <div className='hover:bg-amber-100' onClick={() => loadRoutine(ws)}>
               load
             </div>
           </div>

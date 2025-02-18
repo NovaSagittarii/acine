@@ -1,6 +1,9 @@
 # ws
 autobahn[asyncio]==24.4.2
 
+# asyncio
+aiofiles==24.1.0
+
 # auto inputs
 ahk[binary]==1.8.3
 windows-capture==1.4.2

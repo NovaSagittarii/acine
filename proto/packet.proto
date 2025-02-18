@@ -32,10 +32,12 @@ message Packet {
 message FrameOperation {
   Operation type = 1;
   Frame frame = 2;
+  repeated Frame frames = 3;
   enum Operation {
     FRAME_OP_UNSPECIFIED = 0;
-    FRAME_OP_SAVE = 1;  // make persist (data unused)
-    FRAME_OP_GET = 2;   // request frame (data will be filled on response)
+    FRAME_OP_SAVE = 1;  // persist on backend (currently requires frame.data)
+    FRAME_OP_GET = 2;   // request frame (frame.data will be filled in response)
+    FRAME_OP_BATCH_GET = 3;  // request a bunch of frames (used at startup)
   }
 }
 

@@ -4,8 +4,13 @@
 
 import { atom } from 'nanostores';
 import { persistentAtom } from '@nanostores/persistent';
-import { Routine, Routine_State } from 'acine-proto-dist';
-import { frameToObjectURL } from './client/encoder';
+import {
+  FrameOperation,
+  FrameOperation_Operation,
+  Packet,
+  Routine,
+  Routine_State,
+} from 'acine-proto-dist';
 
 export const $routine = atom(Routine.create());
 export const $routineBase64 = persistentAtom<string>(
@@ -13,29 +18,45 @@ export const $routineBase64 = persistentAtom<string>(
   JSON.stringify(Routine.toJSON(Routine.create())),
 );
 
-/**
- * has actual frame objects (doesn't get reloaded like the reload as frequently)
- */
-export const $routineFrames = atom(Routine.create());
-
 function getRb64MiB() {
   return ($routineBase64.get().length / (1 << 20)).toFixed(2);
 }
 
 export function saveRoutine() {
   let o = Routine.fromJSON(Routine.toJSON($routine.get()));
-  o.frames = $routineFrames.get().frames;
+
+  // scrub frame.data (its too big)
+  o.frames.map((f) => (f.data = new Uint8Array(0)));
+
   $routineBase64.set(JSON.stringify(Routine.toJSON(o)));
   console.log(`write ${getRb64MiB()} MiB (in base64) to storage`);
+  console.log(o);
 }
 
-export function loadRoutine() {
+/**
+ * Loads the base routine from localStorage (persistent-nanostores) and then
+ * batch requests the frames from backend.
+ * @param ws websocket to backend
+ */
+export function loadRoutine(ws: WebSocket) {
   let r = Routine.fromJSON(JSON.parse($routineBase64.get()!));
-  let fr = Routine.create();
-  fr.frames = r.frames.splice(0);
+
+  // TODO: a part of the stuff that should be moved
+  // into the client connection class
+  const f = FrameOperation.create();
+  f.frames = r.frames;
+  f.type = FrameOperation_Operation.FRAME_OP_BATCH_GET;
+  const pkt = Packet.create({
+    type: {
+      $case: 'frameOperation',
+      frameOperation: f,
+    },
+  });
+  ws.send(Packet.encode(pkt).finish());
+
   $routine.set(r);
-  $routineFrames.set(fr);
-  $frames.set(fr.frames.map(frameToObjectURL));
+  // $frames.set(fr.frames.map(frameToObjectURL));
+  // can't set since dependent on server now...
   console.log(`loaded ${getRb64MiB()} MiB (in base64)`);
 }
 

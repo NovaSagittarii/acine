@@ -1,4 +1,5 @@
 from autobahn.asyncio.websocket import WebSocketServerProtocol
+from time import time  # used to id frames
 
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
@@ -7,6 +8,7 @@ from acine_proto_dist.position_pb2 import Point
 
 from .capture import GameCapture
 from .input_handler import InputHandler
+from .persist import fs_read, fs_write
 
 title = "Arknights"
 # title = "Untitled - Paint"
@@ -49,12 +51,23 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 p = Packet(
                     frame_operation=FrameOperation(
                         type=FrameOperation.FRAME_OP_GET,
-                        frame=Frame(id=0, data=data),
+                        frame=Frame(id=int(time() * 1000), data=data),
                     )
                 )
                 # print(p.ByteSize())
                 self.sendMessage(
                     p.SerializeToString(),
+                    isBinary=True,
+                )
+            case FrameOperation.FRAME_OP_SAVE:
+                f: Frame = packet.frame_operation.frame
+                await fs_write(f"{f.id}.png", f.data)
+            case FrameOperation.FRAME_OP_BATCH_GET:
+                # populate requested frames
+                for i, f in enumerate(packet.frame_operation.frames):
+                    f.data = await fs_read(f"{f.id}.png")
+                self.sendMessage(
+                    packet.SerializeToString(),
                     isBinary=True,
                 )
 
