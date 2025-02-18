@@ -45,3 +45,8 @@ dependencies = [
 [tool.setuptools]
 package-dir = { "" = "." }
 # package-dir = { "" = "src" }
+
+# weird recursion bug (EXACTLY because of the `package-dir = "."` above)
+# see https://github.com/pypa/setuptools/issues/4076
+[tool.setuptools.packages.find]
+exclude = ["build", "build*"]
