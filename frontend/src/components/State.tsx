@@ -19,24 +19,29 @@ function State({ state, selected = false }: StateProps) {
   return (
     // slight padding so you can see the highlighted background everywhere
     <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
-      {state.id}
-      <EditableText
-        onChange={(s) => {
-          state.name = s;
-          $routine.set(routine);
-        }}
-      >
-        {state.name}
-      </EditableText>
+      <div className='w-full flex flex-row justify-between items-center'>
+        <EditableText
+          onChange={(s) => {
+            state.name = s;
+            $routine.set(routine);
+          }}
+          className='flex-grow font-semibold font-mono'
+        >
+          {state.name}
+        </EditableText>
+        <div className='flex flex-row text-xs'>
+          id={state.id} ({state.samples.length} samples)
+        </div>
+      </div>
       <EditableText
         onChange={(s) => {
           state.description = s;
           $routine.set(routine);
         }}
+        className='text-sm'
       >
         {state.description}
       </EditableText>
-      <div>{state.samples.length} samples</div>
       <MouseRegion
         outWidth={width}
         outHeight={height}
