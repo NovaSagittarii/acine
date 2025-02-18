@@ -31,14 +31,14 @@ function StateList() {
       <Button
         className='bg-black text-white'
         onClick={() => {
-          routine.states.push(
-            Routine_State.create({
-              id: Date.now(),
-              name: 'new state',
-              description: 'desc',
-            }),
-          );
+          const newState = Routine_State.create({
+            id: Date.now(),
+            name: 'new state',
+            description: 'desc',
+          });
+          routine.states.push(newState);
           $routine.set(routine);
+          $selectedState.set(newState);
         }}
       >
         Add State
