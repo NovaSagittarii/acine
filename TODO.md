@@ -9,6 +9,7 @@ budget issue tracker
 - `PR` setup python protobuf + mypy; maybe bring the patch script over
 - `JS/PY` forward mouse movements
 - `JS` routine states
+- `JS` persistent routine (persistent-nanostores)
 
 ## Core Feature
 
@@ -17,8 +18,7 @@ budget issue tracker
 
 ## High priority
 
-- `PY` setup routine handling
-- `JS` persistent routine
+- `PY` setup routine handling (running it; dependent on everything else working though)
 
 ## Medium priority
 

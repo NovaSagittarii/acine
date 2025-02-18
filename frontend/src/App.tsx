@@ -5,9 +5,12 @@ import { useEffect, useState } from 'react';
 import {
   $frames,
   $routine,
+  $routineFrames,
   $selectedState,
   $sourceDimensions, // used in useStore (function scope)
-  $sourceDimensions as dimensions, // used in global scope
+  $sourceDimensions as dimensions,
+  loadRoutine,
+  saveRoutine, // used in global scope
 } from './state';
 import Button from './components/Button';
 import StateList from './components/StateList';
@@ -30,6 +33,11 @@ ws.onopen = () => {
     },
   });
   ws.send(pb.Packet.encode(req).finish());
+  // autoload on connect (nice QoL)
+  if ($frames.get().length === 0) {
+    // but only when no frames exist (don't repeatedly fire on hot reload)
+    loadRoutine();
+  }
 };
 ws.onclose = () => console.log('ws close');
 ws.onmessage = async (data) => {
@@ -75,13 +83,15 @@ function App() {
     if (packet.type?.$case === 'frameOperation') {
       const frameOperation = packet.type.frameOperation;
       if (frameOperation.type === pb.FrameOperation_Operation.FRAME_OP_GET) {
-        const frameData = frameOperation.frame?.data;
+        if (!frameOperation.frame) return;
+        const frameData = frameOperation.frame.data;
         const blob = new Blob([frameData!]);
         const imageUrl = URL.createObjectURL(blob);
         saveCurrentFrame = () => {
           const persistentURL = URL.createObjectURL(blob);
           let newId = $frames.get().length;
           $frames.set([...$frames.get(), persistentURL]);
+          $routineFrames.get().frames.push(frameOperation.frame!);
           return newId;
         };
         setImageUrl((prev) => {
@@ -200,6 +210,12 @@ function App() {
                 {['states', 'nodes'][index]}
               </div>
             ))}
+            <div className='hover:bg-amber-100' onClick={saveRoutine}>
+              save
+            </div>
+            <div className='hover:bg-amber-100' onClick={loadRoutine}>
+              load
+            </div>
           </div>
           {activeTab === ActiveTab.STATE && <StateList />}
           {activeTab === ActiveTab.NODE && <NodeEditor />}
