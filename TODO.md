@@ -14,8 +14,10 @@ budget issue tracker
 
 ## Core Feature
 
-- `PY` decision tree generation
-- `JS` graph editor, very basic (node and adjacent list editor haha)
+- `1` `JS/PY` send routine to backend for analysis
+- `2` `CL` decision tree generation
+- `3` `JS` graph editor, very basic (node and adjacent list editor haha)
+- `JS/PY` routine replay and replay state inspector
 
 ## High priority
 
@@ -24,6 +26,7 @@ budget issue tracker
 
 ## Medium priority
 
+- `PR` auto-build scripts (need to fix mypy build)
 - `PY` do something about mypy needing insert `from . ` to fix the imports
   - maybe bring the patch script over; or submit PR to mypy proto
 - `JS` persistent websocket
@@ -46,6 +49,7 @@ budget issue tracker
 - `JS/PR/PY` improve stream FPS -- seems to be bottlenecked somewhere
 - `PR` fix the build/lib/build/lib/... recursion (move `*_dist` to `src/*_dist`)
 - `JS/PR` region composition: union
+- `CL` warn when there are ambiguous states (samples are too similar)
 
 ## No priority
 

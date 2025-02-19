@@ -14,7 +14,7 @@ message Routine {
   repeated Node nodes = 6;    // indexed by id
 
   message State {
-    uint32 id = 1;
+    uint64 id = 1;
     string name = 2;
     string description = 3;
     repeated uint32 samples = 4;  // samples for this state; indexes into frames
@@ -24,7 +24,7 @@ message Routine {
   }
 
   message Node {
-    uint32 id = 1;
+    uint64 id = 1;
     string name = 2;
     string description = 3;
 

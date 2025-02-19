@@ -4,9 +4,11 @@ from time import time  # used to id frames
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
 from acine_proto_dist.packet_pb2 import Packet, FrameOperation, Configuration
+from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.position_pb2 import Point
 
 from .capture import GameCapture
+from .classifier import predict
 from .input_handler import InputHandler
 from .persist import fs_read, fs_write
 
@@ -43,15 +45,24 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     await self.on_mouse_event(packet)
                 case "configuration":
                     await self.on_configuration(packet)
+                case "routine":
+                    data = Routine.SerializeToString(packet.routine)
+                    await fs_write(["rt.pb"], data)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
             case FrameOperation.FRAME_OP_GET:
-                data = (await gc.get_png_frame()).tobytes()
+                img = await gc.get_png_frame()
+                state = predict(img)
+                data = img.tobytes()
                 p = Packet(
                     frame_operation=FrameOperation(
                         type=FrameOperation.FRAME_OP_GET,
-                        frame=Frame(id=int(time() * 1000), data=data),
+                        frame=Frame(
+                            id=int(time() * 1000),
+                            data=data,
+                            state=state,
+                        ),
                     )
                 )
                 # print(p.ByteSize())
@@ -61,11 +72,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 )
             case FrameOperation.FRAME_OP_SAVE:
                 f: Frame = packet.frame_operation.frame
-                await fs_write(f"{f.id}.png", f.data)
+                await fs_write(["img", f"{f.id}.png"], f.data)
             case FrameOperation.FRAME_OP_BATCH_GET:
                 # populate requested frames
                 for i, f in enumerate(packet.frame_operation.frames):
-                    f.data = await fs_read(f"{f.id}.png")
+                    f.data = await fs_read(["img", f"{f.id}.png"])
                 self.sendMessage(
                     packet.SerializeToString(),
                     isBinary=True,

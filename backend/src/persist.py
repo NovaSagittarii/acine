@@ -3,18 +3,33 @@ Image persistence / save to disk.
 """
 
 import os
-from aiofiles import open
+from aiofiles import open as aopen
 
 dirname = os.path.dirname(__file__)
-path = os.path.join(dirname, "../data")
+path = os.path.join(dirname, "..", "data")
 
 
-async def fs_write(filename: str, contents: bytes):
-    async with open(os.path.join(path, filename), "wb") as f:
+async def fs_write(filename: list[str], contents: bytes):
+    """
+    write as binary to file
+    """
+    async with aopen(os.path.join(path, *filename), "wb") as f:
         await f.write(contents)
 
 
-async def fs_read(filename: str) -> bytes:
-    async with open(os.path.join(path, filename), "rb") as f:
+def fs_read_sync(filename: list[str]) -> bytes:
+    """
+    read as binary from file
+    """
+    with open(os.path.join(path, *filename), "rb") as f:
+        out = f.read()
+    return out
+
+
+async def fs_read(filename: list[str]) -> bytes:
+    """
+    read as binary from file
+    """
+    async with aopen(os.path.join(path, *filename), "rb") as f:
         out = await f.read()
     return out

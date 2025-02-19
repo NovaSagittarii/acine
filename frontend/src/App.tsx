@@ -106,6 +106,9 @@ let saveCurrentFrame = () => -1;
 
 function App() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [dState, setDState] = useState(''); // debug state
+  let dSend = 0;
+  const [dRecv, setDRecv] = useState(0);
 
   const listen = async (ev: MessageEvent) => {
     // todo: turn this into a EventEmitter
@@ -117,7 +120,9 @@ function App() {
       if (frameOperation.type === pb.FrameOperation_Operation.FRAME_OP_GET) {
         const { frame } = frameOperation;
         if (!frame) return;
-        const { data } = frame;
+        const { data, state } = frame;
+        setDState(state);
+        setDRecv(Date.now() - dSend);
         const blob = new Blob([data!]);
         const imageUrl = URL.createObjectURL(blob);
         saveCurrentFrame = () => {
@@ -146,7 +151,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const int = setInterval(getFrame, 250);
+    const int = setInterval(() => {
+      getFrame();
+      dSend = Date.now();
+    }, 250);
     return () => {
       clearInterval(int);
     };
@@ -231,6 +239,9 @@ function App() {
             >
               {imageUrl && <img src={imageUrl} draggable={false} />}
             </div>
+            {dState}
+            {`; latency=${(dRecv / 1e3).toFixed(3)}s`}
+            {`; ${(1e3 / dRecv).toFixed(1)}fps`}
           </div>
         </div>
         <div className='w-2/3 h-full flex flex-col'>
@@ -249,6 +260,21 @@ function App() {
             </div>
             <div className='hover:bg-amber-100' onClick={() => loadRoutine(ws)}>
               load
+            </div>
+            <div
+              className='hover:bg-amber-100'
+              onClick={() => {
+                const pkt = pb.Packet.create({
+                  type: {
+                    $case: 'routine',
+                    routine: $routine.get(),
+                  },
+                });
+                console.log(pkt);
+                ws.send(pb.Packet.encode(pkt).finish());
+              }}
+            >
+              sync server
             </div>
           </div>
           {activeTab === ActiveTab.STATE && <StateList />}
