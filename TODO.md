@@ -11,12 +11,12 @@ budget issue tracker
 - `JS` routine states
 - `JS` persistent routine (persistent-nanostores)
 - `JS/PY` disk-persistent frame samples
+- `JS/PY` send routine to backend for analysis
+- `CL` decision tree generation (ydf -- it's alright)
 
 ## Core Feature
 
-- `1` `JS/PY` send routine to backend for analysis
-- `2` `CL` decision tree generation
-- `3` `JS` graph editor, very basic (node and adjacent list editor haha)
+- `JS` graph editor, very basic (node and adjacent list editor haha)
 - `JS/PY` routine replay and replay state inspector
 
 ## High priority
@@ -36,6 +36,7 @@ budget issue tracker
 - `JS` don't flood the backend with image requests (don't cause backpressure)
 - `BE` setup compression on images (each one being 1MiB aint great)
 - `JS` state searchbar
+- `JS` undo/redo history
 
 ## Low priority
 
