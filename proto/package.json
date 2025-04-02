@@ -1,6 +1,7 @@
 {
   "name": "acine-proto",
   "version": "1.0.0",
+  "description": "multilang output for acine protos",
   "main": "index.js",
   "scripts": {
     "build:py": "echo 'NO BUILD FOR PY'",
@@ -11,6 +12,5 @@
     "test": "npm run test:ts && npm run test:py"
   },
   "author": "",
-  "license": "ISC",
-  "description": ""
+  "license": "ISC"
 }
