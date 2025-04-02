@@ -5,6 +5,9 @@
   "description": "generated protobufs",
   "main": "index.ts",
   "scripts": {
+    "build:win32": "protoc -I ../../src --plugin=./node_modules/.bin/protoc-gen-ts_proto.cmd --ts_proto_opt=oneof=unions --ts_proto_out=. ../../src/*.proto",
+    "build:nix": "protoc -I ../../src --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=oneof=unions --ts_proto_out=. ../../src/*.proto",
+    "build": "run-script-os",
     "test": "vitest run"
   },
   "author": "NovaSagittarii",
@@ -13,6 +16,9 @@
     "@bufbuild/protobuf": "^2.2.3"
   },
   "devDependencies": {
+    "@protobuf-ts/protoc": "^2.9.6",
+    "run-script-os": "^1.1.6",
+    "ts-proto": "^2.7.0",
     "vitest": "^3.1.1"
   }
 }
