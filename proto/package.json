@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build:win32": "protoc -I . --plugin=./node_modules/.bin/protoc-gen-ts_proto.cmd --ts_proto_opt=oneof=unions --ts_proto_out=dist/ts *.proto",
-    "build:linux": "protoc -I . --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=oneof=unions --ts_proto_out=dist/ts *.proto",
+    "build:win32": "protoc -I src --plugin=./node_modules/.bin/protoc-gen-ts_proto.cmd --ts_proto_opt=oneof=unions --ts_proto_out=dist/ts src/*.proto",
+    "build:linux": "protoc -I src --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=oneof=unions --ts_proto_out=dist/ts src/*.proto",
     "test:py": "echo 'NO TEST FOR PY'",
     "test:ts": "cd ./dist/ts && npm test",
     "test": "npm run test:ts && npm run test:py"
