@@ -1,11 +1,11 @@
-from autobahn.asyncio.websocket import WebSocketServerProtocol
 from time import time  # used to id frames
 
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
-from acine_proto_dist.packet_pb2 import Packet, FrameOperation, Configuration
-from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.packet_pb2 import Configuration, FrameOperation, Packet
 from acine_proto_dist.position_pb2 import Point
+from acine_proto_dist.routine_pb2 import Routine
+from autobahn.asyncio.websocket import WebSocketServerProtocol
 
 from .capture import GameCapture
 from .classifier import predict
@@ -51,13 +51,13 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
-            case FrameOperation.FRAME_OP_GET:
+            case FrameOperation.OPERATION_GET:
                 img = await gc.get_png_frame()
                 state = predict(img)
                 data = img.tobytes()
                 p = Packet(
                     frame_operation=FrameOperation(
-                        type=FrameOperation.FRAME_OP_GET,
+                        type=FrameOperation.OPERATION_GET,
                         frame=Frame(
                             id=int(time() * 1000),
                             data=data,
@@ -70,10 +70,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     p.SerializeToString(),
                     isBinary=True,
                 )
-            case FrameOperation.FRAME_OP_SAVE:
+            case FrameOperation.OPERATION_SAVE:
                 f: Frame = packet.frame_operation.frame
                 await fs_write(["img", f"{f.id}.png"], f.data)
-            case FrameOperation.FRAME_OP_BATCH_GET:
+            case FrameOperation.OPERATION_BATCH_GET:
                 # populate requested frames
                 for i, f in enumerate(packet.frame_operation.frames):
                     f.data = await fs_read(["img", f"{f.id}.png"])

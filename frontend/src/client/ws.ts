@@ -1,5 +1,5 @@
 /**
- * currently unused since it is messy to attach events; 
+ * currently unused since it is messy to attach events;
  * maybe use a library for persistent ws instead...
  */
 

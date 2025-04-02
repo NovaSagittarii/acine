@@ -55,7 +55,7 @@ ws.onmessage = async (data) => {
     case 'frameOperation': {
       const { frameOperation } = packet.type;
       switch (frameOperation.type) {
-        case pb.FrameOperation_Operation.FRAME_OP_BATCH_GET: {
+        case pb.FrameOperation_Operation.OPERATION_BATCH_GET: {
           // an HTTP server would not have been a bad idea...
           $frames.set(frameOperation.frames.map(frameToObjectURL));
           break;
@@ -68,7 +68,7 @@ ws.onmessage = async (data) => {
 
 function getFrame(id: number = -1) {
   const frameOperation = pb.FrameOperation.create();
-  frameOperation.type = pb.FrameOperation_Operation.FRAME_OP_GET;
+  frameOperation.type = pb.FrameOperation_Operation.OPERATION_GET;
   if (id >= 0) frameOperation.frame = pb.Frame.create({ id });
   const packet = pb.Packet.create({
     type: {
@@ -85,7 +85,7 @@ function getFrame(id: number = -1) {
 function persistFrame(frame: pb.Frame) {
   const frameOperation = pb.FrameOperation.create();
   frameOperation.frame = frame;
-  frameOperation.type = pb.FrameOperation_Operation.FRAME_OP_SAVE;
+  frameOperation.type = pb.FrameOperation_Operation.OPERATION_SAVE;
   const packet = pb.Packet.create({
     type: {
       $case: 'frameOperation',
@@ -117,7 +117,7 @@ function App() {
     const packet = pb.Packet.decode(new Uint8Array(await data.arrayBuffer()));
     if (packet.type?.$case === 'frameOperation') {
       const frameOperation = packet.type.frameOperation;
-      if (frameOperation.type === pb.FrameOperation_Operation.FRAME_OP_GET) {
+      if (frameOperation.type === pb.FrameOperation_Operation.OPERATION_GET) {
         const { frame } = frameOperation;
         if (!frame) return;
         const { data, state } = frame;

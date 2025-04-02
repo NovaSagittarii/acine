@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package ac;
 
-import "position.proto";
 import "frame.proto";
+import "position.proto";
 
 message Routine {
   uint32 id = 1;              // metadata

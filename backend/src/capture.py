@@ -1,7 +1,8 @@
 from asyncio import Lock, Semaphore
+
 import cv2
 from numpy import ndarray
-from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+from windows_capture import Frame, InternalCaptureControl, WindowsCapture
 
 
 class GameCapture:  # thanks joshua
@@ -12,7 +13,7 @@ class GameCapture:  # thanks joshua
         self.want_frame = True
         self.get_png_frame_lock = Lock()
         self.capture_callback_semaphore = Semaphore(0)
-        self.dimensions: 'tuple[int, int]' = (0, 0)
+        self.dimensions: "tuple[int, int]" = (0, 0)
 
     def init(self) -> None:
         self.capture = WindowsCapture(

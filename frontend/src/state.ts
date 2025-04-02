@@ -45,7 +45,7 @@ export function loadRoutine(ws: WebSocket) {
   // into the client connection class
   const f = FrameOperation.create();
   f.frames = r.frames;
-  f.type = FrameOperation_Operation.FRAME_OP_BATCH_GET;
+  f.type = FrameOperation_Operation.OPERATION_BATCH_GET;
   const pkt = Packet.create({
     type: {
       $case: 'frameOperation',

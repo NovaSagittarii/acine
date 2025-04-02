@@ -39,14 +39,15 @@ be difficult to implement (?). If it is pixel-based, then downscaling doesn't
 make sense since it involves a full capture.
 """
 
+import os
+
 import cv2
 import numpy as np
-from numpy import ndarray
-import os
 import ydf
-
-from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.frame_pb2 import Frame
+from acine_proto_dist.routine_pb2 import Routine
+from numpy import ndarray
+
 from .persist import fs_read_sync as fs_read
 
 DIMENSIONS = (10, 10)

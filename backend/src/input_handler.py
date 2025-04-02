@@ -6,9 +6,7 @@ ahk = AHK()
 class InputHandler:
     def __init__(self, title: str):
         self.title = title
-        self.win = ahk.win_wait(
-            title=title, timeout=30, detect_hidden_windows=True
-        )
+        self.win = ahk.win_wait(title=title, timeout=30, detect_hidden_windows=True)
         print(self.win.title, self.win)
         print(self.win.get_position())
 

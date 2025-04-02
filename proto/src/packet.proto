@@ -3,8 +3,8 @@ syntax = "proto3";
 package ac;
 
 import "frame.proto";
-import "routine.proto";
 import "position.proto";
+import "routine.proto";
 
 message Packet {
   oneof type {
@@ -34,10 +34,10 @@ message FrameOperation {
   Frame frame = 2;
   repeated Frame frames = 3;
   enum Operation {
-    FRAME_OP_UNSPECIFIED = 0;
-    FRAME_OP_SAVE = 1;  // persist on backend (currently requires frame.data)
-    FRAME_OP_GET = 2;   // request frame (frame.data will be filled in response)
-    FRAME_OP_BATCH_GET = 3;  // request a bunch of frames (used at startup)
+    OPERATION_UNSPECIFIED = 0;
+    OPERATION_SAVE = 1;  // persist on backend (currently requires frame.data)
+    OPERATION_GET = 2;  // request frame (frame.data will be filled in response)
+    OPERATION_BATCH_GET = 3;  // request a bunch of frames (used at startup)
   }
 }
 

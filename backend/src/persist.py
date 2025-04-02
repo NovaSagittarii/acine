@@ -3,6 +3,7 @@ Image persistence / save to disk.
 """
 
 import os
+
 from aiofiles import open as aopen
 
 dirname = os.path.dirname(__file__)
