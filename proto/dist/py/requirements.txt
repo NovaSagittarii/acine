@@ -1,3 +1,5 @@
 mypy-protobuf==3.6.0
 protobuf==5.28.1
 protoc-exe==22.0rc1
+
+pytest==8.3.5
