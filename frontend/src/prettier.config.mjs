@@ -2,14 +2,14 @@
 
 /** @type {import("prettier").Config} */
 const config = {
-  tabWidth: 2,
-  useTabs: false,
-  semi: true,
-  singleQuote: true,
-  jsxSingleQuote: true,
-  trailingComma: 'all',
-  arrowParens: 'always',
-  proseWrap: 'preserve',
+  tabWidth : 2,
+  useTabs : false,
+  semi : true,
+  singleQuote : true,
+  jsxSingleQuote : true,
+  trailingComma : 'all',
+  arrowParens : 'always',
+  proseWrap : 'preserve',
 };
 
 export default config;
