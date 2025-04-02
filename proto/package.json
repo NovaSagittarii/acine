@@ -3,17 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build:win32": "protoc -I src --plugin=./node_modules/.bin/protoc-gen-ts_proto.cmd --ts_proto_opt=oneof=unions --ts_proto_out=dist/ts src/*.proto",
-    "build:linux": "protoc -I src --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=oneof=unions --ts_proto_out=dist/ts src/*.proto",
+    "build:py": "echo 'NO BUILD FOR PY'",
+    "build:ts": "cd ./dist/ts && npm run build",
+    "build": "npm run build:py && npm run build:ts",
     "test:py": "echo 'NO TEST FOR PY'",
     "test:ts": "cd ./dist/ts && npm test",
     "test": "npm run test:ts && npm run test:py"
   },
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@protobuf-ts/protoc": "^2.9.4",
-    "ts-proto": "^2.6.1"
-  }
+  "description": ""
 }
