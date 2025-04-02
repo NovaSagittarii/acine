@@ -4,6 +4,9 @@
   "description": "multilang output for acine protos",
   "main": "index.js",
   "scripts": {
+    "prepare:py": "cd ./dist/py && npm i",
+    "prepare:ts": "cd ./dist/ts && npm i",
+    "prepare": "npm run prepare:py && npm run prepare:ts",
     "build:py": "cd ./dist/py && npm run build",
     "build:ts": "cd ./dist/ts && npm run build",
     "build": "npm run build:py && npm run build:ts",
