@@ -4,10 +4,10 @@
   "description": "multilang output for acine protos",
   "main": "index.js",
   "scripts": {
-    "build:py": "echo 'NO BUILD FOR PY'",
+    "build:py": "cd ./dist/py && npm run build",
     "build:ts": "cd ./dist/ts && npm run build",
     "build": "npm run build:py && npm run build:ts",
-    "test:py": "echo 'NO TEST FOR PY'",
+    "test:py": "cd ./dist/py && npm test",
     "test:ts": "cd ./dist/ts && npm test",
     "test": "npm run test:ts && npm run test:py"
   },
