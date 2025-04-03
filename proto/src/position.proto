@@ -7,6 +7,14 @@ message Point {
   int32 y = 2;
 }
 
+/**
+ * Represents a rectangular region.
+ *
+ * When used for clickable regions (aka repeated Rect):
+ * - This can represent a point (when left/top coincide with right/bottom)
+ * - This can represent a region (single Rect)
+ * - This can represent composite region (repeated Rect)
+ */
 message Rect {
   int32 left = 1;
   int32 right = 2;
