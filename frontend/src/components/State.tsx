@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { Routine_State } from 'acine-proto-dist';
 
 import { $frames, $routine, $sourceDimensions } from '../state';
-import EditableText from './EditableText';
+import EditableRoutineProperty from './EditableRoutineProperty';
 import MouseRegion from './MouseRegion';
 import { toPercentage } from '../client/util';
 
@@ -20,28 +20,20 @@ function State({ state, selected = false }: StateProps) {
     // slight padding so you can see the highlighted background everywhere
     <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
       <div className='w-full flex flex-row justify-between items-center'>
-        <EditableText
-          onChange={(s) => {
-            state.name = s;
-            $routine.set(routine);
-          }}
+        <EditableRoutineProperty
+          object={state}
+          property='name'
           className='flex-grow font-semibold font-mono'
-        >
-          {state.name}
-        </EditableText>
+        />
         <div className='flex flex-row text-xs'>
           id={state.id} ({state.samples.length} samples)
         </div>
       </div>
-      <EditableText
-        onChange={(s) => {
-          state.description = s;
-          $routine.set(routine);
-        }}
+      <EditableRoutineProperty
+        object={state}
+        property={'description'}
         className='text-sm'
-      >
-        {state.description}
-      </EditableText>
+      />
       <MouseRegion
         outWidth={width}
         outHeight={height}
