@@ -1,0 +1,50 @@
+import { Routine_Edge } from 'acine-proto-dist';
+
+import { Selectable } from './types';
+import EditableRoutineProperty from './ui/EditableRoutineProperty';
+import Condition from './Condition';
+import useForceUpdate from './useForceUpdate';
+import { useStore } from '@nanostores/react';
+import { $routine } from '@/state';
+import Select from './ui/Select';
+import ActionEditor from './ActionEditor';
+
+interface EdgeProps extends Selectable {
+  edge: Routine_Edge;
+}
+
+export default function Edge({ edge, selected = false }: EdgeProps) {
+  const routine = useStore($routine);
+  const forceUpdate = useForceUpdate();
+
+  return (
+    <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
+      <EditableRoutineProperty
+        object={edge}
+        property={'description'}
+        callback={forceUpdate}
+      />
+      <div>
+        to
+        <Select
+          values={routine.nodes.map((n) => [
+            `${n.name} - ${n.description.substring(0, 24)}`,
+            n.id,
+          ])}
+          onChange={(v) => {
+            edge.to = v;
+          }}
+        />
+      </div>
+      <ActionEditor edge={edge} />
+      <div>
+        precondition
+        <Condition condition={edge.precondition!} />
+      </div>
+      <div>
+        postcondition
+        <Condition condition={edge.postcondition!} />
+      </div>
+    </div>
+  );
+}
