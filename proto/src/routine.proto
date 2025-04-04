@@ -64,7 +64,7 @@ message Routine {
    */
   message Condition {
     uint32 timeout = 1;   // ms; after timeout, ignore this; defaults to INF
-    uint32 predelay = 2;  // ms; defaults to 0; required time before considering
+    uint32 delay = 2;     // ms; defaults to 0; required time before considering
     uint32 interval = 3;  // ms; defaults to 100; time between checks
     repeated uint32 records = 11;  // past waiting periods (data collection)
     oneof condition {              // what to check; by default ALWAYS TRUE
