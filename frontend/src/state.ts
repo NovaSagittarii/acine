@@ -9,6 +9,7 @@ import {
   FrameOperation_Operation,
   Packet,
   Routine,
+  Routine_Node,
   Routine_State,
 } from 'acine-proto-dist';
 
@@ -76,3 +77,10 @@ export const $selectedState = atom<Routine_State | null>(null);
  * [width, height] of the window you are controlling
  */
 export const $sourceDimensions = atom<[number, number]>([0, 0]);
+
+/**
+ * reference to currently selected node
+ *
+ * need `$routine.set($routine.get())` to make changes appear
+ */
+export const $selectedNode = atom<Routine_Node | null>(null);
