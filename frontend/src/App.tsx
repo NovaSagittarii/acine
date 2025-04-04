@@ -14,7 +14,7 @@ import {
 import Button from './components/ui/Button';
 import StateList from './components/StateList';
 import { toOutCoordinates } from './components/ui/MouseRegion';
-import NodeEditor from './components/NodeEditor';
+import NodeList from './components/NodeList';
 import { frameToObjectURL } from './client/encoder';
 
 enum ActiveTab {
@@ -285,7 +285,7 @@ function App() {
             </div>
           </div>
           {activeTab === ActiveTab.STATE && <StateList />}
-          {activeTab === ActiveTab.NODE && <NodeEditor />}
+          {activeTab === ActiveTab.NODE && <NodeList />}
         </div>
       </div>
     </div>
