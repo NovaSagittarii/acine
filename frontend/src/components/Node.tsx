@@ -7,10 +7,10 @@ import {
 import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
 import Select from '@/ui/Select';
 import { $routine } from '@/state';
+import { Selectable } from './types';
 
-interface NodeProps {
+interface NodeProps extends Selectable {
   node: Routine_Node;
-  selected?: boolean;
 }
 
 const NODE_TYPES_DISPLAY = [
@@ -45,6 +45,8 @@ function Node({ node, selected = false }: NodeProps) {
         />
         <div className='opacity-50'> : type </div>
       </div>
+
+      <div></div>
     </div>
   );
 }

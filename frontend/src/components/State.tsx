@@ -5,10 +5,10 @@ import { $frames, $routine, $sourceDimensions } from '@/state';
 import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
 import MouseRegion from '@/ui/MouseRegion';
 import { toPercentage } from '../client/util';
+import { Selectable } from './types';
 
-interface StateProps {
+interface StateProps extends Selectable {
   state: Routine_State;
-  selected?: boolean;
 }
 
 function State({ state, selected = false }: StateProps) {
