@@ -54,33 +54,33 @@ message Routine {
       uint64 subroutine = 14;   // execute subroutine (node_id)
     };
   }
-}
 
-/**
- * Primarily used for verification; a check (precondition/postcondition)
- * that must pass before an action can happen and
- * used to verify whether an action succeeded.
- *
- * Also used to detect and react to changes (for null actions).
- */
-message Condition {
-  uint32 timeout = 1;   // ms; after timeout, ignore condition; defaults to INF
-  uint32 predelay = 2;  // ms; defaults to 0; required time before considering
-  uint32 interval = 3;  // ms; defaults to 100; time between checks
-  repeated uint32 records = 11;  // past waiting periods (data collection)
-  oneof condition {              // what to check; by default ALWAYS TRUE
-    Image image = 21;            // image match
-    Text text = 22;              // text match
-  }
+  /**
+   * Primarily used for verification; a check (precondition/postcondition)
+   * that must pass before an action can happen and
+   * used to verify whether an action succeeded.
+   *
+   * Also used to detect and react to changes (for null actions).
+   */
+  message Condition {
+    uint32 timeout = 1;   // ms; after timeout, ignore this; defaults to INF
+    uint32 predelay = 2;  // ms; defaults to 0; required time before considering
+    uint32 interval = 3;  // ms; defaults to 100; time between checks
+    repeated uint32 records = 11;  // past waiting periods (data collection)
+    oneof condition {              // what to check; by default ALWAYS TRUE
+      Image image = 21;            // image match
+      Text text = 22;              // text match
+    }
 
-  message Image {          // wants to ensure some pixels match
-    uint32 frame_id = 1;   // actual payload to check
-    double tolerance = 2;  // required similarity to pass; between 0.0 and 1.0
-    repeated Rect regions = 3;  // section that it checks
-  }
+    message Image {          // wants to ensure some pixels match
+      uint32 frame_id = 1;   // actual payload to check
+      double tolerance = 2;  // required similarity to pass; between 0.0 and 1.0
+      repeated Rect regions = 3;  // section that it checks
+    }
 
-  message Text {                // wants to ensure it finds some text
-    string regex = 1;           // regex match pattern
-    repeated Rect regions = 2;  // restricts detect area; defaults to unlimited
+    message Text {                // wants to ensure it finds some text
+      string regex = 1;           // regex match pattern
+      repeated Rect regions = 2;  // restricts detect area; unset = unrestricted
+    }
   }
 }
