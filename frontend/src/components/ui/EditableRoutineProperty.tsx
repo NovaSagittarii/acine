@@ -1,11 +1,9 @@
-import { useStore } from '@nanostores/react';
-
-import { $routine } from '@/state';
 import EditableText from './EditableText';
 
 interface EditableRoutinePropertyProps<T, K extends keyof T> {
   object: T;
   property: K;
+  callback: () => void;
   className?: string;
 }
 
@@ -16,7 +14,7 @@ interface EditableRoutinePropertyProps<T, K extends keyof T> {
  * <EditableText
  *   onChange={(s) => {
  *     object[property] = s;
- *     $routine.set(routine);
+ *     callback();
  *   }}
  * >
  *   {object[property]}
@@ -26,9 +24,9 @@ interface EditableRoutinePropertyProps<T, K extends keyof T> {
 export default function EditableRoutineProperty<T, K extends keyof T>({
   object,
   property,
+  callback,
   className = '',
 }: EditableRoutinePropertyProps<T, K>) {
-  const routine = useStore($routine);
   if (object && property && typeof object[property] !== 'string') {
     throw {
       error: 'T[K] must be string',
@@ -43,7 +41,7 @@ export default function EditableRoutineProperty<T, K extends keyof T>({
       <EditableText
         onChange={(s) => {
           (object[property] as string) = s;
-          $routine.set(routine);
+          callback();
         }}
         className={className}
       >

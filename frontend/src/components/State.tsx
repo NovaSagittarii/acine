@@ -1,20 +1,21 @@
 import { useStore } from '@nanostores/react';
 import { Routine_State } from 'acine-proto-dist';
 
-import { $frames, $routine, $sourceDimensions } from '@/state';
+import { $frames, $sourceDimensions } from '@/state';
 import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
 import MouseRegion from '@/ui/MouseRegion';
 import { toPercentage } from '../client/util';
 import { Selectable } from './types';
+import useForceUpdate from './useForceUpdate';
 
 interface StateProps extends Selectable {
   state: Routine_State;
 }
 
 function State({ state, selected = false }: StateProps) {
-  const routine = useStore($routine);
   const frames = useStore($frames);
   const [width, height] = useStore($sourceDimensions);
+  const forceUpdate = useForceUpdate();
 
   return (
     // slight padding so you can see the highlighted background everywhere
@@ -23,6 +24,7 @@ function State({ state, selected = false }: StateProps) {
         <EditableRoutineProperty
           object={state}
           property='name'
+          callback={forceUpdate}
           className='flex-grow font-semibold font-mono'
         />
         <div className='flex flex-row text-xs'>
@@ -32,6 +34,7 @@ function State({ state, selected = false }: StateProps) {
       <EditableRoutineProperty
         object={state}
         property={'description'}
+        callback={forceUpdate}
         className='text-sm'
       />
       <MouseRegion
@@ -40,7 +43,7 @@ function State({ state, selected = false }: StateProps) {
         onDragRegion={(region) => {
           // something about resetting the region to no selection
           state.region = region;
-          $routine.set(routine);
+          forceUpdate();
           // console.log(region, width, height);
         }}
       >
@@ -89,7 +92,7 @@ function State({ state, selected = false }: StateProps) {
             className='hover:opacity-40'
             onClick={() => {
               state.samples.splice(index, 1);
-              $routine.set(routine);
+              forceUpdate();
             }}
           />
         ))}

@@ -4,6 +4,7 @@ import { Routine_Node } from 'acine-proto-dist';
 import { $routine, $selectedNode } from '@/state';
 import Button from '@/ui/Button';
 import Node from '@/components/Node';
+import useForceUpdate from './useForceUpdate';
 
 /**
  * Editor for nodes & transitions of the DFA.
@@ -11,6 +12,7 @@ import Node from '@/components/Node';
 export default function NodeList() {
   const routine = useStore($routine);
   const selectedNode = useStore($selectedNode);
+  const forceUpdate = useForceUpdate();
 
   return (
     <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
@@ -31,7 +33,7 @@ export default function NodeList() {
             description: 'desc',
           });
           routine.nodes.push(newNode);
-          $routine.set(routine);
+          forceUpdate();
           $selectedNode.set(newNode);
         }}
       >
