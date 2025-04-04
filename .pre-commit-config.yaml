@@ -27,7 +27,7 @@ repos:
     rev: "416330aa894dcaf8b65e9cc83ed7d950829f36e0" # v3.1.0
     hooks:
       - id: prettier
-        types: [css, javascript, jsx, ts, tsx, json, html]
+        types_or: [css, javascript, jsx, ts, tsx, json, html]
         additional_dependencies:
           - prettier@3.4.2
   - repo: https://github.com/pre-commit/mirrors-clang-format

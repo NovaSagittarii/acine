@@ -237,7 +237,14 @@ function App() {
                 ws.send(pb.Packet.encode(pkt).finish());
               }}
             >
-              {imageUrl && <img src={imageUrl} draggable={false} className='w-full object-cover' style={{imageRendering: 'pixelated'}}/>}
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  draggable={false}
+                  className='w-full object-cover'
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              )}
             </div>
             {dState}
             {`; latency=${(dRecv / 1e3).toFixed(3)}s`}

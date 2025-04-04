@@ -1,8 +1,8 @@
-import { expect, test } from 'vitest';
-import * as pb from './index';
+import { expect, test } from "vitest";
+import * as pb from "./index";
 
 // just make sure the frame exists
-test('pb.Frame create', () => {
+test("pb.Frame create", () => {
   const f = pb.Frame.create();
   f.id = 1;
   f.data = new Uint8Array(4);
