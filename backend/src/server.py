@@ -8,9 +8,10 @@ from acine_proto_dist.routine_pb2 import Routine
 from autobahn.asyncio.websocket import WebSocketServerProtocol
 
 from .capture import GameCapture
-from .classifier import predict
 from .input_handler import InputHandler
 from .persist import fs_read, fs_write
+
+# from .classifier import predict
 
 title = "Arknights"
 # title = "Untitled - Paint"
@@ -53,7 +54,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
         match packet.frame_operation.type:
             case FrameOperation.OPERATION_GET:
                 img = await gc.get_png_frame()
-                state = predict(img)
+                state = "DISABLED"  # predict(img)
                 data = img.tobytes()
                 p = Packet(
                     frame_operation=FrameOperation(
