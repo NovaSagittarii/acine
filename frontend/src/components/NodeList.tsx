@@ -8,7 +8,7 @@ import Node from '@/components/Node';
 /**
  * Editor for nodes & transitions of the DFA.
  */
-function NodeEditor() {
+export default function NodeList() {
   const routine = useStore($routine);
   const selectedNode = useStore($selectedNode);
 
@@ -40,5 +40,3 @@ function NodeEditor() {
     </div>
   );
 }
-
-export default NodeEditor;
