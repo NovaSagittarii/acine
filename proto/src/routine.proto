@@ -46,7 +46,8 @@ message Routine {
     Condition precondition = 2;   // required before you can take it
     Condition postcondition = 3;  // used to validate success
     int32 limit = 4;  // how many times this can be taken, negative is unlimited
-    oneof action {    // can be an action, or null action;
+    string description = 5;
+    oneof action {              // can be an action, or null action;
       Point click = 11;         // click here
       Rect click_region = 12;   // click anywhere here
       PointSequence drag = 13;  // drag through these points
