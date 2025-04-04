@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react';
 import { Routine_State } from 'acine-proto-dist';
 
-import { $frames, $routine, $sourceDimensions } from '../state';
-import EditableRoutineProperty from './EditableRoutineProperty';
-import MouseRegion from './MouseRegion';
+import { $frames, $routine, $sourceDimensions } from '@/state';
+import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
+import MouseRegion from '@/ui/MouseRegion';
 import { toPercentage } from '../client/util';
 
 interface StateProps {

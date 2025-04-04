@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react';
 
-import { $routine } from '../state';
+import { $routine } from '../../state';
 import EditableText from './EditableText';
 
 interface EditableRoutinePropertyProps<T, K extends keyof T> {

@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react';
 import { Routine_State } from 'acine-proto-dist';
 
-import { $routine, $selectedState } from '../state';
-import Button from './Button';
-import State from './State';
+import { $routine, $selectedState } from '@/state';
+import Button from '@/ui/Button';
+import State from '@/components/State';
 
 function StateList() {
   const routine = useStore($routine);

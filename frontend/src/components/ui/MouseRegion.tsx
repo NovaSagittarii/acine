@@ -1,7 +1,7 @@
 import { Rect } from 'acine-proto-dist';
 import { ReactNode, useState } from 'react';
 
-import { toPercentage } from '../client/util';
+import { toPercentage } from '../../client/util';
 
 type MouseEventCallback = (
   ev: React.MouseEvent<HTMLDivElement, MouseEvent>,

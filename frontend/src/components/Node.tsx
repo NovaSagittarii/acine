@@ -4,9 +4,9 @@ import {
   Routine_Node_NodeType as NodeType,
 } from 'acine-proto-dist';
 
-import EditableRoutineProperty from './EditableRoutineProperty';
-import Select from './Select';
-import { $routine } from '../state';
+import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
+import Select from '@/ui/Select';
+import { $routine } from '@/state';
 
 interface NodeProps {
   node: Routine_Node;

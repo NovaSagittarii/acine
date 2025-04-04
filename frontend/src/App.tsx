@@ -11,9 +11,9 @@ import {
   loadRoutine,
   saveRoutine, // used in global scope
 } from './state';
-import Button from './components/Button';
+import Button from './components/ui/Button';
 import StateList from './components/StateList';
-import { toOutCoordinates } from './components/MouseRegion';
+import { toOutCoordinates } from './components/ui/MouseRegion';
 import NodeEditor from './components/NodeEditor';
 import { frameToObjectURL } from './client/encoder';
 

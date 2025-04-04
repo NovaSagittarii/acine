@@ -1,10 +1,9 @@
 import { useStore } from '@nanostores/react';
-
-import Node from './Node';
-import { $routine, $selectedNode } from '../state';
-import Button from './Button';
 import { Routine_Node } from 'acine-proto-dist';
-import Select from './Select';
+
+import { $routine, $selectedNode } from '@/state';
+import Button from '@/ui/Button';
+import Node from '@/components/Node';
 
 /**
  * Editor for nodes & transitions of the DFA.
