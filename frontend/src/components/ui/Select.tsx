@@ -27,9 +27,10 @@ export default function Select<T>({
         setSelectedIndex(index);
         onChange(values[index][1]);
       }}
+      value={selectedIndex}
     >
       {values.map(([s, _v], i) => (
-        <option value={i} selected={i === selectedIndex}>
+        <option value={i} key={i}>
           {s}
         </option>
       ))}
