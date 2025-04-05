@@ -27,7 +27,7 @@ export default function Select<T>({
         setSelectedIndex(index);
         onChange(values[index][1]);
       }}
-      value={selectedIndex}
+      defaultValue={selectedIndex} // this seems to be broken
     >
       {values.map(([s, _v], i) => (
         <option value={i} key={i}>

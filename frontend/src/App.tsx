@@ -16,6 +16,7 @@ import StateList from './components/StateList';
 import { toOutCoordinates } from './components/ui/MouseRegion';
 import NodeList from './components/NodeList';
 import { frameToObjectURL } from './client/encoder';
+import ConditionImageEditor from './components/ConditionImageEditor';
 
 enum ActiveTab {
   STATE,
@@ -288,6 +289,7 @@ function App() {
           {activeTab === ActiveTab.NODE && <NodeList />}
         </div>
       </div>
+      <ConditionImageEditor />
     </div>
   );
 }

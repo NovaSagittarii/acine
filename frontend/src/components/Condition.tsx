@@ -8,6 +8,8 @@ import { Selectable } from './types';
 import NumberInput from './ui/NumberInput';
 import useForceUpdate from './useForceUpdate';
 import { SelectAuto } from './ui/Select';
+import Button from './ui/Button';
+import { $condition } from './ConditionImageEditor';
 
 interface ConditionProps extends Selectable {
   condition: Routine_Condition;
@@ -67,6 +69,21 @@ export default function Condition({ condition }: ConditionProps) {
         />
         <span className='opacity-50'>: condition</span>
       </div>
+      {condition.condition?.$case === 'image' && (
+        <Button
+          className='p-1! w-1/2 bg-black text-white scale-100!'
+          onClick={() => {
+            console.log('setters');
+
+            // duplicate conditional to make typescript happy
+            if (condition.condition?.$case === 'image') {
+              $condition.set(condition.condition?.image);
+            }
+          }}
+        >
+          edit
+        </Button>
+      )}
     </div>
   );
 }

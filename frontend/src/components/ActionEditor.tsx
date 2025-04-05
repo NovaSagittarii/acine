@@ -15,13 +15,19 @@ interface ActionEditorProps {
 
 export default function ActionEditor({ edge }: ActionEditorProps) {
   const forceUpdate = useForceUpdate();
-  edge.action?.$case;
 
   return (
     <div className='font-mono'>
       <div>
         <Select
           values={ACTION_TYPES_DISPLAY}
+          defaultIndex={
+            !edge.action
+              ? 0
+              : ACTION_TYPES_DISPLAY.map((s) => s[0]).indexOf(
+                  edge.action?.$case!,
+                )
+          }
           onChange={(v) => {
             if (v === null) {
               edge.action = undefined;
