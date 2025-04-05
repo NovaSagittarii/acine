@@ -8,6 +8,8 @@ type MouseEventCallback = (
 ) => void;
 
 interface MouseRegionProps {
+  className?: string;
+  disabled?: boolean;
   outWidth: number; // mapped output width
   outHeight: number; // mapped output height
   children: ReactNode;
@@ -56,6 +58,8 @@ export function toOutCoordinates(
  * Added support for a rectangular selection on drag.
  */
 function MouseRegion({
+  className = '',
+  disabled = false,
   children,
   outWidth,
   outHeight,
@@ -73,16 +77,19 @@ function MouseRegion({
 
   return (
     <div
-      className='relative'
+      className={'relative ' + className}
       onMouseMove={(ev) => {
+        if (disabled) return;
         setMouseCurrentPosition(toOutCoordinates(outWidth, outHeight, ev));
         onMouseMove(ev);
       }}
       onMouseDown={(ev) => {
+        if (disabled) return;
         setMouseDownPosition(toOutCoordinates(outWidth, outHeight, ev));
         onMouseDown(ev);
       }}
       onMouseUp={(ev) => {
+        if (disabled) return;
         setMouseCurrentPosition(null);
         const xy2 = toOutCoordinates(outWidth, outHeight, ev);
         const { x: x1, y: y1 } = xy1!; // down pos
