@@ -42,7 +42,7 @@ export default function ConditionImageEditor() {
     const images = frames.map((_, i) => [frames[i], i] as [string, number]);
     setImageChoices(images);
     if (images.length) setSrc((s) => (s ? s : images[0][0]));
-  }, [routine]);
+  }, [frames]);
 
   // sync condition image
   useEffect(() => {
