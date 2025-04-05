@@ -1,2 +1,5 @@
 **/*.png
 **/*.pb
+**/*.zip
+
+!.gitignore
