@@ -13,7 +13,9 @@ function EditableText({
     <div
       className={'hover:bg-black/5 hover:cursor-text ' + className}
       onClick={() => {
-        const newText = prompt('replace with? (leave empty to cancel)');
+        const newText = prompt(
+          `replace ${children} with? (leave empty to cancel)`,
+        );
         if (newText) {
           onChange(newText);
         }
