@@ -20,14 +20,14 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
     <div className='font-mono'>
       <div>
         <Select
-          values={ACTION_TYPES_DISPLAY}
-          defaultIndex={
+          value={
             !edge.action
               ? 0
               : ACTION_TYPES_DISPLAY.map((s) => s[0]).indexOf(
                   edge.action?.$case!,
                 )
           }
+          values={ACTION_TYPES_DISPLAY}
           onChange={(v) => {
             if (v === null) {
               edge.action = undefined;

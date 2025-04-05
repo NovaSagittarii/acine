@@ -27,6 +27,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
       <div>
         to
         <Select
+          value={routine.nodes.map((n) => n.id).indexOf(edge.to)}
           values={routine.nodes.map((n) => [
             `${n.name} - ${n.description.substring(0, 24)}`,
             n.id,

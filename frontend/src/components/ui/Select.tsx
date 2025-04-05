@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface SelectProps<T> {
   className?: string;
-  defaultIndex?: number;
+  value?: number; // defaultIndex
   values: [string, T][];
   onChange: (newValue: T) => void;
 }
@@ -13,12 +13,12 @@ interface SelectProps<T> {
  * `values` prop is in the form [displayString, actualValue]
  */
 export default function Select<T>({
-  defaultIndex = 0,
+  value = 0,
   values,
   onChange,
   className = '',
 }: SelectProps<T>) {
-  const [selectedIndex, setSelectedIndex] = useState(defaultIndex);
+  const [selectedIndex, setSelectedIndex] = useState(value);
   return (
     <select
       className={'hover:bg-black/5 hover:cursor-text ' + className}
@@ -27,7 +27,8 @@ export default function Select<T>({
         setSelectedIndex(index);
         onChange(values[index][1]);
       }}
-      defaultValue={selectedIndex} // this seems to be broken
+      value={selectedIndex}
+      defaultValue={selectedIndex} // nevermind, you need to set it
     >
       {values.map(([s, _v], i) => (
         <option value={i} key={i}>
@@ -40,7 +41,7 @@ export default function Select<T>({
 
 type SelectAutoProps<T> = {
   values: T[];
-} & Pick<SelectProps<T>, 'className' | 'defaultIndex' | 'onChange'>;
+} & Pick<SelectProps<T>, 'className' | 'value' | 'onChange'>;
 
 /**
  * Special case of <Select> where you are setting a string and the display
@@ -48,14 +49,14 @@ type SelectAutoProps<T> = {
  */
 export function SelectAuto<T>({
   className,
-  defaultIndex = 0,
+  value = 0,
   values,
   onChange,
 }: SelectAutoProps<T>) {
   return (
     <Select
       className={className}
-      defaultIndex={defaultIndex}
+      value={value}
       values={values.map((s) => [s + '', s] as [string, T])}
       onChange={onChange}
     />

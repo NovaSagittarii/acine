@@ -57,7 +57,7 @@ export default function ConditionImageEditor() {
         <div className='m-12 grow bg-white pointer-events-auto'>
           <Select
             values={imageChoices}
-            // defaultIndex={imageChoices.map((s) => s[0]).indexOf(condition.frameId)}
+            // value={imageChoices.map((s) => s[0]).indexOf(condition.frameId)}
             onChange={(s) => setSrc(frames[s])}
           />
           <RegionEditor
