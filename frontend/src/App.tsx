@@ -195,8 +195,8 @@ function App() {
                 const { x, y } = toOutCoordinates(...dimensions, ev);
                 const pkt = pb.Packet.create({
                   type: {
-                    $case: 'mouseEvent',
-                    mouseEvent: {
+                    $case: 'inputEvent',
+                    inputEvent: {
                       type: {
                         $case: 'move',
                         move: {
@@ -212,8 +212,8 @@ function App() {
               onMouseDown={() => {
                 const pkt = pb.Packet.create({
                   type: {
-                    $case: 'mouseEvent',
-                    mouseEvent: {
+                    $case: 'inputEvent',
+                    inputEvent: {
                       type: {
                         $case: 'mouseDown',
                         mouseDown: 0,
@@ -226,8 +226,8 @@ function App() {
               onMouseUp={() => {
                 const pkt = pb.Packet.create({
                   type: {
-                    $case: 'mouseEvent',
-                    mouseEvent: {
+                    $case: 'inputEvent',
+                    inputEvent: {
                       type: {
                         $case: 'mouseUp',
                         mouseUp: 0,

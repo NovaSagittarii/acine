@@ -2,6 +2,7 @@ from time import time  # used to id frames
 
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
+from acine_proto_dist.input_event_pb2 import InputEvent
 from acine_proto_dist.packet_pb2 import Configuration, FrameOperation, Packet
 from acine_proto_dist.position_pb2 import Point
 from acine_proto_dist.routine_pb2 import Routine
@@ -42,8 +43,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
             match packet.WhichOneof("type"):
                 case "frame_operation":
                     await self.on_frame_operation(packet)
-                case "mouse_event":
-                    await self.on_mouse_event(packet)
+                case "input_event":
+                    await self.on_input_event(packet)
                 case "configuration":
                     await self.on_configuration(packet)
                 case "routine":
@@ -83,21 +84,21 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     isBinary=True,
                 )
 
-    async def on_mouse_event(self, packet: Packet):
-        mouse_event_type = packet.mouse_event.WhichOneof("type")
-        match mouse_event_type:
+    async def on_input_event(self, packet: Packet):
+        event_type = packet.input_event.WhichOneof("type")
+        match event_type:
             case "move":
-                pos: Point = packet.mouse_event.move
+                pos: Point = packet.input_event.move
                 ih.mouse_move(pos.x, pos.y)
             case "mouse_up" | "mouse_down":
-                if mouse_event_type == "mouse_up":
-                    button = packet.mouse_event.mouse_up
+                if event_type == "mouse_up":
+                    button = packet.input_event.mouse_up
                     ih.mouse_up()
                 else:
-                    button = packet.mouse_event.mouse_down
+                    button = packet.input_event.mouse_down
                     ih.mouse_down()
                 match button:
-                    case Packet.MouseEvent.MouseButton.MOUSE_BUTTON_LEFT:
+                    case InputEvent.MouseButton.MOUSE_BUTTON_LEFT:
                         pass
 
     async def on_configuration(self, packet: Packet):

@@ -13,6 +13,7 @@ message Routine {
   repeated State states = 5;  // indexed by id
   repeated Node nodes = 6;    // indexed by id
 
+  // basically unused at the moment
   message State {
     uint64 id = 1;
     string name = 2;

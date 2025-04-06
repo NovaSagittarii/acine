@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package ac;
+
+import "position.proto";
+
+/**
+ * Various input events.
+ */
+message InputEvent {
+  int32 timestamp = 1;  // ms; only used in recording playback
+  oneof type {
+    ac.Point move = 11;           // mouse moved
+    MouseButton mouse_up = 12;    // mouse button release
+    MouseButton mouse_down = 13;  // mouse button press
+    Key key_up = 14;              // key release
+    Key key_down = 15;            // key press
+  }
+
+  // some combination of mouse keys, can use as bitmask
+  enum MouseButton {
+    MOUSE_BUTTON_UNSPECIFIED = 0;
+    MOUSE_BUTTON_LEFT = 1;
+    MOUSE_BUTTON_MIDDLE = 2;
+    MOUSE_BUTTON_RIGHT = 4;
+  }
+
+  // one of the keyboard keys
+  enum Key {
+    KEY_UNSPECIFIED = 0;
+    KEY_1 = 1;
+    KEY_2 = 2;
+    // TODO: ... continue someday
+  }
+}
