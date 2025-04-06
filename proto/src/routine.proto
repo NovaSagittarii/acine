@@ -30,7 +30,7 @@ message Routine {
     string name = 2;
     string description = 3;
 
-    uint32 state_id = 4;      // indexes into states (for recongition)
+    uint64 state_id = 4;      // indexes into states (for recongition)
     repeated Edge edges = 5;  // transitions
 
     NodeType type = 6;
@@ -74,7 +74,7 @@ message Routine {
     }
 
     message Image {          // wants to ensure some pixels match
-      uint32 frame_id = 1;   // actual payload to check
+      uint64 frame_id = 1;   // actual payload to check
       double tolerance = 2;  // required similarity to pass; between 0.0 and 1.0
       repeated Rect regions = 3;  // section that it checks
     }
