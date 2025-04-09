@@ -2,8 +2,13 @@ import { useState } from 'react';
 
 interface SelectProps<T> {
   className?: string;
-  value?: number; // defaultIndex
+  /** current displayed index (this is a controlled element) */
+  value: number;
+
+  /** list of options; an option consists of [display, value] */
   values: [string, T][];
+
+  /** calls onChange with the [value] of the selected item  */
   onChange: (newValue: T) => void;
 }
 
@@ -13,7 +18,7 @@ interface SelectProps<T> {
  * `values` prop is in the form [displayString, actualValue]
  */
 export default function Select<T>({
-  value = 0,
+  value,
   values,
   onChange,
   className = '',
@@ -27,7 +32,7 @@ export default function Select<T>({
         // setSelectedIndex(index);
         onChange(values[index][1]);
       }}
-      value={value} // bugged??
+      value={value}
     >
       {values.map(([s, _v], i) => (
         <option value={i.toString()} key={i}>
