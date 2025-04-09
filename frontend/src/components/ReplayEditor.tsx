@@ -37,7 +37,7 @@ export default function ReplayEditor({ replay }: ReplayEditorProps) {
           onClick={async () => {
             setRecording(false);
             if (stream) {
-              stream.close();
+              stream.close({ noHover: true });
               replay.events = await stream.getContents();
               console.log(replay.events);
             } else console.error("InputStream wasn't initialized.");
