@@ -54,7 +54,7 @@ export default function ConditionImageEditor() {
   return (
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
-        <div className='m-12 grow bg-white pointer-events-auto'>
+        <div className='flex flex-col m-12 grow bg-white pointer-events-auto'>
           <Select
             value={frames.indexOf(src)}
             values={imageChoices}

@@ -63,7 +63,8 @@ export default function RegionEditor({
 
   return (
     <MouseRegion
-      className='select-none' // without this you can somehow select the image
+      // without `select-none` you can somehow select the image
+      className='flex overflow-hidden justify-center select-none'
       disabled={hoveredRegion !== null}
       outWidth={width}
       outHeight={height}
