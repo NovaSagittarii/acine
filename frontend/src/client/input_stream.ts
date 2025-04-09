@@ -80,6 +80,17 @@ namespace InputStream {
      * Useful for mobile games which only have tap and drag.
      */
     noHover?: boolean;
+
+    /**
+     * NOT IMPLEMENTED
+     *
+     * Removes mousemove events that happen before the first mousedown
+     * and after the last mouseup.
+     *
+     * Used to clean up artifact from mouse move as a result of
+     * moving from [Record Start] -> (recording ...) -> [Record End]
+     */
+    stripMove?: boolean;
   }
 }
 
