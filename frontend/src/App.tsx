@@ -17,6 +17,7 @@ import { toOutCoordinates } from './components/ui/MouseRegion';
 import NodeList from './components/NodeList';
 import { frameToObjectURL } from './client/encoder';
 import ConditionImageEditor from './components/ConditionImageEditor';
+import Window from './components/Window';
 
 enum ActiveTab {
   STATE,
@@ -184,69 +185,16 @@ function App() {
             >
               CAPTURE
             </Button>
-            <div className='flex gap-4'>
+            {/* <div className='flex gap-4'>
               <Button className='bg-blue-200 w-full'>Click</Button>
               <Button className='bg-blue-200 w-full'>Click (Region)</Button>
               <Button className='bg-blue-200 w-full'>Drag</Button>
-            </div>
-            <div
-              className='min-h-[12rem] bg-black'
-              onMouseMove={(ev) => {
-                const { x, y } = toOutCoordinates(...dimensions, ev);
-                const pkt = pb.Packet.create({
-                  type: {
-                    $case: 'inputEvent',
-                    inputEvent: {
-                      type: {
-                        $case: 'move',
-                        move: {
-                          x,
-                          y,
-                        },
-                      },
-                    },
-                  },
-                });
-                ws.send(pb.Packet.encode(pkt).finish());
-              }}
-              onMouseDown={() => {
-                const pkt = pb.Packet.create({
-                  type: {
-                    $case: 'inputEvent',
-                    inputEvent: {
-                      type: {
-                        $case: 'mouseDown',
-                        mouseDown: 0,
-                      },
-                    },
-                  },
-                });
-                ws.send(pb.Packet.encode(pkt).finish());
-              }}
-              onMouseUp={() => {
-                const pkt = pb.Packet.create({
-                  type: {
-                    $case: 'inputEvent',
-                    inputEvent: {
-                      type: {
-                        $case: 'mouseUp',
-                        mouseUp: 0,
-                      },
-                    },
-                  },
-                });
-                ws.send(pb.Packet.encode(pkt).finish());
-              }}
-            >
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  draggable={false}
-                  className='w-full object-cover'
-                  style={{ imageRendering: 'pixelated' }}
-                />
-              )}
-            </div>
+            </div> */}
+            <Window
+              websocket={ws}
+              dimensions={dimensions}
+              imageUrl={imageUrl}
+            />
             {dState}
             {`; latency=${(dRecv / 1e3).toFixed(3)}s`}
             {`; ${(1e3 / dRecv).toFixed(1)}fps`}
