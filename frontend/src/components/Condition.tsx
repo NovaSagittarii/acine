@@ -43,6 +43,20 @@ export default function Condition({ condition }: ConditionProps) {
 
   return (
     <div className='pl-1 border border-black font-mono'>
+      {condition.condition?.$case === 'image' && (
+        <Button
+          className='p-1! w-fit bg-black text-white scale-100! float-right'
+          onClick={() => {
+            // duplicate conditional to make typescript happy
+            if (condition.condition?.$case === 'image') {
+              $condition.set(condition.condition?.image);
+            }
+          }}
+        >
+          edit
+        </Button>
+      )}
+
       {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
       <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' />
       <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' />
@@ -83,21 +97,6 @@ export default function Condition({ condition }: ConditionProps) {
         />
         <span className='opacity-50'>: condition</span>
       </div>
-      {condition.condition?.$case === 'image' && (
-        <Button
-          className='p-1! w-1/2 bg-black text-white scale-100!'
-          onClick={() => {
-            console.log('setters');
-
-            // duplicate conditional to make typescript happy
-            if (condition.condition?.$case === 'image') {
-              $condition.set(condition.condition?.image);
-            }
-          }}
-        >
-          edit
-        </Button>
-      )}
     </div>
   );
 }
