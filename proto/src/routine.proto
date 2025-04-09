@@ -3,6 +3,7 @@ syntax = "proto3";
 package ac;
 
 import "frame.proto";
+import "input_event.proto";
 import "position.proto";
 
 message Routine {
@@ -53,6 +54,7 @@ message Routine {
       Rect click_region = 12;   // click anywhere here
       PointSequence drag = 13;  // drag through these points
       uint64 subroutine = 14;   // execute subroutine (node_id)
+      InputReplay replay = 15;  // recording playback
     };
   }
 

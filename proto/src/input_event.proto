@@ -33,3 +33,8 @@ message InputEvent {
     // TODO: ... continue someday
   }
 }
+
+message InputReplay {              // fields in oneof can't have repeated
+  repeated InputEvent events = 1;  // for playback
+  uint32 duration = 2;             // ms; needs to be computed
+}
