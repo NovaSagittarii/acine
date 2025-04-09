@@ -1,12 +1,38 @@
 import { expect, test } from 'vitest';
 import { InputEvent } from 'acine-proto-dist';
-import { handleEvent, open } from './input_stream';
+import { handleInputEvent as handleEvent, open } from './input_stream';
+
+/**
+ * strings that represent some type of input event
+ */
+type P = NonNullable<InputEvent['type']>['$case'];
 
 let t = 0;
-function getInputEvent() {
-  return InputEvent.create({
+function getInputEvent(s: P = 'move') {
+  let e = InputEvent.create({
     timestamp: t++,
   });
+  switch (s) {
+    case 'move':
+      e.type = {
+        $case: 'move',
+        move: { x: 0, y: 0 },
+      };
+      break;
+    case 'mouseUp':
+      e.type = {
+        $case: 'mouseUp',
+        mouseUp: 0,
+      };
+      break;
+    case 'mouseDown':
+      e.type = {
+        $case: 'mouseDown',
+        mouseDown: 0,
+      };
+      break;
+  }
+  return e;
 }
 
 test('open and close', async () => {
@@ -63,4 +89,16 @@ test('2 listeners with partial overlap', async () => {
   g.close();
   expect(await f.getContents()).toStrictEqual(a.slice(0, 7));
   expect(await g.getContents()).toStrictEqual(a.slice(3, 9));
+});
+
+test('noHover flag', async () => {
+  const a = new Array(12)
+    .fill(12)
+    .map((_, i) =>
+      getInputEvent((['move', 'mouseDown', 'move', 'mouseUp'] as P[])[i % 4]),
+    );
+  const f = open();
+  a.map(handleEvent);
+  f.close({ noHover: true });
+  expect(await f.getContents()).toStrictEqual(a.filter((_, i) => i % 4 != 0));
 });

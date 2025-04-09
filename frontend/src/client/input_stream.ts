@@ -41,7 +41,7 @@ class InputStream {
    * closes the stream (no longer accepts events),
    * processes events then makes getContents return something
    */
-  public close() {
+  public close({ noHover = false }: InputStream.CloseOptions = {}) {
     delete streams[this.id]; // disconnect
     this.events.sort((a, b) => a.timestamp - b.timestamp);
 
@@ -52,8 +52,34 @@ class InputStream {
         event.timestamp -= t0;
       }
     }
+    if (noHover) {
+      const flag: boolean[] = [];
+      let ok = false;
+      for (const e of this.events) {
+        if (e.type?.$case === 'mouseDown') ok = true;
+        else if (e.type?.$case === 'mouseUp') ok = false;
+        flag.push(ok);
+      }
+      this.events = this.events.filter(
+        (e, i) => e.type?.$case !== 'move' || flag[i],
+      );
+    }
 
     this.completeCallback();
+  }
+}
+
+namespace InputStream {
+  /**
+   * Various input event stream post-processing options.
+   */
+  export interface CloseOptions {
+    /**
+     * Removes mousemove events that happen while the mouse is up.
+     *
+     * Useful for mobile games which only have tap and drag.
+     */
+    noHover?: boolean;
   }
 }
 
