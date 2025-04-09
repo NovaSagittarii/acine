@@ -18,6 +18,14 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
 
   return (
     <div className='font-mono'>
+      <NumberInput
+        className='min-w-8 w-fit'
+        object={edge}
+        property={'limit'}
+        label={'limit'}
+        callback={forceUpdate}
+        format={(x) => (x > 0 ? x.toString() : x < 0 ? 'INF' : 'disabled')}
+      />
       <div>
         <Select
           value={
@@ -51,16 +59,6 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
           }}
         />
         <span className='opacity-50'>: action_type</span>
-      </div>
-      <div className='flex flex-row'>
-        <NumberInput
-          className='min-w-8 w-fit'
-          object={edge}
-          property={'limit'}
-          callback={forceUpdate}
-          format={(x) => (x > 0 ? x.toString() : x < 0 ? 'INF' : 'disabled')}
-        />
-        <span className='opacity-50'>: limit</span>
       </div>
     </div>
   );
