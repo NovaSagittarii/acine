@@ -1,4 +1,4 @@
-import { InputEvent } from 'acine-proto-dist';
+import { InputEvent, InputReplay } from 'acine-proto-dist';
 
 /**
  * all ongoing streams
@@ -67,6 +67,14 @@ class InputStream {
     }
 
     this.completeCallback();
+  }
+
+  /**
+   * write events to InputReplay protobuf; sets duration property.
+   */
+  public async write(r: InputReplay) {
+    r.events = await this.getContents();
+    if (r.events.length) r.duration = r.events[r.events.length - 1].timestamp;
   }
 }
 

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { InputEvent } from 'acine-proto-dist';
+import { InputEvent, InputReplay } from 'acine-proto-dist';
 import { handleInputEvent as handleEvent, open } from './input_stream';
 
 /**
@@ -108,4 +108,23 @@ test('noHover flag', async () => {
   f.close({ noHover: true });
   expect(await f.getContents()).toStrictEqual(a.filter((_, i) => i % 4 != 0));
   expect((await f.getContents())[0].timestamp, E_ALIGN).toEqual(0);
+});
+
+test('write 0 (empty)', async () => {
+  const f = open();
+  f.close();
+  const pb = InputReplay.create();
+  await f.write(pb);
+  expect(pb).toStrictEqual(InputReplay.create({ events: [], duration: 0 }));
+});
+
+test('write 1', async () => {
+  const f = open();
+  const x = getInputEvent();
+  handleEvent(x);
+  f.close();
+  const pb = InputReplay.create();
+  await f.write(pb);
+  const expected = InputReplay.create({ events: [x], duration: x.timestamp });
+  expect(pb).toStrictEqual(expected);
 });
