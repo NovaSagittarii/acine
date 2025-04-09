@@ -114,7 +114,7 @@ test('write 0 (empty)', async () => {
   const f = open();
   f.close();
   const pb = InputReplay.create();
-  await f.write(pb);
+  await f.writeTo(pb);
   expect(pb).toStrictEqual(InputReplay.create({ events: [], duration: 0 }));
 });
 
@@ -124,7 +124,7 @@ test('write 1', async () => {
   handleEvent(x);
   f.close();
   const pb = InputReplay.create();
-  await f.write(pb);
+  await f.writeTo(pb);
   const expected = InputReplay.create({ events: [x], duration: x.timestamp });
   expect(pb).toStrictEqual(expected);
 });

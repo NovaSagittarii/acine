@@ -49,7 +49,7 @@ export default function ReplayEditor({ replay }: ReplayEditorProps) {
               setRecording(false);
               if (stream) {
                 stream.close({ noHover: true });
-                await stream.write(replay);
+                await stream.writeTo(replay);
                 console.log(replay.events);
               } else console.error("InputStream wasn't initialized.");
             }}
