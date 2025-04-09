@@ -1,5 +1,6 @@
 import * as pb from 'acine-proto-dist';
 import { toOutCoordinates } from './ui/MouseRegion';
+import { handleInputEvent } from '../client/input_stream';
 
 interface WindowProps {
   websocket: WebSocket;
@@ -31,12 +32,10 @@ export default function Window({
           timestamp: Math.round(ev.timeStamp),
           type: {
             $case: 'move',
-            move: {
-              x,
-              y,
-            },
+            move: { x, y },
           },
         });
+        handleInputEvent(inputEvent);
         const pkt = pb.Packet.create({
           type: {
             $case: 'inputEvent',
@@ -45,30 +44,36 @@ export default function Window({
         });
         ws.send(pb.Packet.encode(pkt).finish());
       }}
-      onMouseDown={() => {
+      onMouseDown={(ev) => {
+        const inputEvent = pb.InputEvent.create({
+          timestamp: Math.round(ev.timeStamp),
+          type: {
+            $case: 'mouseDown',
+            mouseDown: pb.InputEvent_MouseButton.MOUSE_BUTTON_LEFT,
+          },
+        });
+        handleInputEvent(inputEvent);
         const pkt = pb.Packet.create({
           type: {
             $case: 'inputEvent',
-            inputEvent: {
-              type: {
-                $case: 'mouseDown',
-                mouseDown: 0,
-              },
-            },
+            inputEvent: inputEvent,
           },
         });
         ws.send(pb.Packet.encode(pkt).finish());
       }}
-      onMouseUp={() => {
+      onMouseUp={(ev) => {
+        const inputEvent = pb.InputEvent.create({
+          timestamp: Math.round(ev.timeStamp),
+          type: {
+            $case: 'mouseUp',
+            mouseUp: pb.InputEvent_MouseButton.MOUSE_BUTTON_LEFT,
+          },
+        });
+        handleInputEvent(inputEvent);
         const pkt = pb.Packet.create({
           type: {
             $case: 'inputEvent',
-            inputEvent: {
-              type: {
-                $case: 'mouseUp',
-                mouseUp: 0,
-              },
-            },
+            inputEvent: inputEvent,
           },
         });
         ws.send(pb.Packet.encode(pkt).finish());

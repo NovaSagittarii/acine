@@ -1,11 +1,13 @@
-import { Point, Routine_Edge } from 'acine-proto-dist';
+import { InputReplay, Point, Routine_Edge } from 'acine-proto-dist';
 import useForceUpdate from './useForceUpdate';
 import Select from './ui/Select';
 import NumberInput from './ui/NumberInput';
+import ReplayEditor from './ReplayEditor';
 
 const ACTION_TYPES_DISPLAY = [
   ['𝜀', null],
   ['click', 'click'],
+  ['replay', 'replay'],
   ['subroutine', 'subroutine'],
 ] as [string, Exclude<Routine_Edge['action'], undefined>['$case']][];
 
@@ -47,6 +49,12 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
                     click: Point.create(),
                   };
                   break;
+                case 'replay':
+                  edge.action = {
+                    $case: v,
+                    replay: InputReplay.create(),
+                  };
+                  break;
                 case 'subroutine':
                   edge.action = {
                     $case: v,
@@ -60,6 +68,9 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
         />
         <span className='opacity-50'>: action_type</span>
       </div>
+      {edge.action?.$case === 'replay' && (
+        <ReplayEditor replay={edge.action.replay} />
+      )}
     </div>
   );
 }

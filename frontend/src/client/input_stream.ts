@@ -67,7 +67,7 @@ export function open() {
  * This is a good enough way of tracking events since there shouldn't be many
  * ongoing event streams at any point in time.
  */
-export function handleEvent(event: InputEvent) {
+export function handleInputEvent(event: InputEvent) {
   for (const stream of Object.values(streams)) {
     stream.insert(event);
   }
