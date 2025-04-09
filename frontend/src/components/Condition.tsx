@@ -45,7 +45,7 @@ export default function Condition({ condition }: ConditionProps) {
     <div className='pl-1 border border-black font-mono'>
       {condition.condition?.$case === 'image' && (
         <Button
-          className='p-1.5! w-fit bg-black text-white scale-100! float-right'
+          className='p-1.5! w-fit bg-black text-white scale-100! float-right font-sans'
           onClick={() => {
             // duplicate conditional to make typescript happy
             if (condition.condition?.$case === 'image') {
