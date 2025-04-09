@@ -73,6 +73,8 @@ test('3 events via handleEvent', async () => {
   expect(await f.getContents()).toStrictEqual(a);
 });
 
+const E_ALIGN = 'First timestamp should be zero (auto alignment)';
+
 test('2 listeners with partial overlap', async () => {
   async function runInBackground() {
     expect(await f.getContents()).toStrictEqual(a.slice(0, 7));
@@ -87,8 +89,12 @@ test('2 listeners with partial overlap', async () => {
   f.close();
   for (let i = 7; i < 9; ++i) handleEvent(a[i]);
   g.close();
-  expect(await f.getContents()).toStrictEqual(a.slice(0, 7));
-  expect(await g.getContents()).toStrictEqual(a.slice(3, 9));
+  const fc = await f.getContents();
+  const gc = await g.getContents();
+  expect(fc).toStrictEqual(a.slice(0, 7));
+  expect(gc).toStrictEqual(a.slice(3, 9));
+  expect(fc[0].timestamp, E_ALIGN).toBe(0);
+  expect(gc[0].timestamp, E_ALIGN).toBe(0);
 });
 
 test('noHover flag', async () => {
@@ -101,4 +107,5 @@ test('noHover flag', async () => {
   a.map(handleEvent);
   f.close({ noHover: true });
   expect(await f.getContents()).toStrictEqual(a.filter((_, i) => i % 4 != 0));
+  expect((await f.getContents())[0].timestamp, E_ALIGN).toEqual(0);
 });

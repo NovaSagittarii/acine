@@ -45,13 +45,6 @@ class InputStream {
     delete streams[this.id]; // disconnect
     this.events.sort((a, b) => a.timestamp - b.timestamp);
 
-    // time alignment; only applies if there is at least 1 event
-    if (this.events.length) {
-      const t0 = this.events[0].timestamp;
-      for (const event of this.events) {
-        event.timestamp -= t0;
-      }
-    }
     if (noHover) {
       const flag: boolean[] = [];
       let ok = false;
@@ -63,6 +56,14 @@ class InputStream {
       this.events = this.events.filter(
         (e, i) => e.type?.$case !== 'move' || flag[i],
       );
+    }
+
+    // time alignment; only applies if there is at least 1 event
+    if (this.events.length) {
+      const t0 = this.events[0].timestamp;
+      for (const event of this.events) {
+        event.timestamp -= t0;
+      }
     }
 
     this.completeCallback();
