@@ -11,6 +11,29 @@ import { SelectAuto } from './ui/Select';
 import Button from './ui/Button';
 import { $condition } from './ConditionImageEditor';
 
+interface ConditionNumberInputProps<K extends keyof Routine_Condition> {
+  /* property */
+  p: K;
+  /*condition */
+  c: Routine_Condition;
+  /* callback */
+  cb: () => void;
+}
+function ConditionNumberInput<K extends keyof Routine_Condition>({
+  p: property,
+  c: condition,
+  cb: callback,
+}: ConditionNumberInputProps<K>) {
+  return (
+    <NumberInput
+      label={property}
+      object={condition}
+      property={property}
+      callback={callback}
+    />
+  );
+}
+
 interface ConditionProps extends Selectable {
   condition: Routine_Condition;
 }
@@ -18,26 +41,12 @@ interface ConditionProps extends Selectable {
 export default function Condition({ condition }: ConditionProps) {
   const forceUpdate = useForceUpdate();
 
-  function ScopedNumberInput<K extends keyof Routine_Condition>({
-    property,
-  }: {
-    property: K;
-  }) {
-    return (
-      <NumberInput
-        label={property}
-        object={condition}
-        property={property}
-        callback={forceUpdate}
-      />
-    );
-  }
-
   return (
     <div className='pl-1 border border-black font-mono'>
-      <ScopedNumberInput property='timeout' />
-      <ScopedNumberInput property='delay' />
-      <ScopedNumberInput property='interval' />
+      {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
+      <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' />
+      <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' />
+      <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' />
       <div>
         <SelectAuto
           value={(() => {
