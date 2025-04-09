@@ -18,20 +18,19 @@ export default function Select<T>({
   onChange,
   className = '',
 }: SelectProps<T>) {
-  const [selectedIndex, setSelectedIndex] = useState(value);
+  // const [selectedIndex, setSelectedIndex] = useState(value);
   return (
     <select
       className={'hover:bg-black/5 hover:cursor-text ' + className}
       onChange={(ev) => {
         const index = +ev.target.value;
-        setSelectedIndex(index);
+        // setSelectedIndex(index);
         onChange(values[index][1]);
       }}
-      value={selectedIndex}
-      defaultValue={selectedIndex} // nevermind, you need to set it
+      value={value} // bugged??
     >
       {values.map(([s, _v], i) => (
-        <option value={i} key={i}>
+        <option value={i.toString()} key={i}>
           {s}
         </option>
       ))}

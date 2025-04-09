@@ -40,6 +40,11 @@ export default function Condition({ condition }: ConditionProps) {
       <ScopedNumberInput property='interval' />
       <div>
         <SelectAuto
+          value={(() => {
+            if (!condition.condition) return 0; // undefined
+            if (condition.condition.$case === 'image') return 1;
+            return -1;
+          })()}
           values={
             ['true', 'image' /*, 'text'*/] as (
               | Exclude<Routine_Condition['condition'], undefined>['$case']
