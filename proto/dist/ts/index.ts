@@ -9,3 +9,5 @@ export * from "./packet";
 export * from "./position";
 // @ts-ignore
 export * from "./routine";
+// @ts-ignore
+export * from "./input_event";
