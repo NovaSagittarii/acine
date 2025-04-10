@@ -33,8 +33,10 @@ export default class InputSource {
       }
       const future = replay.events[i].timestamp;
       setTimeout(() => {
-        next();
-        this.onEvent(replay.events[i++]);
+        next(); // queue next event
+        const event = replay.events[i++];
+        // goes over by one (since next will fail first)
+        if (event) this.onEvent(event);
       }, future - t);
     };
     next();
