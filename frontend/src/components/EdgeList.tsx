@@ -34,8 +34,14 @@ export default function EdgeList({ node }: EdgeListProps) {
         className='bg-black text-white text-sm p-2!'
         onClick={() => {
           const newEdge = Routine_Edge.create({
-            precondition: Routine_Condition.create(),
-            postcondition: Routine_Condition.create(),
+            precondition: Routine_Condition.create({
+              delay: 50,
+              interval: 100,
+            }),
+            postcondition: Routine_Condition.create({
+              delay: 50,
+              interval: 100,
+            }),
             limit: -1,
             description: 'desc',
           });
