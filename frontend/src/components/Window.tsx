@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
 import * as pb from 'acine-proto-dist';
+
 import { toOutCoordinates } from './ui/MouseRegion';
 import { handleInputEvent } from '../client/input_stream';
+import InputSource from '../client/input_source';
 
 interface WindowProps {
-  websocket: WebSocket;
+  websocket: WebSocket; // forward events towards here
+  replaySource: InputSource; // external replay events from here
   dimensions: [number, number];
   imageUrl?: string | null;
 }
@@ -18,9 +22,22 @@ interface WindowProps {
  */
 export default function Window({
   websocket: ws,
+  replaySource,
   dimensions,
   imageUrl = null,
 }: WindowProps) {
+  useEffect(() => {
+    replaySource.setCallback((event) => {
+      const pkt = pb.Packet.create({
+        type: {
+          $case: 'inputEvent',
+          inputEvent: event,
+        },
+      });
+      ws.send(pb.Packet.encode(pkt).finish());
+    });
+  }, []);
+
   return (
     <div
       className='min-h-[12rem] bg-black'

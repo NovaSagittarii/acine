@@ -1,6 +1,9 @@
 import { InputReplay } from 'acine-proto-dist';
-import Button from './ui/Button';
 import { useState } from 'react';
+import { useStore } from '@nanostores/react';
+import { $replayInputSource } from '@/state';
+
+import Button from './ui/Button';
 import { open } from '../client/input_stream';
 
 interface ReplayEditorProps {
@@ -9,6 +12,7 @@ interface ReplayEditorProps {
 export default function ReplayEditor({ replay }: ReplayEditorProps) {
   const [isRecording, setRecording] = useState<boolean>(false);
   const [stream, setStream] = useState<null | ReturnType<typeof open>>(null);
+  const replayInputSource = useStore($replayInputSource);
 
   return (
     <div className='flex flex-col'>
@@ -32,7 +36,10 @@ export default function ReplayEditor({ replay }: ReplayEditorProps) {
             >
               Record
             </Button>
-            <Button className='p-1! w-full bg-black text-white'>
+            <Button
+              className='p-1! w-full bg-black text-white'
+              onClick={() => replayInputSource.play(replay)}
+            >
               Playback
             </Button>
             <Button

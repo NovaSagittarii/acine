@@ -12,6 +12,7 @@ import {
   Routine_Node,
   Routine_State,
 } from 'acine-proto-dist';
+import InputSource from './client/input_source';
 
 export const $routine = atom(Routine.create());
 export const $routineBase64 = persistentAtom<string>(
@@ -84,3 +85,10 @@ export const $sourceDimensions = atom<[number, number]>([0, 0]);
  * need `$routine.set($routine.get())` to make changes appear
  */
 export const $selectedNode = atom<Routine_Node | null>(null);
+
+/**
+ * a global input source, this is used for
+ *
+ * forwarding replay events => client websocket => backend
+ */
+export const $replayInputSource = atom<InputSource>(new InputSource());

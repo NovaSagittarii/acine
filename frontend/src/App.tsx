@@ -10,6 +10,7 @@ import {
   $sourceDimensions as dimensions,
   loadRoutine,
   saveRoutine, // used in global scope
+  $replayInputSource,
 } from './state';
 import Button from './components/ui/Button';
 import StateList from './components/StateList';
@@ -162,6 +163,7 @@ function App() {
     };
   }, []);
 
+  const replayInputSource = useStore($replayInputSource);
   const selectedState = useStore($selectedState);
   const dimensions = useStore($sourceDimensions);
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.STATE);
@@ -192,6 +194,7 @@ function App() {
             </div> */}
             <Window
               websocket={ws}
+              replaySource={replayInputSource}
               dimensions={dimensions}
               imageUrl={imageUrl}
             />
