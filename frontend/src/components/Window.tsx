@@ -129,7 +129,7 @@ export default function Window({
         >
           <div
             className={
-              'w-1 h-1 rounded-full transition-all border-4 ' +
+              'w-1 h-1 rounded-full border-4 ' +
               `${!isMouseDown ? 'border-transparent' : 'border-amber-700/80'}`
             }
           ></div>
