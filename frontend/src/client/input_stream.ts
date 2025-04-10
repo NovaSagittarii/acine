@@ -54,7 +54,7 @@ class InputStream {
         flag.push(ok);
       }
       this.events = this.events.filter(
-        (e, i) => e.type?.$case !== 'move' || flag[i],
+        (e, i) => e.type?.$case !== 'move' || flag[i] || flag[i + 1],
       );
     }
 

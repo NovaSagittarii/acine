@@ -98,15 +98,17 @@ test('2 listeners with partial overlap', async () => {
 });
 
 test('noHover flag', async () => {
-  const a = new Array(12)
-    .fill(12)
+  const a = new Array(15)
+    .fill(15)
     .map((_, i) =>
-      getInputEvent((['move', 'mouseDown', 'move', 'mouseUp'] as P[])[i % 4]),
+      getInputEvent(
+        (['move', 'move', 'mouseDown', 'move', 'mouseUp'] as P[])[i % 5],
+      ),
     );
   const f = open();
   a.map(handleEvent);
   f.close({ noHover: true });
-  expect(await f.getContents()).toStrictEqual(a.filter((_, i) => i % 4 != 0));
+  expect(await f.getContents()).toStrictEqual(a.filter((_, i) => i % 5 != 0));
   expect((await f.getContents())[0].timestamp, E_ALIGN).toEqual(0);
 });
 
