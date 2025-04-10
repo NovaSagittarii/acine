@@ -4,6 +4,7 @@ import * as pb from 'acine-proto-dist';
 import { toOutCoordinates } from './ui/MouseRegion';
 import { handleInputEvent } from '../client/input_stream';
 import InputSource from '../client/input_source';
+import { toPercentage } from '../client/util';
 
 interface WindowProps {
   websocket: WebSocket; // forward events towards here
@@ -65,7 +66,7 @@ export default function Window({
 
   return (
     <div
-      className='min-h-[12rem] bg-black'
+      className='relative min-h-[12rem] bg-black'
       onMouseMove={(ev) => {
         const { x, y } = toOutCoordinates(...dimensions, ev);
         const inputEvent = pb.InputEvent.create({
@@ -111,6 +112,29 @@ export default function Window({
           style={{ imageRendering: 'pixelated' }}
         />
       )}
+      <div
+        className='absolute top-0 left-0 pointer-events-none'
+        style={{
+          left: toPercentage(mouseX / dimensions[0]),
+          top: toPercentage(mouseY / dimensions[1]),
+        }}
+      >
+        <div
+          className={
+            'bg-transparent w-3 h-3 overflow-hidden rounded-full border-2 ' +
+            '-translate-x-[50%] -translate-y-[50%] transition-all ' +
+            'flex justify-center items-center ' +
+            `${!isMouseDown ? 'border-amber-600' : 'scale-125 border-amber-500/30'}`
+          }
+        >
+          <div
+            className={
+              'w-1 h-1 rounded-full transition-all border-4 ' +
+              `${!isMouseDown ? 'border-transparent' : 'border-amber-700/80'}`
+            }
+          ></div>
+        </div>
+      </div>
       <div className='absolute pointer-events-none'>
         ({mouseX}, {mouseY}, {isMouseDown ? 'down' : 'up'})
       </div>
