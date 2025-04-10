@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import * as pb from 'acine-proto-dist';
 
 import { toOutCoordinates } from './ui/MouseRegion';
@@ -26,17 +26,41 @@ export default function Window({
   dimensions,
   imageUrl = null,
 }: WindowProps) {
-  useEffect(() => {
-    replaySource.setCallback((event) => {
-      console.log('fwd', event);
-      const pkt = pb.Packet.create({
-        type: {
-          $case: 'inputEvent',
-          inputEvent: event,
-        },
-      });
-      ws.send(pb.Packet.encode(pkt).finish());
+  const [mouseX, setMouseX] = useState(0);
+  const [mouseY, setMouseY] = useState(0);
+  const [isMouseDown, setMouseDown] = useState(false);
+  /**
+   * for each event:
+   * 1. update mouseX/mouseY/mouseDown (for display)
+   * 2. send to websocket
+   */
+  const processEvent = (event: pb.InputEvent) => {
+    // 1. update display values
+    switch (event.type?.$case) {
+      case 'move':
+        const { x, y } = event.type.move;
+        setMouseX(x);
+        setMouseY(y);
+        break;
+      case 'mouseDown':
+        setMouseDown(true);
+        break;
+      case 'mouseUp':
+        setMouseDown(false);
+        break;
+    }
+
+    // 2. prepare and send to websocket
+    const pkt = pb.Packet.create({
+      type: {
+        $case: 'inputEvent',
+        inputEvent: event,
+      },
     });
+    ws.send(pb.Packet.encode(pkt).finish());
+  };
+  useEffect(() => {
+    replaySource.setCallback(processEvent);
   }, []);
 
   return (
@@ -54,13 +78,7 @@ export default function Window({
           },
         });
         handleInputEvent(inputEvent);
-        const pkt = pb.Packet.create({
-          type: {
-            $case: 'inputEvent',
-            inputEvent,
-          },
-        });
-        ws.send(pb.Packet.encode(pkt).finish());
+        processEvent(inputEvent);
       }}
       onMouseDown={(ev) => {
         const inputEvent = pb.InputEvent.create({
@@ -71,13 +89,7 @@ export default function Window({
           },
         });
         handleInputEvent(inputEvent);
-        const pkt = pb.Packet.create({
-          type: {
-            $case: 'inputEvent',
-            inputEvent: inputEvent,
-          },
-        });
-        ws.send(pb.Packet.encode(pkt).finish());
+        processEvent(inputEvent);
       }}
       onMouseUp={(ev) => {
         const inputEvent = pb.InputEvent.create({
@@ -88,13 +100,7 @@ export default function Window({
           },
         });
         handleInputEvent(inputEvent);
-        const pkt = pb.Packet.create({
-          type: {
-            $case: 'inputEvent',
-            inputEvent: inputEvent,
-          },
-        });
-        ws.send(pb.Packet.encode(pkt).finish());
+        processEvent(inputEvent);
       }}
     >
       {imageUrl && (
@@ -105,6 +111,9 @@ export default function Window({
           style={{ imageRendering: 'pixelated' }}
         />
       )}
+      <div className='absolute pointer-events-none'>
+        ({mouseX}, {mouseY}, {isMouseDown ? 'down' : 'up'})
+      </div>
     </div>
   );
 }
