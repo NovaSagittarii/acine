@@ -2,6 +2,13 @@
 
 budget issue tracker
 
+## Task Queue
+- subroutine edit
+- implement graph (for debugging)
+- implement router + route display; goto state, queue edge
+- implement scheduling groups
+- implement scheduler
+
 ## Done
 
 - `PY` setup python screenshot capability
@@ -26,9 +33,6 @@ budget issue tracker
 
 ## Medium priority
 
-- `PR` auto-build scripts (need to fix mypy build)
-- `PY` do something about mypy needing insert `from . ` to fix the imports
-  - maybe bring the patch script over; or submit PR to mypy proto
 - `JS` persistent websocket
 - `JS` move input listener into its own component
 - `JS` CollapseRegion.tsx -- implement collapseable region for viewing samples
@@ -40,16 +44,11 @@ budget issue tracker
 
 ## Low priority
 
-- `JS/PR/PY` get the package overhead out of proto -- no need to build it there?? i don't know
-- `PR` uninvert the proto/dist/{lang} to proto/{lang}/dist (this is a waste of paths)
-- `PR` fix the documentation on proto; js stuff lives in root and py stuff in dist/py
 - `JS` setup path alias
 - `JS` EditableText.tsx -- improve UX
 - `JS` break up toOutCoordinates into two functions, probably shouldn't be one?
 - `JS` reset region of interest selection; back to default (entire screen)
 - `JS/PR/PY` improve stream FPS -- seems to be bottlenecked somewhere
-- `PR` fix the build/lib/build/lib/... recursion (move `*_dist` to `src/*_dist`)
-- `JS/PR` region composition: union
 - `CL` warn when there are ambiguous states (samples are too similar)
 
 ## No priority
