@@ -10,6 +10,7 @@ export default class InputSource {
   private timeout: null | number = null;
   private active: boolean = false;
   private onEvent: (event: InputEvent) => void;
+  private onEnd: () => void = () => {};
   constructor(callback: (event: InputEvent) => void = () => {}) {
     this.onEvent = callback;
   }
@@ -27,6 +28,7 @@ export default class InputSource {
       if (!this.active) return;
       const t = Date.now() - t0;
       if (i >= replay.events.length) {
+        this.onEnd();
         return;
       }
       const future = replay.events[i].timestamp;
@@ -40,10 +42,13 @@ export default class InputSource {
 
   /**
    * ends the replay
+   *
+   * TODO: need to handle the case of auto release pressed mouse
    */
   public stop() {
     this.active = false;
     if (this.timeout !== null) clearTimeout(this.timeout);
+    this.onEnd();
   }
 
   /**
@@ -51,5 +56,12 @@ export default class InputSource {
    */
   public setCallback(callback: (event: InputEvent) => void) {
     this.onEvent = callback;
+  }
+
+  /**
+   * budget addEventListener (onEnd) (also does not allow multiple)
+   */
+  public setEndCallback(callback: () => void) {
+    this.onEnd = callback;
   }
 }

@@ -11,6 +11,7 @@ interface ReplayEditorProps {
 }
 export default function ReplayEditor({ replay }: ReplayEditorProps) {
   const [isRecording, setRecording] = useState<boolean>(false);
+  const [isPlaying, setPlaying] = useState<boolean>(false); // for replay
   const [stream, setStream] = useState<null | ReturnType<typeof open>>(null);
   const replayInputSource = useStore($replayInputSource);
 
@@ -36,12 +37,27 @@ export default function ReplayEditor({ replay }: ReplayEditorProps) {
             >
               Record
             </Button>
-            <Button
-              className='p-1! w-full bg-black text-white'
-              onClick={() => replayInputSource.play(replay)}
-            >
-              Playback
-            </Button>
+            {!isPlaying ? (
+              <Button
+                className='p-1! w-full bg-black text-white'
+                onClick={() => {
+                  replayInputSource.setEndCallback(() => setPlaying(false));
+                  replayInputSource.play(replay);
+                  setPlaying(true);
+                }}
+              >
+                Playback
+              </Button>
+            ) : (
+              <div className='w-full'>
+                <Button
+                  className='p-1! w-full bg-red-500 text-white'
+                  onClick={() => replayInputSource.stop()}
+                >
+                  Stop
+                </Button>
+              </div>
+            )}
             <Button
               className='p-1! w-full bg-black text-white'
               onClick={() => console.log(replay)}

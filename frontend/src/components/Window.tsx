@@ -28,6 +28,7 @@ export default function Window({
 }: WindowProps) {
   useEffect(() => {
     replaySource.setCallback((event) => {
+      console.log('fwd', event);
       const pkt = pb.Packet.create({
         type: {
           $case: 'inputEvent',
