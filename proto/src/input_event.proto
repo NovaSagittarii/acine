@@ -34,7 +34,10 @@ message InputEvent {
   }
 }
 
-message InputReplay {              // fields in oneof can't have repeated
+/**
+ * A collection of input events used for replay playback.
+ */
+message InputReplay {
   repeated InputEvent events = 1;  // for playback
   uint32 duration = 2;             // ms; needs to be computed
 }
