@@ -24,12 +24,17 @@ function Node({ node, selected = false }: NodeProps) {
 
   return (
     <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
-      <EditableRoutineProperty
-        object={node}
-        property={'name'}
-        callback={forceUpdate}
-        className='font-semibold font-mono'
-      />
+      <div className='w-full flex flex-row justify-between items-center'>
+        <EditableRoutineProperty
+          object={node}
+          property={'name'}
+          callback={forceUpdate}
+          className='font-semibold font-mono'
+        />
+        <div className='flex flex-row text-xs'>
+          id={node.id} (outdegree={node.edges.length})
+        </div>
+      </div>
       <EditableRoutineProperty
         object={node}
         property={'description'}
