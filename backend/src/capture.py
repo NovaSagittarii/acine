@@ -7,15 +7,19 @@ from windows_capture import Frame, InternalCaptureControl, WindowsCapture
 
 class GameCapture:  # thanks joshua
     def __init__(self, window_name: str | None = None):
-        self.framedata_png = None
+        self.data: cv2.typing.MatLike = None
+        """cv2.MatLike frame data"""
+
         self.window_name = window_name
         self.init()
         self.want_frame = True
         self.get_png_frame_lock = Lock()
         self.capture_callback_semaphore = Semaphore(0)
         self.dimensions: "tuple[int, int]" = (0, 0)
+        """ screen dimensions """
 
     def init(self) -> None:
+        """set up WindowsCapture event listeners"""
         self.capture = WindowsCapture(
             cursor_capture=False,
             draw_border=False,
@@ -32,9 +36,7 @@ class GameCapture:  # thanks joshua
 
             # print("got frame")
             # frame.save_as_image("./yooo.png")
-
-            _, framedata_png = cv2.imencode(".png", frame.frame_buffer)
-            self.framedata_png = framedata_png
+            self.data = frame.frame_buffer
             self.dimensions = (frame.width, frame.height)
             self.capture_callback_semaphore.release()
 
@@ -45,14 +47,22 @@ class GameCapture:  # thanks joshua
 
         self.capture.start_free_threaded()
 
-    async def get_png_frame(self) -> ndarray:
-        """
-        Gets a png encoded frame
-        """
+    async def __next_frame(self):
+        """requests a frame until it gets the next frame"""
         async with self.get_png_frame_lock:
             self.want_frame = True
             await self.capture_callback_semaphore.acquire()
-        return self.framedata_png
+
+    async def get_frame(self) -> cv2.typing.MatLike:
+        """gets a MatLike frame for cv2"""
+        await self.__next_frame()
+        return self.data
+
+    async def get_png_frame(self) -> ndarray:
+        """gets a png encoded frame"""
+        await self.__next_frame()
+        _, framedata_png = cv2.imencode(".png", self.data)
+        return framedata_png
 
 
 if __name__ == "__main__":
