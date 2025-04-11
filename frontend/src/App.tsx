@@ -222,6 +222,12 @@ function App() {
             </div>
             <div
               className='hover:bg-amber-100'
+              onClick={() => console.info($routine.get())}
+            >
+              log
+            </div>
+            <div
+              className='hover:bg-amber-100'
               onClick={() => {
                 const pkt = pb.Packet.create({
                   type: {
