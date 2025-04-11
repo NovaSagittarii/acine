@@ -3,11 +3,11 @@
 budget issue tracker
 
 ## Task Queue
-- subroutine edit
-- implement graph (for debugging)
-- implement router + route display; goto state, queue edge
-- implement scheduling groups
-- implement scheduler
+- [x] subroutine edit
+- [ ] implement graph (for debugging)
+- [ ] implement router + route display; goto state, queue edge
+- [ ] implement scheduling groups
+- [ ] implement scheduler
 
 ## Done
 
