@@ -3,6 +3,7 @@ import useForceUpdate from './useForceUpdate';
 import Select from './ui/Select';
 import NumberInput from './ui/NumberInput';
 import ReplayEditor from './ReplayEditor';
+import SubroutineEditor from './SubroutineEditor';
 
 const ACTION_TYPES_DISPLAY = [
   ['𝜀', null],
@@ -68,6 +69,9 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
         />
         <span className='opacity-50'>: action_type</span>
       </div>
+      {edge.action?.$case === 'subroutine' && (
+        <SubroutineEditor action={edge.action} />
+      )}
       {edge.action?.$case === 'replay' && (
         <ReplayEditor replay={edge.action.replay} />
       )}

@@ -28,14 +28,17 @@ export default function Select<T>({
     <select
       className={'hover:bg-black/5 hover:cursor-text ' + className}
       onChange={(ev) => {
-        const index = +ev.target.value;
+        const index = +ev.target.value - 1; // unset placeholder
         // setSelectedIndex(index);
         onChange(values[index][1]);
       }}
-      value={value}
+      value={isNaN(value) ? 0 : value + 1}
     >
+      <option value='0' disabled>
+        --- N/A ---
+      </option>
       {values.map(([s, _v], i) => (
-        <option value={i.toString()} key={i}>
+        <option value={(i + 1).toString()} key={i}>
           {s}
         </option>
       ))}
