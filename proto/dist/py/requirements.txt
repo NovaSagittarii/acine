@@ -1,5 +1,5 @@
 mypy-protobuf==3.6.0
-protobuf==5.28.1
+protobuf==5.29.4
 protoc-exe==22.0rc1
 protoletariat==3.3.10
 
