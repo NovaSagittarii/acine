@@ -24,9 +24,12 @@ export default function RoutineViewer() {
       <GraphCanvas
         nodes={nodes()}
         edges={edges()}
-        edgeInterpolation='curved'
+        edgeInterpolation='curved' // make <-> 2-cycles more visible
         labelType='all'
         selections={[routine.nodes[0].id.toString()]}
+        edgeLabelPosition={'above'} // for label readability
+        animated={false} // less errors
+        // onEdgeClick={(e) => console.log(e)} // it does work (highlight bugged)
       />
     </div>
   );
