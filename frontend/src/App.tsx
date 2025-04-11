@@ -14,15 +14,16 @@ import {
 } from './state';
 import Button from './components/ui/Button';
 import StateList from './components/StateList';
-import { toOutCoordinates } from './components/ui/MouseRegion';
 import NodeList from './components/NodeList';
 import { frameToObjectURL } from './client/encoder';
 import ConditionImageEditor from './components/ConditionImageEditor';
 import Window from './components/Window';
+import RoutineViewer from './components/RoutineViewer';
 
 enum ActiveTab {
   STATE,
   NODE,
+  GRAPH,
   length, // keep this at the end to know how many tabs there are
 }
 
@@ -211,7 +212,7 @@ function App() {
                 onClick={() => setActiveTab(index)}
                 className={`hover:bg-amber-100 ${activeTab === index && 'font-bold'}`}
               >
-                {['states', 'nodes'][index]}
+                {['states', 'nodes', 'graph'][index]}
               </div>
             ))}
             <div className='hover:bg-amber-100' onClick={saveRoutine}>
@@ -244,6 +245,7 @@ function App() {
           </div>
           {activeTab === ActiveTab.STATE && <StateList />}
           {activeTab === ActiveTab.NODE && <NodeList />}
+          {activeTab === ActiveTab.GRAPH && <RoutineViewer />}
         </div>
       </div>
       <ConditionImageEditor />
