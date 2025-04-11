@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react';
-import { Routine_Node } from 'acine-proto-dist';
+import { Routine_Node, Routine_Node_NodeType } from 'acine-proto-dist';
 
 import { $routine, $selectedNode } from '@/state';
 import Button from '@/ui/Button';
@@ -31,6 +31,7 @@ export default function NodeList() {
             id: Date.now(),
             name: 'unnamed node',
             description: 'desc',
+            type: Routine_Node_NodeType.NODE_TYPE_STANDARD,
           });
           routine.nodes.push(newNode);
           forceUpdate();
