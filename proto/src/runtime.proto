@@ -1,0 +1,25 @@
+// Handles routing and listens for routing goals
+
+syntax = "proto3";
+
+package ac;
+
+import "google/protobuf/empty.proto";
+import "routine.proto";
+
+service Runtime {
+  // Fetches where the current node is
+  rpc GetCurrentNode(google.protobuf.Empty) returns (Routine.Node) {}
+
+  rpc SetNode(Routine.Node) returns (google.protobuf.Empty) {}
+
+  rpc GoToNode(Routine.Node) returns (google.protobuf.Empty) {}
+}
+
+message RuntimeState {
+  // current node
+  Routine.Node current_node = 1;
+
+  // desired next node
+  Routine.Node next_node = 2;
+}
