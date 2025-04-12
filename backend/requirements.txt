@@ -10,3 +10,7 @@ windows-capture==1.4.2
 
 # classification
 ydf==0.8.0  # 0.10.0 exists now, but 0.8.0 is highest with windows wheel
+scikit-image==0.25.2
+
+# routing
+networkx==3.4.2
