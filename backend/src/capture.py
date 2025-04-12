@@ -12,7 +12,6 @@ class GameCapture:  # thanks joshua
 
         self.window_name = window_name
         self.init()
-        self.want_frame = True
         self.get_png_frame_lock = Lock()
         self.capture_callback_semaphore = Semaphore(0)
         self.dimensions: "tuple[int, int]" = (0, 0)
@@ -30,9 +29,21 @@ class GameCapture:  # thanks joshua
         @self.capture.event
         def on_frame_arrived(frame: Frame, _: InternalCaptureControl):
             # Note: when minimized, this does not run
-            if not self.want_frame:
-                return  # discard frame
-            self.want_frame = False
+            if self.get_png_frame_lock.locked():
+                return
+            """
+            Checking if the lock is locked directly to decide whether
+            to do the copy or not.
+
+            Previously, when testing subroutines, this would hang on line
+            ```py
+            await self.capture_callback_semaphore.acquire()
+            ```
+            since somehow `want_frame` didn't work properly...
+
+            This might be related to how windows_capture is running on a
+            dedicated thread (allowing multicore race conditions).
+            """
 
             # print("got frame")
             # frame.save_as_image("./yooo.png")
@@ -50,7 +61,6 @@ class GameCapture:  # thanks joshua
     async def __next_frame(self):
         """requests a frame until it gets the next frame"""
         async with self.get_png_frame_lock:
-            self.want_frame = True
             await self.capture_callback_semaphore.acquire()
 
     async def get_frame(self) -> cv2.typing.MatLike:
