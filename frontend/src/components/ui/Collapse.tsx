@@ -22,7 +22,7 @@ export default function Collapse({
   return (
     <div
       className={
-        'relative overflow-hidden transition-all ' +
+        'relative overflow-hidden transition-all select-none ' +
         // `${isOpen ? 'max-h-[1000px]' : 'max-h-10'} ` +
         `${!isOpen && 'group hover:bg-black/5'} ` +
         className
@@ -34,12 +34,15 @@ export default function Collapse({
           'absolute right-0 top-0 w-6 h-6 mx-4 flex justify-center items-center ' +
           'font-mono font-bold select-none transition-all ' +
           'group-hover:text-amber-700 hover:text-amber-700 ' +
-          'border-2 border-transparent group-hover:border-black/20 hover:border-black/20 group-hover:bg-white/50 hover:bg-white ' +
+          'border-2 border-transparent group-hover:border-black/20 hover:border-black/20 group-hover:bg-white hover:bg-white ' +
           `${isOpen && 'rotate-90'} `
         }
         onClick={() => setOpen((o) => !o)}
       >
         {'>'}
+        <div className='absolute opacity-0 w-full h-64'>
+          {/* make the collapse hitbox bigger */}
+        </div>
       </div>
       {isOpen ? children : label}
     </div>
