@@ -40,9 +40,9 @@ export default function RoutineViewer() {
         edges={edges()}
         edgeInterpolation='curved' // make <-> 2-cycles more visible
         labelType='all'
-        selections={[routine.nodes[0].id.toString()]}
+        // selections={[routine.nodes[0].id.toString()]}
         edgeLabelPosition={'above'} // for label readability
-        animated={false} // less errors
+        // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
         // onEdgeClick={(e) => console.log(e)} // it does work (highlight bugged)
       />
     </div>

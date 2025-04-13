@@ -29,7 +29,7 @@ function Node({ node, selected = false }: NodeProps) {
           object={node}
           property={'name'}
           callback={forceUpdate}
-          className='font-semibold font-mono'
+          className='font-semibold font-mono grow'
         />
         <div className='flex flex-row text-xs'>
           id={node.id} (outdegree={node.edges.length})

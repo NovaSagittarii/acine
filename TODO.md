@@ -7,13 +7,14 @@ budget issue tracker
 - [x] subroutine edit
 - [x] implement graph (for debugging)
 - [x] implement router; goto state
-- [ ] improve UX; add collapseable ui elements (maybe add search if it's still bad)
+- [x] improve UX; add collapseable ui elements
 - [ ] queue edge
 - [ ] implement scheduling groups
 - [ ] implement scheduler
 
 ### Lower Priority
 
+- [ ] implement search
 - [ ] route display
 
 Currently the tasks below aren't being considered (even lower priority) after
