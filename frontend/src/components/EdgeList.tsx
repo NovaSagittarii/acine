@@ -7,8 +7,7 @@ import {
 
 import Button from '@/ui/Button';
 import Edge from '@/components/Edge';
-import { atom } from 'nanostores';
-import { $routine } from '@/state';
+import { $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 
 interface EdgeListProps {
@@ -19,6 +18,7 @@ interface EdgeListProps {
  * Editor for nodes & transitions of the DFA.
  */
 export default function EdgeList({ node }: EdgeListProps) {
+  const selectedNode = useStore($selectedNode);
   const forceUpdate = useForceUpdate();
   return (
     <div className='w-full max-h-full pb-4 overflow-hidden flex flex-col gap-4'>
@@ -30,27 +30,29 @@ export default function EdgeList({ node }: EdgeListProps) {
           </div>
         ))}
       </div>
-      <Button
-        className='bg-black text-white text-sm p-2!'
-        onClick={() => {
-          const newEdge = Routine_Edge.create({
-            precondition: Routine_Condition.create({
-              delay: 50,
-              interval: 100,
-            }),
-            postcondition: Routine_Condition.create({
-              delay: 50,
-              interval: 100,
-            }),
-            limit: -1,
-            description: 'desc',
-          });
-          node.edges.push(newEdge);
-          forceUpdate();
-        }}
-      >
-        Add Transition
-      </Button>
+      {selectedNode === node && (
+        <Button
+          className='bg-black text-white text-sm p-2!'
+          onClick={() => {
+            const newEdge = Routine_Edge.create({
+              precondition: Routine_Condition.create({
+                delay: 50,
+                interval: 100,
+              }),
+              postcondition: Routine_Condition.create({
+                delay: 50,
+                interval: 100,
+              }),
+              limit: -1,
+              description: 'desc',
+            });
+            node.edges.push(newEdge);
+            forceUpdate();
+          }}
+        >
+          Add Transition
+        </Button>
+      )}
     </div>
   );
 }
