@@ -28,6 +28,18 @@ to reproduce the success would fail.
 Also, switched to v2 since v1 seems to break (mouse events no longer work)
 after some time (not sure how long) after opening a maximized window such
 as Chrome browser. v2 does not have the same issues.
+
+## Window title bar jank (a result of v2)
+
+Anyways, AHK window (0,0) does not include the window title bar. You can either
+crop out all window bars to make AHK work properly, or make AHK account for the
+window bar. I'm choosing the latter option since I have some 50 screenshots
+that I do not want to retake. (either should be fine in practice)
+
+With further testing, turns out this is a result of changing to v2.
+> Initially, actions were recorded in v1 and replayed fine.
+> Some actions broke after switching to v2, in fact, all mouse inputs were
+> offset by exactly 36 pixels (the height of the window title bar)
 """
 
 from ahk import AHK
@@ -51,6 +63,10 @@ class InputHandler:
         # shadow offset in windows
         self.x = x + 8
         self.y = y + 8
+
+        # window title bar (required in AHK v2)
+        self.y -= 36
+
         self.update_mouse()
 
     def mouse_down(self):
