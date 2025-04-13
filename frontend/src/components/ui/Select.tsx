@@ -26,7 +26,9 @@ export default function Select<T>({
   // const [selectedIndex, setSelectedIndex] = useState(value);
   return (
     <select
-      className={'hover:bg-black/5 hover:cursor-text ' + className}
+      className={
+        'hover:bg-black/5 hover:cursor-text transition-colors ' + className
+      }
       onChange={(ev) => {
         const index = +ev.target.value - 1; // unset placeholder
         // setSelectedIndex(index);

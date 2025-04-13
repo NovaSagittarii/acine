@@ -11,7 +11,9 @@ function EditableText({
 }: EditableTextProps) {
   return (
     <div
-      className={'hover:bg-black/5 hover:cursor-text ' + className}
+      className={
+        'hover:bg-black/5 hover:cursor-text transition-colors ' + className
+      }
       onClick={() => {
         const newText = prompt(
           `replace ${children} with? (leave empty to cancel)`,
