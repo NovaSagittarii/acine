@@ -22,7 +22,7 @@ export default function EdgeList({ node }: EdgeListProps) {
   const forceUpdate = useForceUpdate();
   return (
     <div className='w-full max-h-full pb-4 overflow-hidden flex flex-col gap-4'>
-      <div className='max-h-full overflow-y-scroll'>
+      <div className='max-h-full overflow-y-auto'>
         {node.edges.length === 0 && 'no edges (type=RETURN)'}
         {node.edges.map((edge, index) => (
           <div key={index}>
