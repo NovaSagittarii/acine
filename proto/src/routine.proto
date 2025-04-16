@@ -59,7 +59,7 @@ message Routine {
       Point click = 11;         // click here
       Rect click_region = 12;   // click anywhere here
       PointSequence drag = 13;  // drag through these points
-      uint64 subroutine = 14;   // execute subroutine (node_id)
+      string subroutine = 14;   // execute subroutine (node_id)
       InputReplay replay = 15;  // recording playback
     };
   }
