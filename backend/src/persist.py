@@ -25,6 +25,14 @@ async def fs_write(filename: list[str], contents: bytes):
         await f.write(contents)
 
 
+def fs_write_sync(filename: list[str], contents: bytes):
+    """
+    write as binary file (sync)
+    """
+    with open(resolve(*filename), "wb") as f:
+        f.write(contents)
+
+
 def fs_read_sync(filename: list[str]) -> bytes:
     """
     read as binary from file
