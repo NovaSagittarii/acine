@@ -80,10 +80,10 @@ ws.onmessage = async (data) => {
   }
 };
 
-function getFrame(id: number = -1) {
+function getFrame(id: string = '') {
   const frameOperation = pb.FrameOperation.create();
   frameOperation.type = pb.FrameOperation_Operation.OPERATION_GET;
-  if (id >= 0) frameOperation.frame = pb.Frame.create({ id });
+  if (id) frameOperation.frame = pb.Frame.create({ id });
   const packet = pb.Packet.create({
     type: {
       $case: 'frameOperation',

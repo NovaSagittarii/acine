@@ -9,7 +9,7 @@ export default function RoutineViewer() {
     return routine.nodes.map(
       (n) =>
         ({
-          id: n.id.toString(),
+          id: n.id,
           label: n.name,
           subLabel: n.description,
         }) as GraphNode,

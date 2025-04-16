@@ -7,7 +7,7 @@ message Frame {
   // sequence (ms since unix epoch)
   // safe against MAX_SAFE_INT in js (using doubles) of (2<<53)-1
   // which is after the year 144683 for 2<<52
-  uint64 id = 1;
+  string id = 1;
 
   bytes data = 2;  // frame data for screenshot; don't use high res
 

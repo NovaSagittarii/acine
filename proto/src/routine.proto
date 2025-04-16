@@ -16,7 +16,7 @@ message Routine {
 
   // basically unused at the moment
   message State {
-    uint64 id = 1;
+    string id = 1;  // uuid
     string name = 2;
     string description = 3;
     repeated uint32 samples = 4;  // samples for this state; indexes into frames
@@ -27,11 +27,11 @@ message Routine {
   }
 
   message Node {
-    uint64 id = 1;
+    string id = 1;  // uuid
     string name = 2;
     string description = 3;
 
-    uint64 state_id = 4;      // indexes into states (for recongition)
+    string state_id = 4;      // indexes into states (for recongition); unused
     repeated Edge edges = 5;  // transitions
 
     NodeType type = 6;
@@ -44,12 +44,14 @@ message Routine {
   }
 
   message Edge {
-    uint64 to = 1;                // id of next node; from node is edge's parent
-    Condition precondition = 2;   // required before you can take it
-    Condition postcondition = 3;  // used to validate success
-    int32 limit = 4;  // how many times this can be taken, negative is unlimited
-    string description = 5;
-    oneof action {              // can be an action, or null action;
+    string id = 1;  // uuid
+    string name = 2;
+    string description = 3;
+    string to = 4;  // uuid of next node; from node is edge's parent
+    Condition precondition = 5;   // required before you can take it
+    Condition postcondition = 6;  // used to validate success
+    int32 limit = 7;  // how many times this can be taken, negative is unlimited
+    oneof action {    // can be an action, or null action;
       Point click = 11;         // click here
       Rect click_region = 12;   // click anywhere here
       PointSequence drag = 13;  // drag through these points
@@ -76,7 +78,7 @@ message Routine {
     }
 
     message Image {          // wants to ensure some pixels match
-      uint64 frame_id = 1;   // actual payload to check
+      string frame_id = 1;   // actual payload to check
       double tolerance = 2;  // required similarity to pass; between 0.0 and 1.0
       repeated Rect regions = 3;  // section that it checks
     }
