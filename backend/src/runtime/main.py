@@ -37,18 +37,22 @@ async def run():
 
     routine = Routine.FromString(fs_read(["rt.pb"]))
     rt = Runtime(routine, Controller())
-    rt.curr = rt.nodes[1743814810164]
-
+    rt.curr = rt.nodes["1743814810164"]  # pretitle
+    rt.curr = rt.nodes["1743845025324"]  # title
+    rt.curr = rt.nodes["1743845105546"]  # lobby
     # await rt.goto(1744272692041)  # store_credit
     # await rt.goto(1744273928651)  # store_credit_claim
     # await rt.goto(1744273938680)  # resource_gain
     # await rt.goto(1744272692041)  # store_credit
+    # await rt.queue_edge("12")  # claim credit
+    for i in range(15, 21):
+        # base routine
+        await rt.queue_edge(str(i))
 
-    rt.curr = rt.nodes[1743845105546]  # lobby
     # rt.curr = rt.nodes[1744434006282] # base
     while True:
-        await rt.goto(1744434006282)  # go to base
-        await rt.goto(1744434325209)  # confirm (via leave base, probably)
+        await rt.goto("1744434006282")  # go to base
+        await rt.goto("1744434325209")  # confirm (via leave base, probably)
 
 
 asyncio.run(run())
