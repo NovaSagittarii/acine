@@ -67,6 +67,16 @@ ws.onmessage = async (data) => {
       }
       break;
     }
+    case 'getRoutine': {
+      const { getRoutine: routine } = packet.type;
+      console.log('rcv', routine);
+      $routine.set(routine); // set internal routine
+      saveRoutine(); // this saves it in b64 persistent
+      loadRoutine(ws); // loads from base64 persistent
+      break;
+    }
+    default:
+      console.warn('Unhandled packet', packet);
   }
 };
 
@@ -240,7 +250,19 @@ function App() {
                 ws.send(pb.Packet.encode(pkt).finish());
               }}
             >
-              sync server
+              push
+            </div>
+            <div
+              className='hover:bg-amber-100'
+              onClick={() => {
+                const pkt = pb.Packet.create({
+                  type: { $case: 'getRoutine', getRoutine: {} },
+                });
+                console.log(pkt);
+                ws.send(pb.Packet.encode(pkt).finish());
+              }}
+            >
+              pull
             </div>
           </div>
           {activeTab === ActiveTab.STATE && <StateList />}

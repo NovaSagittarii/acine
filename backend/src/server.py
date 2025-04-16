@@ -50,6 +50,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "routine":
                     data = Routine.SerializeToString(packet.routine)
                     await fs_write(["rt.pb"], data)
+                case "get_routine":
+                    await self.on_get_routine(packet)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
@@ -104,6 +106,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
     async def on_configuration(self, packet: Packet):
         w, h = gc.dimensions
         response = Packet(configuration=Configuration(width=w, height=h))
+        self.sendMessage(response.SerializeToString(), isBinary=True)
+
+    async def on_get_routine(self, packet: Packet):
+        s = await fs_read(["rt.pb"])
+        response = Packet(get_routine=Routine.FromString(s))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def onClose(self, wasClean, code, reason):
