@@ -8,7 +8,7 @@ budget issue tracker
 - [x] implement graph (for debugging)
 - [x] implement router; goto state
 - [x] improve UX; add collapseable ui elements
-- [ ] queue edge
+- [x] queue edge
 - [ ] implement scheduling groups
 - [ ] implement scheduler
 

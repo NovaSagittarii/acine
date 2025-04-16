@@ -20,7 +20,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
 
   return (
     <Collapse
-      label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${edge.description.substring(0, 50)}`}
+      label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${edge.description.substring(0, 50)} (id=${edge.id})`}
     >
       <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
         <EditableRoutineProperty

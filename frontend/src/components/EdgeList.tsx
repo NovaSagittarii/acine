@@ -4,6 +4,7 @@ import {
   Routine_Edge,
   Routine_Node,
 } from 'acine-proto-dist';
+import { v4 as uuidv4 } from 'uuid';
 
 import Button from '@/ui/Button';
 import Edge from '@/components/Edge';
@@ -35,6 +36,7 @@ export default function EdgeList({ node }: EdgeListProps) {
           className='bg-black text-white text-sm p-2!'
           onClick={() => {
             const newEdge = Routine_Edge.create({
+              id: uuidv4(),
               precondition: Routine_Condition.create({
                 delay: 50,
                 interval: 100,

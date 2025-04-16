@@ -1,4 +1,4 @@
-from time import time  # used to id frames
+import uuid
 
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
@@ -50,6 +50,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "routine":
                     data = Routine.SerializeToString(packet.routine)
                     await fs_write(["rt.pb"], data)
+                case "get_routine":
+                    await self.on_get_routine(packet)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
@@ -61,7 +63,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     frame_operation=FrameOperation(
                         type=FrameOperation.OPERATION_GET,
                         frame=Frame(
-                            id=int(time() * 1000),
+                            # since websocket is built on HTTP
+                            # you don't need to worry about the time for
+                            # reordering packets
+                            id=str(uuid.uuid4()),
                             data=data,
                             state=state,
                         ),
@@ -104,6 +109,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
     async def on_configuration(self, packet: Packet):
         w, h = gc.dimensions
         response = Packet(configuration=Configuration(width=w, height=h))
+        self.sendMessage(response.SerializeToString(), isBinary=True)
+
+    async def on_get_routine(self, packet: Packet):
+        s = await fs_read(["rt.pb"])
+        response = Packet(get_routine=Routine.FromString(s))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def onClose(self, wasClean, code, reason):

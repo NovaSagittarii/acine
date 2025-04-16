@@ -1,5 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { Routine_Node, Routine_Node_NodeType } from 'acine-proto-dist';
+import { v4 as uuidv4 } from 'uuid';
 
 import { $routine, $selectedNode } from '@/state';
 import Button from '@/ui/Button';
@@ -28,7 +29,7 @@ export default function NodeList() {
         className='bg-black text-white'
         onClick={() => {
           const newNode = Routine_Node.create({
-            id: Date.now(),
+            id: uuidv4(),
             name: 'unnamed node',
             description: 'desc',
             type: Routine_Node_NodeType.NODE_TYPE_STANDARD,

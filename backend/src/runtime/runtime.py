@@ -43,7 +43,8 @@ class Runtime:
 
     routine: Routine
     curr: Routine.Node
-    nodes: dict[int, Routine.Node] = {}
+    nodes: dict[str, Routine.Node] = {}
+    edges: dict[str, Routine.Edge] = {}
     G = nx.DiGraph()
     controller: IController
 
@@ -60,8 +61,10 @@ class Runtime:
             self.nodes[n.id] = n
             for e in n.edges:
                 self.G.add_edge(n.id, e.to, data=e)
+                e.u = n.id
+                self.edges[e.id] = e
 
-    async def goto(self, id: int):
+    async def goto(self, id: str):
         while self.curr.id != id:
             print(f"{self.curr.name} => {self.nodes[id].name}")
 
@@ -128,10 +131,24 @@ class Runtime:
             )
             await self.__run_action(take_edge)
 
+    async def queue_edge(self, id: str):
+        """
+        goes to the edge start node and then runs the action on the edge
+        """
+        e = self.edges[id]
+        await self.goto(e.u)
+        await self.__run_action(e)
+
     def __precheck_action(self, action: Routine.Edge, img: cv2.typing.MatLike):
+        """
+        Runs precheck once.
+        """
         return check_once(action.precondition, img)
 
     async def __run_action(self, action: Routine.Edge):
+        """
+        Runs the precheck/action/postcheck of an action
+        """
         res = await check(action.precondition, self.controller.get_frame)
         if res != CheckResult.PASS:
             print("X ? ? precheck fail")

@@ -1,5 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { Routine_State } from 'acine-proto-dist';
+import { v4 as uuidv4 } from 'uuid';
 
 import { $routine, $selectedState } from '@/state';
 import Button from '@/ui/Button';
@@ -32,7 +33,7 @@ function StateList() {
         className='bg-black text-white'
         onClick={() => {
           const newState = Routine_State.create({
-            id: Date.now(),
+            id: uuidv4(),
             name: 'new state',
             description: 'desc',
           });

@@ -12,6 +12,7 @@ message Packet {
     ac.InputEvent input_event = 2;       // forwarding mouse up/down/move
     Configuration configuration = 3;     // sync client with server
     ac.Routine routine = 4;              // sync server routine with client
+    ac.Routine get_routine = 5;          // sync client routine with server
   }
 }
 
