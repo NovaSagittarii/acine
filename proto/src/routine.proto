@@ -47,6 +47,10 @@ message Routine {
     string id = 1;  // uuid
     string name = 2;
     string description = 3;
+    /* uuid of (from) curr node; only used by runtime
+     * from is a reserved keyword in python
+     */
+    string u = 8;
     string to = 4;  // uuid of next node; from node is edge's parent
     Condition precondition = 5;   // required before you can take it
     Condition postcondition = 6;  // used to validate success

@@ -1,4 +1,4 @@
-from time import time  # used to id frames
+import uuid
 
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
@@ -63,7 +63,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     frame_operation=FrameOperation(
                         type=FrameOperation.OPERATION_GET,
                         frame=Frame(
-                            id=int(time() * 1000),
+                            # since websocket is built on HTTP
+                            # you don't need to worry about the time for
+                            # reordering packets
+                            id=str(uuid.uuid4()),
                             data=data,
                             state=state,
                         ),
