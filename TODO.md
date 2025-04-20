@@ -9,12 +9,20 @@ budget issue tracker
 - [x] implement router; goto state
 - [x] improve UX; add collapseable ui elements
 - [x] queue edge
+- [ ] improve frame select
+- [ ] implement interrupt handler (send to state)
+- [ ] implement node default precondition; action default
+- [ ] implement template match
+- [ ] implement replay offset (on dynamic check)
+- [ ] implement text match
 - [ ] implement scheduling groups
 - [ ] implement scheduler
+- [ ] implement runtime duration logging
 
 ### Lower Priority
 
-- [ ] implement search
+- [ ] implement search by node name (frontend editor)
+- [ ] implement graph based editor
 - [ ] route display
 
 Currently the tasks below aren't being considered (even lower priority) after
