@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { Routine_Condition_Image } from 'acine-proto-dist';
 
@@ -51,6 +51,16 @@ export default function ConditionImageEditor() {
     if (condition) condition.frameId = routine.frames[i].id;
   }, [src]);
 
+  // auto select
+  // Can migrate to direct useRef (or similar) in React 19
+  // but currently many dependencies don't support it yet (as of 4/23/2025).
+  // const selectRef = useRef<HTMLSelectElement>(null);
+  // useEffect(() => {
+  //   if (open && selectRef.current) {
+  //     selectRef.current.focus();
+  //   }
+  // }, [open]);
+
   return (
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
@@ -59,6 +69,7 @@ export default function ConditionImageEditor() {
             value={frames.indexOf(src)}
             values={imageChoices}
             onChange={(s) => setSrc(frames[s])}
+            autofocus
           />
           <RegionEditor
             composite
