@@ -139,6 +139,15 @@ class Runtime:
         await self.goto(e.u)
         await self.__run_action(e)
 
+    def __process_condition(self, edge: Routine.Edge, condition: Routine.Condition):
+        """
+        handles substitution in case of auto
+        (references the destination node's default condition)
+        """
+        if condition.WhichOneof("condition") == "auto":
+            condition = self.nodes[edge.to].default_condition
+        return condition
+
     def __check(
         self,
         edge: Routine.Edge,
@@ -147,18 +156,28 @@ class Runtime:
         no_delay: bool = False,
     ) -> CheckResult:
         """
-        check preprocess; handles substitution in case of auto
-        (references the destination node's default condition)
+        processes condition before calling `check`
         """
-        if condition.WhichOneof("condition") == "auto":
-            condition = self.nodes[edge.to].default_condition
+        condition = self.__process_condition(edge, condition)
         return check(condition, self.controller.get_frame, no_delay=no_delay)
+
+    def __check_once(
+        self,
+        edge: Routine.Edge,
+        condition: Routine.Condition,
+        img: cv2.typing.MatLike,
+    ) -> CheckResult:
+        """
+        processes condition before calling `check_once`
+        """
+        condition = self.__process_condition(edge, condition)
+        return check_once(condition, img)
 
     def __precheck_action(self, action: Routine.Edge, img: cv2.typing.MatLike):
         """
         Runs precheck once.
         """
-        return check_once(action.precondition, img)
+        return self.__check_once(action, action.precondition, img)
 
     async def __run_action(self, action: Routine.Edge):
         """
