@@ -9,7 +9,7 @@ budget issue tracker
 - [x] implement router; goto state
 - [x] improve UX; add collapseable ui elements
 - [x] queue edge
-- [ ] improve frame select
+- [x] improve frame select (v2: autoselect)
 - [ ] implement interrupt handler (send to state)
 - [ ] implement node default precondition; action default
 - [ ] implement template match
@@ -18,6 +18,7 @@ budget issue tracker
 - [ ] implement scheduling groups
 - [ ] implement scheduler
 - [ ] implement runtime duration logging
+- [ ] improve frame select (v3: visual selector)
 
 ### Lower Priority
 
