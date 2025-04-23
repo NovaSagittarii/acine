@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface SelectProps<T> {
   className?: string;
@@ -10,6 +10,9 @@ interface SelectProps<T> {
 
   /** calls onChange with the [value] of the selected item  */
   onChange: (newValue: T) => void;
+
+  autofocus?: boolean;
+  // ref?: React.RefObject<HTMLSelectElement> | null;
 }
 
 /**
@@ -22,8 +25,13 @@ export default function Select<T>({
   values,
   onChange,
   className = '',
+  autofocus = false,
 }: SelectProps<T>) {
   // const [selectedIndex, setSelectedIndex] = useState(value);
+  const ref = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    if (autofocus && ref.current) ref.current.focus();
+  }, [ref]);
   return (
     <select
       className={
@@ -35,6 +43,7 @@ export default function Select<T>({
         onChange(values[index][1]);
       }}
       value={isNaN(value) ? 0 : value + 1}
+      ref={ref}
     >
       <option value='0' disabled>
         --- N/A ---

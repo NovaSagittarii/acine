@@ -10,6 +10,7 @@ import useForceUpdate from './useForceUpdate';
 import { SelectAuto } from './ui/Select';
 import Button from './ui/Button';
 import { $condition } from './ConditionImageEditor';
+import { pluralize } from '../client/util';
 
 interface ConditionNumberInputProps<K extends keyof Routine_Condition> {
   /* property */
@@ -44,17 +45,27 @@ export default function Condition({ condition }: ConditionProps) {
   return (
     <div className='pl-1 border border-black font-mono'>
       {condition.condition?.$case === 'image' && (
-        <Button
-          className='p-1.5! w-fit bg-black text-white scale-100! float-right font-sans'
-          onClick={() => {
-            // duplicate conditional to make typescript happy
-            if (condition.condition?.$case === 'image') {
-              $condition.set(condition.condition?.image);
+        <div className='float-right flex gap-2 items-center font-sans'>
+          <div
+            className={
+              'text-sm ' +
+              `${!condition.condition.image.regions.length && 'text-red-500 font-bold'}`
             }
-          }}
-        >
-          edit
-        </Button>
+          >
+            {pluralize(condition.condition.image.regions.length, 'region')}
+          </div>
+          <Button
+            className='p-1.5! w-fit bg-black text-white scale-100!'
+            onClick={() => {
+              // duplicate conditional to make typescript happy
+              if (condition.condition?.$case === 'image') {
+                $condition.set(condition.condition?.image);
+              }
+            }}
+          >
+            edit
+          </Button>
+        </div>
       )}
 
       {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
