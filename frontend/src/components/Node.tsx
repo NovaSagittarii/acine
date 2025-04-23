@@ -11,6 +11,7 @@ import EdgeList from './EdgeList';
 import useForceUpdate from './useForceUpdate';
 import { useEffect } from 'react';
 import Condition from './Condition';
+import Collapse from './ui/Collapse';
 
 interface NodeProps extends Selectable {
   node: Routine_Node;
@@ -64,9 +65,12 @@ function Node({ node, selected = false }: NodeProps) {
         <div className='opacity-50'> : type </div>
       </div>
       {node.defaultCondition && (
-        <div>
+        <Collapse
+          label={'defaultCondition ' + node.defaultCondition.condition?.$case}
+        >
+          defaultCondition
           <Condition condition={node.defaultCondition} />
-        </div>
+        </Collapse>
       )}
 
       <div>

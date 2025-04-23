@@ -42,14 +42,16 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
           />
         </div>
         <ActionEditor edge={edge} />
-        <div>
+        <Collapse label={'precondition ' + edge.precondition?.condition?.$case}>
           precondition
           <Condition condition={edge.precondition!} allowAuto />
-        </div>
-        <div>
+        </Collapse>
+        <Collapse
+          label={'postcondition ' + edge.postcondition?.condition?.$case}
+        >
           postcondition
           <Condition condition={edge.postcondition!} allowAuto />
-        </div>
+        </Collapse>
       </div>
     </Collapse>
   );
