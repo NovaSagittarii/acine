@@ -44,11 +44,11 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         <ActionEditor edge={edge} />
         <div>
           precondition
-          <Condition condition={edge.precondition!} />
+          <Condition condition={edge.precondition!} allowAuto />
         </div>
         <div>
           postcondition
-          <Condition condition={edge.postcondition!} />
+          <Condition condition={edge.postcondition!} allowAuto />
         </div>
       </div>
     </Collapse>

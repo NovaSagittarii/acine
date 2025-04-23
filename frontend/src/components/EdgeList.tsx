@@ -44,6 +44,10 @@ export default function EdgeList({ node }: EdgeListProps) {
               postcondition: Routine_Condition.create({
                 delay: 50,
                 interval: 100,
+                // you probably want to use the destination node
+                // default_condition since most transitions are
+                // state transitions
+                condition: { $case: 'auto', auto: true },
               }),
               limit: -1,
               description: 'desc',

@@ -37,9 +37,13 @@ function ConditionNumberInput<K extends keyof Routine_Condition>({
 
 interface ConditionProps extends Selectable {
   condition: Routine_Condition;
+  allowAuto?: boolean; // whether auto is an option
 }
 
-export default function Condition({ condition }: ConditionProps) {
+export default function Condition({
+  condition,
+  allowAuto = false,
+}: ConditionProps) {
   const forceUpdate = useForceUpdate();
 
   return (
@@ -80,7 +84,9 @@ export default function Condition({ condition }: ConditionProps) {
             return -1;
           })()}
           values={
-            ['true', 'image' /*, 'text'*/] as (
+            ['true', 'image' /*, 'text'*/, allowAuto ? 'auto' : null].filter(
+              (x) => x,
+            ) as (
               | Exclude<Routine_Condition['condition'], undefined>['$case']
               | 'true'
             )[]
@@ -100,6 +106,12 @@ export default function Condition({ condition }: ConditionProps) {
                 condition.condition = {
                   $case: 'text',
                   text: Routine_Condition_Text.create(),
+                };
+                break;
+              case 'auto':
+                condition.condition = {
+                  $case: 'auto',
+                  auto: true,
                 };
                 break;
             }

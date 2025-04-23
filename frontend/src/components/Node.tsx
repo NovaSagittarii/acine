@@ -1,6 +1,7 @@
 import {
   Routine_Node,
   Routine_Node_NodeType as NodeType,
+  Routine_Condition,
 } from 'acine-proto-dist';
 
 import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
@@ -8,6 +9,8 @@ import Select from '@/ui/Select';
 import { Selectable } from './types';
 import EdgeList from './EdgeList';
 import useForceUpdate from './useForceUpdate';
+import { useEffect } from 'react';
+import Condition from './Condition';
 
 interface NodeProps extends Selectable {
   node: Routine_Node;
@@ -21,6 +24,13 @@ const NODE_TYPES_DISPLAY = [
 
 function Node({ node, selected = false }: NodeProps) {
   const forceUpdate = useForceUpdate();
+
+  useEffect(() => {
+    // ensure it exists; protos created before this don't have it
+    if (!node.defaultCondition) {
+      node.defaultCondition = Routine_Condition.create();
+    }
+  }, [node]);
 
   return (
     <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
@@ -53,6 +63,11 @@ function Node({ node, selected = false }: NodeProps) {
         />
         <div className='opacity-50'> : type </div>
       </div>
+      {node.defaultCondition && (
+        <div>
+          <Condition condition={node.defaultCondition} />
+        </div>
+      )}
 
       <div>
         <EdgeList node={node} />

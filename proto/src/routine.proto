@@ -42,6 +42,18 @@ message Routine {
       NODE_TYPE_INIT = 2;      // starting node; referenced by subroutines
       NODE_TYPE_RETURN = 4;    // subroutine end
     }
+
+    /* Default condition used whenever a pre/post condition check is "Auto"
+     *
+     * Acts like a "state precondition" -- Primarily used when there are
+     * multiple transitions to the same state, representing multiple ways
+     * to get there. These will all have the same postcondition.
+     *
+     * Additionally, potential use in node autodetection.
+     *
+     * Might be some application for precondition (not sure yet)
+     */
+    Condition default_condition = 7;
   }
 
   message Edge {
@@ -87,6 +99,11 @@ message Routine {
     oneof condition {              // what to check; by default ALWAYS TRUE
       Image image = 21;            // image match
       Text text = 22;              // text match
+
+      /* takes on from/to node's default condition
+       * CANNOT be used as a node's default condition
+       */
+      bool auto = 23;
     }
 
     message Image {          // wants to ensure some pixels match

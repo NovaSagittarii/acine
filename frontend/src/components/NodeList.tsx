@@ -1,5 +1,9 @@
 import { useStore } from '@nanostores/react';
-import { Routine_Node, Routine_Node_NodeType } from 'acine-proto-dist';
+import {
+  Routine_Condition,
+  Routine_Node,
+  Routine_Node_NodeType,
+} from 'acine-proto-dist';
 import { v4 as uuidv4 } from 'uuid';
 
 import { $routine, $selectedNode } from '@/state';
@@ -33,6 +37,10 @@ export default function NodeList() {
             name: 'unnamed node',
             description: 'desc',
             type: Routine_Node_NodeType.NODE_TYPE_STANDARD,
+            defaultCondition: Routine_Condition.create({
+              delay: 50,
+              interval: 100,
+            }),
           });
           routine.nodes.push(newNode);
           forceUpdate();
