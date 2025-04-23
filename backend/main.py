@@ -1,4 +1,4 @@
-from src.server import AcineServerProtocol
+from acine.server import AcineServerProtocol
 
 if __name__ == "__main__":
 

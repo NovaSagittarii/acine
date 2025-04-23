@@ -1,9 +1,14 @@
+"""
+Top level module that implements the acine routine runtime.
+"""
+
 import cv2
 import networkx as nx
 from acine_proto_dist.input_event_pb2 import InputReplay
 from acine_proto_dist.routine_pb2 import Routine
-from check import CheckResult, check, check_once
-from util import now, sleep
+
+from .check import CheckResult, check, check_once
+from .util import now, sleep
 
 
 class IController:

@@ -1,3 +1,9 @@
+"""
+Various utility functions.
+
+Currently only contains time (sleep/now) functions.
+"""
+
 import asyncio
 import time
 

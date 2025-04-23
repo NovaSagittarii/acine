@@ -7,8 +7,9 @@ from typing import Any, Callable, Coroutine
 
 import cv2
 from acine_proto_dist.routine_pb2 import Routine
-from check_image import check_image
-from util import now, sleep
+
+from .check_image import check_image
+from .util import now, sleep
 
 GetImageCallableType = Callable[[], Coroutine[Any, Any, cv2.typing.MatLike]]
 

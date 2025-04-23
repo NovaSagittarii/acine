@@ -1,9 +1,13 @@
+"""
+Example usage of interacting with the runtime
+"""
+
 import asyncio
 
-from capture import GameCapture
-from input_handler import InputHandler
-from persist import fs_read_sync as fs_read
-from runtime import IController, Routine, Runtime
+from acine.capture import GameCapture
+from acine.input_handler import InputHandler
+from acine.persist import fs_read_sync as fs_read
+from acine.runtime.runtime import IController, Routine, Runtime
 
 if __name__ != "__main__":
     raise ImportError("Do not import this file.")

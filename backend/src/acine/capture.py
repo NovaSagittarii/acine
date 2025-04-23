@@ -1,3 +1,7 @@
+"""
+Window capture module
+"""
+
 from asyncio import Lock, Semaphore
 
 import cv2

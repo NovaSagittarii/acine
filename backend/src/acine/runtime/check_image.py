@@ -1,7 +1,12 @@
+"""
+Implements image similarity checks
+"""
+
 import cv2
 from acine_proto_dist.routine_pb2 import Routine
-from persist import resolve
 from skimage.metrics import structural_similarity
+
+from ..persist import resolve
 
 
 def check_image(
