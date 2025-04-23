@@ -10,8 +10,8 @@ budget issue tracker
 - [x] improve UX; add collapseable ui elements
 - [x] queue edge
 - [x] improve frame select (v2: autoselect)
-- [ ] implement interrupt handler (send to state)
 - [ ] implement node default precondition; action default
+- [ ] implement interrupt handler (send to state)
 - [ ] implement template match
 - [ ] implement replay offset (on dynamic check)
 - [ ] implement text match
