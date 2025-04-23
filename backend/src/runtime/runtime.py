@@ -139,6 +139,21 @@ class Runtime:
         await self.goto(e.u)
         await self.__run_action(e)
 
+    def __check(
+        self,
+        edge: Routine.Edge,
+        condition: Routine.Condition,
+        *,
+        no_delay: bool = False,
+    ) -> CheckResult:
+        """
+        check preprocess; handles substitution in case of auto
+        (references the destination node's default condition)
+        """
+        if condition.WhichOneof("condition") == "auto":
+            condition = self.nodes[edge.to].default_condition
+        return check(condition, self.controller.get_frame, no_delay=no_delay)
+
     def __precheck_action(self, action: Routine.Edge, img: cv2.typing.MatLike):
         """
         Runs precheck once.
@@ -149,7 +164,7 @@ class Runtime:
         """
         Runs the precheck/action/postcheck of an action
         """
-        res = await check(action.precondition, self.controller.get_frame)
+        res = await self.__check(action, action.precondition)
         if res != CheckResult.PASS:
             print("X ? ? precheck fail")
             return
@@ -165,7 +180,7 @@ class Runtime:
             case _:
                 raise NotImplementedError()
 
-        res = await check(action.postcondition, self.controller.get_frame)
+        res = await self.__check(action, action.postcondition)
         if res != CheckResult.PASS:
             print("! ! X postcheck fail")
             return
