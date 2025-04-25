@@ -1,7 +1,7 @@
 from random import randint
 
 import pytest
-from acine.runtime.runtime import IController, Routine, Runtime
+from acine.runtime.runtime import CheckResult, IController, Routine, Runtime
 from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture, MockType
@@ -35,6 +35,16 @@ def mocked_runtime(
 ) -> tuple[MockType, MockType, IController, Runtime]:
     rt = Runtime(r1, mocked_controller)
     return (mocked_now, mocked_sleep, mocked_controller, rt)
+
+
+@pytest.fixture
+def mocked_check(mocker: MockerFixture):
+    return mocker.patch("acine.runtime.runtime.check")
+
+
+@pytest.fixture
+def mocked_check_once(mocker: MockerFixture):
+    return mocker.patch("acine.runtime.runtime.check_once")
 
 
 def single_event_replay(event: InputEvent) -> InputReplay:
@@ -79,7 +89,13 @@ class TestRuntimeIntegration:
         id: str,
         type: Routine.Node.NodeType = Routine.Node.NodeType.NODE_TYPE_STANDARD,
     ) -> Routine.Node:
-        return Routine.Node(id=id, type=type)
+        return Routine.Node(
+            id=id,
+            type=type,
+            default_condition=Routine.Condition(
+                text=Routine.Condition.Text(regex=f"{id} {randint(1, 10**9)}")
+            ),
+        )
 
     @classmethod
     def node_init(cls, id: str) -> Routine.Node:
@@ -160,3 +176,54 @@ class TestRuntimeIntegration:
         await rt.goto("n6")
         assert rt.curr.id == "n6"
         rt.run_replay.assert_called_once_with(e34.replay)
+
+    @pytest.mark.parametrize("subtest", ("check pre", "check post", "check pre/post"))
+    @pytest.mark.asyncio
+    async def test_default_condition(
+        self,
+        mocker: MockerFixture,
+        mocked_controller,
+        mocked_check: MockType,
+        mocked_check_once: MockType,
+        subtest: str,
+    ):
+        """
+        n1 -> n2 -> n3
+        edge n1->n2 has auto precondition
+        edge n2->n3 has auto postcondition
+        """
+        n1 = self.node("n1")
+        n2 = self.node("n2")
+        n3 = self.node("n3")
+        e12 = self.add_edge(n1, n2, precondition=Routine.Condition(auto=True))
+        e23 = self.add_edge(n2, n3, postcondition=Routine.Condition(auto=True))
+
+        # should be using check when you queue_edge
+        mocked_check.return_value = CheckResult.PASS
+        mocked_check_once.return_value = CheckResult.ERROR
+        r = Routine(nodes=[n1, n2, n3])
+        rt = Runtime(r, mocked_controller)
+        rt.run_replay = mocker.AsyncMock()
+
+        if "pre" in subtest:  # 1 -> 2
+            rt.curr = n1
+            await rt.queue_edge(e12.id)
+            # call pattern is (condition, getframe/frame, no_delay)
+            checked = list(c.args[0] for c in mocked_check.call_args_list)
+            # print(checked)
+            # print("CMP", n1.default_condition)
+            # print("CMP", checked[0])
+            assert rt.curr.id == n2.id
+            assert checked[0] == n1.default_condition
+            assert checked[1] == e12.postcondition
+            mocked_check_once.assert_not_called()
+        else:
+            rt.curr = n2
+
+        if "post" in subtest:  # 2 -> 3
+            assert rt.curr.id == n2.id
+            await rt.queue_edge(e23.id)
+            checked = list(c.args[0] for c in mocked_check.call_args_list)
+            assert rt.curr.id == n3.id
+            assert checked[0] == e23.precondition
+            assert checked[1] == n3.default_condition
