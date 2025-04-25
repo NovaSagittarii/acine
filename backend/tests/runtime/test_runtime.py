@@ -219,6 +219,7 @@ class TestRuntimeIntegration:
             mocked_check_once.assert_not_called()
         else:
             rt.curr = n2
+        mocked_check.reset_mock()
 
         if "post" in subtest:  # 2 -> 3
             assert rt.curr.id == n2.id
