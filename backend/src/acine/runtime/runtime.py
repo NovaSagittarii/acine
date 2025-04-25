@@ -195,7 +195,7 @@ class Runtime:
 
         match action.WhichOneof("action"):
             case "replay":
-                await self.__run_replay(action.replay)
+                await self.run_replay(action.replay)
                 print("REPLAY DONE")
             case "subroutine":
                 print("EXEC SUBROUTINE", action.description)
@@ -215,7 +215,7 @@ class Runtime:
             # until after the subroutine completes
             self.curr = self.nodes[action.to]
 
-    async def __run_replay(self, replay: InputReplay):
+    async def run_replay(self, replay: InputReplay):
         """
         simulate a replay in terms of controller calls
         """
