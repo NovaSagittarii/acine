@@ -113,9 +113,9 @@ class TestRuntimeIntegration:
         n5 = self.node_ret("n5")
         n6 = self.node("n6")
         self.add_edge(n1, n2, subroutine="n3")
-        self.add_edge(n2, n6)
-        self.add_edge(n3, n4)
-        self.add_edge(n4, n5)
+        e26 = self.add_edge(n2, n6)
+        e34 = self.add_edge(n3, n4)
+        e45 = self.add_edge(n4, n5)
 
         r = Routine(nodes=[n1, n2, n3, n4, n5, n6])
         rt = Runtime(r, mocked_controller)
@@ -125,7 +125,8 @@ class TestRuntimeIntegration:
         assert rt.curr.id == to
         await rt.goto("n6")
         assert rt.curr.id == "n6"
-        rt.run_replay.assert_called()
+        expected_calls = [mocker.call(e.replay) for e in [e34, e45, e26]]
+        rt.run_replay.assert_has_calls(expected_calls)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("to", ("n2", "n3", "n4", "n5"))
@@ -145,7 +146,7 @@ class TestRuntimeIntegration:
         n6 = self.node("n6")
         self.add_edge(n1, n6, subroutine="n2")
         self.add_edge(n2, n5, subroutine="n3")
-        self.add_edge(n3, n4)
+        e34 = self.add_edge(n3, n4)
 
         r = Routine(nodes=[n1, n2, n3, n4, n5, n6])
         rt = Runtime(r, mocked_controller)
@@ -155,4 +156,4 @@ class TestRuntimeIntegration:
         assert rt.curr.id == to
         await rt.goto("n6")
         assert rt.curr.id == "n6"
-        rt.run_replay.assert_called()
+        rt.run_replay.assert_called_once_with(e34.replay)
