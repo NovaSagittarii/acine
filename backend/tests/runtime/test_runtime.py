@@ -74,20 +74,23 @@ class TestRuntimeIntegration:
     Various tests on the graph traversal algorithm
     """
 
+    @staticmethod
     def node(
-        self,
         id: str,
         type: Routine.Node.NodeType = Routine.Node.NodeType.NODE_TYPE_STANDARD,
     ) -> Routine.Node:
         return Routine.Node(id=id, type=type)
 
-    def node_init(self, id: str) -> Routine.Node:
-        return self.node(id=id, type=Routine.Node.NodeType.NODE_TYPE_INIT)
+    @classmethod
+    def node_init(cls, id: str) -> Routine.Node:
+        return cls.node(id=id, type=Routine.Node.NodeType.NODE_TYPE_INIT)
 
-    def node_ret(self, id: str) -> Routine.Node:
-        return self.node(id=id, type=Routine.Node.NodeType.NODE_TYPE_RETURN)
+    @classmethod
+    def node_ret(cls, id: str) -> Routine.Node:
+        return cls.node(id=id, type=Routine.Node.NodeType.NODE_TYPE_RETURN)
 
-    def add_edge(self, u: Routine.Node, v: Routine.Node, **kwargs) -> Routine.Edge:
+    @staticmethod
+    def add_edge(u: Routine.Node, v: Routine.Node, **kwargs) -> Routine.Edge:
         e = Routine.Edge(id=f"{u.id}->{v.id}", to=v.id, **kwargs)
         if e.WhichOneof("action") in ("replay", None):
             # if it is unset, assume it's a replay action (trackable)
