@@ -170,13 +170,16 @@ class Runtime:
         await self.goto(e.u)
         await self.__run_action(e)
 
-    def __process_condition(self, edge: Routine.Edge, condition: Routine.Condition):
+    def __process_condition(
+        self, edge: Routine.Edge, condition: Routine.Condition, use_dest=True
+    ):
         """
         handles substitution in case of auto
-        (references the destination node's default condition)
+        if use_dest: references the destination node's default condition
+        else: references the source node's default condition
         """
         if condition.WhichOneof("condition") == "auto":
-            condition = self.nodes[edge.to].default_condition
+            condition = self.nodes[edge.to if use_dest else edge.u].default_condition
         return condition
 
     def __check(
@@ -185,11 +188,12 @@ class Runtime:
         condition: Routine.Condition,
         *,
         no_delay: bool = False,
+        use_dest: bool = True,
     ) -> CheckResult:
         """
         processes condition before calling `check`
         """
-        condition = self.__process_condition(edge, condition)
+        condition = self.__process_condition(edge, condition, use_dest=use_dest)
         return check(condition, self.controller.get_frame, no_delay=no_delay)
 
     def __check_once(
@@ -197,24 +201,25 @@ class Runtime:
         edge: Routine.Edge,
         condition: Routine.Condition,
         img: cv2.typing.MatLike,
+        use_dest: bool = True,
     ) -> CheckResult:
         """
         processes condition before calling `check_once`
         """
-        condition = self.__process_condition(edge, condition)
+        condition = self.__process_condition(edge, condition, use_dest=use_dest)
         return check_once(condition, img)
 
     def __precheck_action(self, action: Routine.Edge, img: cv2.typing.MatLike):
         """
         Runs precheck once.
         """
-        return self.__check_once(action, action.precondition, img)
+        return self.__check_once(action, action.precondition, img, use_dest=False)
 
     async def __run_action(self, action: Routine.Edge):
         """
         Runs the precheck/action/postcheck of an action
         """
-        res = await self.__check(action, action.precondition)
+        res = await self.__check(action, action.precondition, use_dest=False)
         if res != CheckResult.PASS:
             print("X ? ? precheck fail")
             return
@@ -232,7 +237,7 @@ class Runtime:
             case _:
                 raise NotImplementedError()
 
-        res = await self.__check(action, action.postcondition)
+        res = await self.__check(action, action.postcondition, use_dest=True)
         if res != CheckResult.PASS:
             print("! ! X postcheck fail")
             return
