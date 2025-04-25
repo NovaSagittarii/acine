@@ -48,15 +48,18 @@ class Runtime:
 
     routine: Routine
     curr: Routine.Node
-    nodes: dict[str, Routine.Node] = {}
-    edges: dict[str, Routine.Edge] = {}
-    G = nx.DiGraph()
+    nodes: dict[str, Routine.Node]
+    edges: dict[str, Routine.Edge]
+    G: nx.DiGraph
     controller: IController
 
     def __init__(self, routine: Routine, controller: IController):
         self.routine = routine
         self.controller = controller
 
+        self.nodes = {}
+        self.edges = {}
+        self.G = nx.DiGraph()
         self.curr = routine.nodes[0]
         self.return_stack: list[Routine.Node] = [None]
         """ the call stack but only the return nodes "addresses" """
