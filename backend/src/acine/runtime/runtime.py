@@ -194,6 +194,8 @@ class Runtime:
             return
 
         match action.WhichOneof("action"):
+            case None:
+                pass
             case "replay":
                 await self.run_replay(action.replay)
                 print("REPLAY DONE")
