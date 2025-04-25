@@ -83,6 +83,9 @@ class Runtime:
                 print("POP")
                 continue
 
+            # is deepcopy needed?
+            # from copy import deepcopy
+            # H = deepcopy(self.G)
             H = self.G.copy()
             """
             modified graph with extra edges to handle subroutines
@@ -103,10 +106,30 @@ class Runtime:
                     if e.WhichOneof("action") == "subroutine":
                         H.add_edge(u.id, e.subroutine, data=e)
                         # print("ADD FUNC EDGE", u.id, e.subroutine)
-                ret = self.return_stack[-1]
-                if ret and (u.type & Routine.Node.NODE_TYPE_RETURN):
-                    H.add_edge(u.id, ret.id, data=None)
-                    # print("ADD RET EDGE", u.id, ret.id)
+                # this method only works for subroutine depth 1
+                # ret = self.return_stack[-1]
+                # if ret and (u.type & Routine.Node.NODE_TYPE_RETURN):
+                #     H.add_edge(u.id, ret.id, data=None)
+                #     # print("ADD RET EDGE", u.id, ret.id)
+            # BFS/reachability based way for subroutine depth 2+
+            # TODO: improve efficiency
+            # method: you can precompute a RET-reachability for each node
+            curr = self.curr
+            # print("CURR", curr.id, "STACK", [x.id for x in self.return_stack if x])
+            for i in range(1, len(self.return_stack)):
+                ret = self.return_stack[-i]
+                # print(f"RET={ret.id} CURR={curr.id}")
+                # print(self.G.edges)
+                reachable = list(nx.descendants(self.G, curr.id))
+                # might be the case that the RET from stack is itself a return node
+                reachable.append(curr.id)
+                # print("REACH=", reachable)
+                for uid in reachable:
+                    u = self.nodes[uid]
+                    if u.type & Routine.Node.NODE_TYPE_RETURN:
+                        H.add_edge(u.id, ret.id)
+                        # print("ADD RET EDGE", u.id, ret.id)
+                curr = ret
 
             path = nx.shortest_path(H, self.curr.id, id)
             u = self.nodes[path[0]]
