@@ -12,3 +12,7 @@ dependencies = []
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+asyncio_default_fixture_loop_scope = "function"
