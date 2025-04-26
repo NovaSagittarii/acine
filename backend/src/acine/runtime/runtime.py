@@ -147,6 +147,11 @@ class Runtime:
                 for e in u.edges:
                     if self.__precheck_action(e, img):
                         oklist.append(e)
+                        if e.trigger == e.EDGE_TRIGGER_TYPE_INTERRUPT:
+                            # handle interrupt
+                            oklist.clear()
+                            take_edge = e
+                            break
                 for e in oklist:
                     if e.to == v.id or e.subroutine == v.id:
                         take_edge = e

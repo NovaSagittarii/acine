@@ -283,7 +283,7 @@ class TestRuntimeIntegration:
 
         mocked_check.return_value = CheckResult.PASS
         mocked_check_once.return_value = CheckResult.PASS
-        r = Routine(nodes=[n1, n2, n3])
+        r = Routine(nodes=[n1, n2, n3, n4])
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
 
