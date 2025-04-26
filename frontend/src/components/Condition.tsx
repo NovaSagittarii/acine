@@ -81,6 +81,7 @@ export default function Condition({
           value={(() => {
             if (!condition.condition) return 0; // undefined
             if (condition.condition.$case === 'image') return 1;
+            if (condition.condition.$case === 'auto') return 2;
             return -1;
           })()}
           values={
