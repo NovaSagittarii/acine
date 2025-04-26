@@ -11,7 +11,7 @@ budget issue tracker
 - [x] queue edge
 - [x] improve frame select (v2: autoselect)
 - [x] implement node default precondition; action default
-- [ ] implement interrupt handler (send to state)
+- [x] implement interrupt handler (send to state)
 - [ ] implement template match
 - [ ] implement replay offset (on dynamic check)
 - [ ] implement text match

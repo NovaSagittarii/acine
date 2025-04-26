@@ -1,4 +1,7 @@
-import { Routine_Edge } from 'acine-proto-dist';
+import {
+  Routine_Edge,
+  Routine_Edge_EdgeTriggerType as TriggerType,
+} from 'acine-proto-dist';
 
 import { Selectable } from './types';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
@@ -9,6 +12,12 @@ import { $routine } from '@/state';
 import Select from './ui/Select';
 import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
+
+const TRIGGER_TYPES_DISPLAY = [
+  ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
+  ['standard', TriggerType.EDGE_TRIGGER_TYPE_STANDARD],
+  ['interrupt', TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT],
+] as [string, TriggerType][];
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
@@ -41,6 +50,21 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
             }}
           />
         </div>
+        <div className='flex flex-row text-sm font-mono'>
+          <Select
+            className='p-0 appearance-none'
+            value={TRIGGER_TYPES_DISPLAY.findIndex(
+              ([_, t]) => t === edge.trigger,
+            )}
+            values={TRIGGER_TYPES_DISPLAY}
+            onChange={(t) => {
+              edge.trigger = t;
+              forceUpdate();
+            }}
+          />
+          <div className='opacity-50'> : type </div>
+        </div>
+
         <ActionEditor edge={edge} />
         <Collapse label={'precondition ' + edge.precondition?.condition?.$case}>
           precondition
