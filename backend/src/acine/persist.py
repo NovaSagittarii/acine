@@ -7,7 +7,7 @@ import os
 from aiofiles import open as aopen
 
 dirname = os.path.dirname(__file__)
-path = os.path.join(dirname, "..", "data")
+path = os.path.join(dirname, "..", "..", "data")
 
 
 def resolve(*paths: str) -> str:
