@@ -148,6 +148,7 @@ class TestRuntimeIntegration:
         rt.run_replay.assert_has_calls(expected_calls)
 
     @pytest.mark.asyncio
+    @pytest.mark.dependency(depends=["test_subroutine"])
     @pytest.mark.parametrize("to", ("n2", "n3", "n4", "n5"))
     async def test_subroutine_nested(
         self, mocker: MockerFixture, mocked_controller, to: str

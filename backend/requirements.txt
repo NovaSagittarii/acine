@@ -19,3 +19,4 @@ networkx==3.4.2
 pytest>=8.3.5
 pytest-asyncio>=0.26.0
 pytest-mock>=3.14.0
+pytest-dependency>=0.6.0
