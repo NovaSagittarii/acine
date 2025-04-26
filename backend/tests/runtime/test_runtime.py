@@ -47,6 +47,12 @@ def mocked_check_once(mocker: MockerFixture):
     return mocker.patch("acine.runtime.runtime.check_once")
 
 
+@pytest.fixture
+def checks_always_pass(mocker: MockerFixture, mocked_check, mocked_check_once):
+    mocked_check.return_value = CheckResult.PASS
+    mocked_check_once.return_value = CheckResult.PASS
+
+
 def single_event_replay(event: InputEvent) -> InputReplay:
     return InputReplay(events=[event])
 
@@ -263,7 +269,7 @@ class TestRuntimeIntegration:
     @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["goto"])
     async def test_interrupt(
-        self, mocker: MockerFixture, mocked_check, mocked_check_once, mocked_controller
+        self, mocker: MockerFixture, checks_always_pass, mocked_controller
     ):
         """
         n1 --> n2 <-- n3
@@ -281,8 +287,6 @@ class TestRuntimeIntegration:
         e14 = self.add_edge(n1, n4, trigger=Routine.Edge.EDGE_TRIGGER_TYPE_INTERRUPT)
         e43 = self.add_edge(n4, n3)
 
-        mocked_check.return_value = CheckResult.PASS
-        mocked_check_once.return_value = CheckResult.PASS
         r = Routine(nodes=[n1, n2, n3, n4])
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
