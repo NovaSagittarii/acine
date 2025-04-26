@@ -4,21 +4,31 @@ budget issue tracker
 
 ## Task Queue
 
-- [x] subroutine edit
-- [x] implement graph (for debugging)
-- [x] implement router; goto state
-- [x] improve UX; add collapseable ui elements
-- [x] queue edge
-- [x] improve frame select (v2: autoselect)
-- [x] implement node default precondition; action default
-- [x] implement interrupt handler (send to state)
-- [ ] implement template match
-- [ ] implement replay offset (on dynamic check)
-- [ ] implement text match
-- [ ] implement scheduling groups
-- [ ] implement scheduler
-- [ ] implement runtime duration logging
-- [ ] improve frame select (v3: visual selector)
+- v0.1.0 Automation Features (static)
+  - [x] subroutine edit
+  - [x] implement graph (for debugging)
+  - [x] implement router; goto state
+  - [x] improve UX; add collapseable ui elements
+  - [x] queue edge
+  - [x] improve frame select (v2: autoselect)
+  - [x] implement node default precondition; action default
+  - [x] implement interrupt handler (send to state)
+- v0.1.1 Verification Features
+  - [ ] improve frame select (v3: visual selector)
+  - [ ] query backend for which frames match a condition
+  - [ ] implement threshold matching
+- v0.1.2 Automation Features (dynamic)
+  - [ ] implement template match
+  - [ ] implement replay offset (on dynamic check)
+  - [ ] implement text match
+- v0.2.0 Routine Manager
+  - Manage multiple routines
+  - Handle routine export (handle frames as file)
+  - Launch sequence
+- v0.3.0 Scheduler
+  - [ ] implement scheduling groups
+  - [ ] implement scheduler
+  - [ ] implement runtime duration logging
 
 ### Lower Priority
 
