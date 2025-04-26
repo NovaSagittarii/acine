@@ -115,7 +115,36 @@ class TestRuntimeIntegration:
         return e
 
     @pytest.mark.asyncio
-    @pytest.mark.dependency(name="subroutine")
+    @pytest.mark.dependency(name="goto")
+    @pytest.mark.parametrize("s", ("n1", "n2", "n3", "n4"))
+    @pytest.mark.parametrize("t", ("n1", "n2", "n3", "n4"))
+    async def test_goto(self, mocker: MockerFixture, mocked_controller, s, t):
+        """
+              +-----------+
+              v           |
+        n1 -> n2 -> n3 -> n4
+         ^          |
+         +----------+
+        """
+        n1 = self.node("n1")
+        n2 = self.node("n2")
+        n3 = self.node("n3")
+        n4 = self.node("n4")
+        self.add_edge(n1, n2)
+        self.add_edge(n2, n3)
+        self.add_edge(n3, n1)
+        self.add_edge(n3, n4)
+        self.add_edge(n4, n2)
+
+        r = Routine(nodes=[n1, n2, n3, n4])
+        rt = Runtime(r, mocked_controller)
+        rt.run_replay = mocker.AsyncMock()
+        rt.curr = [x for x in [n1, n2, n3, n4] if x.id == s][0]
+        await rt.goto(t)
+        assert rt.curr.id == t
+
+    @pytest.mark.asyncio
+    @pytest.mark.dependency(name="subroutine", depends=["goto"])
     @pytest.mark.parametrize("to", ("n1", "n2", "n3", "n4", "n5", "n6"))
     async def test_subroutine(self, mocker: MockerFixture, mocked_controller, to: str):
         """
@@ -232,6 +261,7 @@ class TestRuntimeIntegration:
             assert checked[1] == n3.default_condition
 
     @pytest.mark.asyncio
+    @pytest.mark.dependency(depends=["goto"])
     async def test_interrupt(
         self, mocker: MockerFixture, mocked_check, mocked_check_once, mocked_controller
     ):
