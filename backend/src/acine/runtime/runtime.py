@@ -148,7 +148,9 @@ class Runtime:
                     if self.__precheck_action(e, img):
                         oklist.append(e)
                         if e.trigger == e.EDGE_TRIGGER_TYPE_INTERRUPT:
-                            # handle interrupt
+                            # handle interrupt -- note: current order is first
+                            # in the list will take effect -- maybe later can
+                            # set up priorities
                             oklist.clear()
                             take_edge = e
                             break
