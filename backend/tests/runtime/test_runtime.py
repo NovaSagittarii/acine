@@ -230,3 +230,40 @@ class TestRuntimeIntegration:
             assert rt.curr.id == n3.id
             assert checked[0] == e23.precondition
             assert checked[1] == n3.default_condition
+
+    @pytest.mark.asyncio
+    async def test_interrupt(
+        self, mocker: MockerFixture, mocked_check, mocked_check_once, mocked_controller
+    ):
+        """
+        n1 --> n2 <-- n3
+        |              ^
+        +----> n4 -----+
+        edge n1->n4 is an interrupt
+        edge n1->n2 shouldn't be taken (should get interrupted)
+        """
+        n1 = self.node("n1")
+        n2 = self.node("n2")
+        n3 = self.node("n3")
+        n4 = self.node("n4")
+        e12 = self.add_edge(n1, n2)
+        e32 = self.add_edge(n3, n2)
+        e14 = self.add_edge(n1, n4, trigger=Routine.Edge.EDGE_TRIGGER_TYPE_INTERRUPT)
+        e43 = self.add_edge(n4, n3)
+
+        mocked_check.return_value = CheckResult.PASS
+        mocked_check_once.return_value = CheckResult.PASS
+        r = Routine(nodes=[n1, n2, n3])
+        rt = Runtime(r, mocked_controller)
+        rt.run_replay = mocker.AsyncMock()
+
+        rt.curr = n1
+        await rt.goto(n2.id)
+
+        assert rt.curr == n2, "should be at n2 after `rt.goto(n2.id)`"
+        rt.run_replay.assert_called()
+        replays = [c.args[0] for c in rt.run_replay.call_args_list]
+        assert e12.replay not in replays, "do not take edge n1->n2"
+        assert e14.replay in replays, "take edge n1->n4 (interrupt)"
+        assert e43.replay in replays, "take edge n4->n3 (after n1->n4 interrupt)"
+        assert e32.replay in replays, "take edge n3->n2 (after n4->n3)"
