@@ -71,12 +71,24 @@ message Routine {
     repeated ScheduleInstance schedules = 9;  // if none, does not auto schedule
 
     oneof action {              // can be an action, or null action;
-      Point click = 11;         // click here
-      Rect click_region = 12;   // click anywhere here
-      PointSequence drag = 13;  // drag through these points
+      Point click = 11;         // [replay impl's] click here
+      Rect click_region = 12;   // [unused] click anywhere here
+      PointSequence drag = 13;  // [replay impl's] drag through these points
       string subroutine = 14;   // execute subroutine (node_id)
       InputReplay replay = 15;  // recording playback
     };
+
+    EdgeTriggerType trigger = 10;  // standard or interrupt
+
+    enum EdgeTriggerType {
+      EDGE_TRIGGER_TYPE_UNSPECIFIED = 0;
+      EDGE_TRIGGER_TYPE_STANDARD = 1;  // can be taken or not
+      /* must be taken if possible -- forced action
+       * if precondition passes, goto is forced (an unplaned async event)
+       * recommended to use auto postcondition
+       */
+      EDGE_TRIGGER_TYPE_INTERRUPT = 2;
+    }
 
     message ScheduleInstance {
       string scheduling_group_id = 1;  // which scheduling group this references
