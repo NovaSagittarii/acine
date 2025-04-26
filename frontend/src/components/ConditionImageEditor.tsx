@@ -29,10 +29,10 @@ export default function ConditionImageEditor() {
   useEffect(() => {
     if (condition !== null) {
       setOpen(true);
-      if (condition.frameId) {
-        setSrc(
-          frames[routine.frames.map((f) => f.id).indexOf(condition.frameId)],
-        );
+      const { frameId } = condition;
+      if (frameId) {
+        setSrc(frames[routine.frames.map((f) => f.id).indexOf(frameId)]);
+        // console.log("with condition, call set src", condition);
       }
     }
   }, [condition]);
@@ -46,10 +46,11 @@ export default function ConditionImageEditor() {
 
   // sync condition image
   useEffect(() => {
+    if (!open) return;
     const i = frames.indexOf(src);
-    console.log(src, 'idx=', i);
+    // console.log('sync image', src, 'idx=', i);
     if (condition) condition.frameId = routine.frames[i].id;
-  }, [src]);
+  }, [src, open]);
 
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
