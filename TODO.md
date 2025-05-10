@@ -15,9 +15,13 @@ budget issue tracker
   - [x] implement interrupt handler (send to state)
 - v0.1.1 Verification Features
   - [ ] improve frame select (v3: visual selector)
-  - [ ] query backend for which frames match a condition
+  - [ ] implement frame grouping (states!!)
   - [ ] implement threshold matching
-- v0.1.2 Automation Features (dynamic)
+- v0.1.2 Runtime Frontend
+  - [ ] query backend for which frames match a condition
+  - [ ] display runtime state (needed for debugging runtime)
+  - [ ] goto/queue_edge from frontend
+- v0.1.3 Automation Features (dynamic)
   - [ ] implement template match
   - [ ] implement replay offset (on dynamic check)
   - [ ] implement text match
