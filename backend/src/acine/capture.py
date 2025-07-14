@@ -1,5 +1,8 @@
 """
 Window capture module
+
+NOTE: Capture does not capture (seems to fail) when the window is visible,
+but partially offscreen.
 """
 
 from asyncio import Lock, Semaphore

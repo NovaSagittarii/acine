@@ -60,9 +60,11 @@ class InputHandler:
         self.y = 0
 
     def mouse_move(self, x: int, y: int):
-        # shadow offset in windows
-        self.x = x + 8
-        self.y = y + 8
+        self.x = x
+        self.y = y
+        # shadow offset in windows (... ? no longer seems to be a thing)
+        # self.x += 8
+        # self.y += 8
 
         # window title bar (required in AHK v2)
         self.y -= 36
