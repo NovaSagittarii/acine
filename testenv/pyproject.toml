@@ -1,0 +1,7 @@
+[project]
+name = "testenv"
+version = "0.1.0"
+description = "Testing environment for automating common tasks"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []

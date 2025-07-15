@@ -14,7 +14,8 @@ from .persist import fs_read, fs_write
 
 # from .classifier import predict
 
-title = "Arknights"
+# title = "Arknights"
+title = "TestEnv"
 # title = "Untitled - Paint"
 gc = GameCapture(title)
 ih = InputHandler(title)

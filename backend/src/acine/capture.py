@@ -67,6 +67,7 @@ class GameCapture:  # thanks joshua
 
     async def __next_frame(self):
         """requests a frame until it gets the next frame"""
+        return  # bursty frames??
         async with self.get_png_frame_lock:
             await self.capture_callback_semaphore.acquire()
 
