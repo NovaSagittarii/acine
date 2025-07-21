@@ -262,9 +262,7 @@ class Runtime:
                 await self.run_replay(action.replay)
                 print("REPLAY DONE")
             case "subroutine":
-                print("EXEC SUBROUTINE", action.description)
-                self.push(self.nodes[action.to])
-                self.set_curr(self.nodes[action.subroutine])
+                pass
             case _:
                 raise NotImplementedError()
 
@@ -273,7 +271,13 @@ class Runtime:
             print("! ! X postcheck fail")
             return
 
-        if action.WhichOneof("action") != "subroutine":
+        if action.WhichOneof("action") == "subroutine":
+            # update state after postcondition check,
+            # in case it failed for whatever reason
+            print("EXEC SUBROUTINE", action.description)
+            self.push(self.nodes[action.to])
+            self.set_curr(self.nodes[action.subroutine])
+        else:
             # need to skip when subroutine runs
             # the next shouldn't get set immediately, but stored on stack
             # until after the subroutine completes
