@@ -53,7 +53,14 @@ class Runtime:
     G: nx.DiGraph
     controller: IController
 
-    def __init__(self, routine: Routine, controller: IController):
+    def __init__(
+        self,
+        routine: Routine,
+        controller: IController,
+        *,
+        on_change_curr=None,
+        on_change_return=None,
+    ):
         self.routine = routine
         self.controller = controller
 
@@ -62,6 +69,8 @@ class Runtime:
         self.G = nx.DiGraph()
         self.curr = routine.nodes[0]
         self.return_stack: list[Routine.Node] = [None]
+        self.on_change_curr = on_change_curr
+        self.on_change_return = on_change_return
         """ the call stack but only the return nodes "addresses" """
 
         for n in self.routine.nodes:
@@ -72,6 +81,22 @@ class Runtime:
                 e.u = n.id
                 self.edges[e.id] = e
 
+    def set_curr(self, node: Routine.Node):
+        self.curr = node
+        if self.on_change_curr:
+            self.on_change_curr(self.curr)
+
+    def push(self, node: Routine.Node):
+        self.return_stack.append(node)
+        if self.on_change_return:
+            self.on_change_return(self.return_stack)
+
+    def pop(self, node: Routine.Node):
+        u = self.return_stack.pop()
+        if self.on_change_return:
+            self.on_change_return(self.return_stack)
+        return u
+
     async def goto(self, id: str):
         while self.curr.id != id:
             print(f"{self.curr.name} => {self.nodes[id].name}")
@@ -80,7 +105,6 @@ class Runtime:
             # note: type=RETURN nodes have no fixed edges!
             if self.curr.type & Routine.Node.NODE_TYPE_RETURN:
                 self.curr = self.return_stack.pop()
-                print("POP")
                 continue
 
             # is deepcopy needed?
@@ -239,8 +263,8 @@ class Runtime:
                 print("REPLAY DONE")
             case "subroutine":
                 print("EXEC SUBROUTINE", action.description)
-                self.return_stack.append(self.nodes[action.to])
-                self.curr = self.nodes[action.subroutine]
+                self.push(self.nodes[action.to])
+                self.set_curr(self.nodes[action.subroutine])
             case _:
                 raise NotImplementedError()
 
@@ -253,7 +277,7 @@ class Runtime:
             # need to skip when subroutine runs
             # the next shouldn't get set immediately, but stored on stack
             # until after the subroutine completes
-            self.curr = self.nodes[action.to]
+            self.set_curr(self.nodes[action.to])
 
     async def run_replay(self, replay: InputReplay):
         """
