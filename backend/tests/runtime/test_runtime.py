@@ -145,9 +145,9 @@ class TestRuntimeIntegration:
         r = Routine(nodes=[n1, n2, n3, n4])
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
-        rt.curr = [x for x in [n1, n2, n3, n4] if x.id == s][0]
+        rt.context.curr = [x for x in [n1, n2, n3, n4] if x.id == s][0]
         await rt.goto(t)
-        assert rt.curr.id == t
+        assert rt.context.curr.id == t
 
     @pytest.mark.asyncio
     @pytest.mark.dependency(name="subroutine", depends=["goto"])
@@ -175,11 +175,11 @@ class TestRuntimeIntegration:
         r = Routine(nodes=[n1, n2, n3, n4, n5, n6])
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
-        rt.curr = n1
+        rt.context.curr = n1
         await rt.goto(to)
-        assert rt.curr.id == to
+        assert rt.context.curr.id == to
         await rt.goto("n6")
-        assert rt.curr.id == "n6"
+        assert rt.context.curr.id == "n6"
         expected_calls = [mocker.call(e.replay) for e in [e34, e45, e26]]
         rt.run_replay.assert_has_calls(expected_calls)
 
@@ -207,11 +207,11 @@ class TestRuntimeIntegration:
         r = Routine(nodes=[n1, n2, n3, n4, n5, n6])
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
-        rt.curr = n1
+        rt.context.curr = n1
         await rt.goto(to)
-        assert rt.curr.id == to
+        assert rt.context.curr.id == to
         await rt.goto("n6")
-        assert rt.curr.id == "n6"
+        assert rt.context.curr.id == "n6"
         rt.run_replay.assert_called_once_with(e34.replay)
 
     @pytest.mark.parametrize("subtest", ("check pre", "check post", "check pre/post"))
@@ -243,26 +243,26 @@ class TestRuntimeIntegration:
         rt.run_replay = mocker.AsyncMock()
 
         if "pre" in subtest:  # 1 -> 2
-            rt.curr = n1
+            rt.context.curr = n1
             await rt.queue_edge(e12.id)
             # call pattern is (condition, getframe/frame, no_delay)
             checked = list(c.args[0] for c in mocked_check.call_args_list)
             # print(checked)
             # print("CMP", n1.default_condition)
             # print("CMP", checked[0])
-            assert rt.curr.id == n2.id
+            assert rt.context.curr.id == n2.id
             assert checked[0] == n1.default_condition
             assert checked[1] == e12.postcondition
             mocked_check_once.assert_not_called()
         else:
-            rt.curr = n2
+            rt.context.curr = n2
         mocked_check.reset_mock()
 
         if "post" in subtest:  # 2 -> 3
-            assert rt.curr.id == n2.id
+            assert rt.context.curr.id == n2.id
             await rt.queue_edge(e23.id)
             checked = list(c.args[0] for c in mocked_check.call_args_list)
-            assert rt.curr.id == n3.id
+            assert rt.context.curr.id == n3.id
             assert checked[0] == e23.precondition
             assert checked[1] == n3.default_condition
 
@@ -291,10 +291,10 @@ class TestRuntimeIntegration:
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
 
-        rt.curr = n1
+        rt.context.curr = n1
         await rt.goto(n2.id)
 
-        assert rt.curr == n2, "should be at n2 after `rt.goto(n2.id)`"
+        assert rt.context.curr == n2, "should be at n2 after `rt.goto(n2.id)`"
         rt.run_replay.assert_called()
         replays = [c.args[0] for c in rt.run_replay.call_args_list]
         assert e12.replay not in replays, "do not take edge n1->n2"

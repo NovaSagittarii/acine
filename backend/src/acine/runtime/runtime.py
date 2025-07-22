@@ -53,6 +53,16 @@ class Runtime:
     G: nx.DiGraph
     controller: IController
 
+    class Context:
+        """
+        Routine runtime state
+        """
+
+        curr: Routine.Node = None
+        return_stack: list[Routine.Node] = [None]
+
+    context: Context = Context()
+
     def __init__(
         self,
         routine: Routine,
@@ -67,8 +77,8 @@ class Runtime:
         self.nodes = {}
         self.edges = {}
         self.G = nx.DiGraph()
-        self.curr = routine.nodes[0]
-        self.return_stack: list[Routine.Node] = [None]
+        self.context.curr = routine.nodes[0]
+        self.context.return_stack = [None]
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
         """ the call stack but only the return nodes "addresses" """
@@ -82,29 +92,40 @@ class Runtime:
                 self.edges[e.id] = e
 
     def set_curr(self, node: Routine.Node):
-        self.curr = node
+        self.context.curr = node
         if self.on_change_curr:
-            self.on_change_curr(self.curr)
+            self.on_change_curr(self.context.curr)
 
     def push(self, node: Routine.Node):
-        self.return_stack.append(node)
+        self.context.return_stack.append(node)
         if self.on_change_return:
-            self.on_change_return(self.return_stack)
+            self.on_change_return(self.context.return_stack)
 
-    def pop(self, node: Routine.Node):
-        u = self.return_stack.pop()
+    def pop(self):
+        u = self.context.return_stack.pop()
         if self.on_change_return:
-            self.on_change_return(self.return_stack)
+            self.on_change_return(self.context.return_stack)
         return u
 
+    def get_context(self) -> Context:
+        return self.context
+
+    def restore_context(self, context: Context):
+        """
+        restore past state
+        """
+        if context.curr.id in self.nodes:
+            self.context.curr = context.curr
+            self.context.return_stack = context.return_stack
+
     async def goto(self, id: str):
-        while self.curr.id != id:
-            print(f"{self.curr.name} => {self.nodes[id].name}")
+        while self.context.curr.id != id:
+            print(f"{self.context.curr.name} => {self.nodes[id].name}")
 
             # handle pop stack (return nodes)
             # note: type=RETURN nodes have no fixed edges!
-            if self.curr.type & Routine.Node.NODE_TYPE_RETURN:
-                self.curr = self.return_stack.pop()
+            if self.context.curr.type & Routine.Node.NODE_TYPE_RETURN:
+                self.context.curr = self.context.return_stack.pop()
                 continue
 
             # is deepcopy needed?
@@ -131,17 +152,20 @@ class Runtime:
                         H.add_edge(u.id, e.subroutine, data=e)
                         # print("ADD FUNC EDGE", u.id, e.subroutine)
                 # this method only works for subroutine depth 1
-                # ret = self.return_stack[-1]
+                # ret = self.context.return_stack[-1]
                 # if ret and (u.type & Routine.Node.NODE_TYPE_RETURN):
                 #     H.add_edge(u.id, ret.id, data=None)
                 #     # print("ADD RET EDGE", u.id, ret.id)
             # BFS/reachability based way for subroutine depth 2+
             # TODO: improve efficiency
             # method: you can precompute a RET-reachability for each node
-            curr = self.curr
-            # print("CURR", curr.id, "STACK", [x.id for x in self.return_stack if x])
-            for i in range(1, len(self.return_stack)):
-                ret = self.return_stack[-i]
+            curr = self.context.curr
+            # print(
+            #     "CURR", curr.id,
+            #     "STACK", [x.id for x in self.context.return_stack if x]
+            # )
+            for i in range(1, len(self.context.return_stack)):
+                ret = self.context.return_stack[-i]
                 # print(f"RET={ret.id} CURR={curr.id}")
                 # print(self.G.edges)
                 reachable = list(nx.descendants(self.G, curr.id))
@@ -155,7 +179,7 @@ class Runtime:
                         # print("ADD RET EDGE", u.id, ret.id)
                 curr = ret
 
-            path = nx.shortest_path(H, self.curr.id, id)
+            path = nx.shortest_path(H, self.context.curr.id, id)
             u = self.nodes[path[0]]
             v = self.nodes[path[1]]
 
