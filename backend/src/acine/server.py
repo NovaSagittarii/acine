@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 
 # import acine_proto_dist as pb
@@ -6,11 +7,13 @@ from acine_proto_dist.input_event_pb2 import InputEvent
 from acine_proto_dist.packet_pb2 import Configuration, FrameOperation, Packet
 from acine_proto_dist.position_pb2 import Point
 from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import RuntimeState
 from autobahn.asyncio.websocket import WebSocketServerProtocol
 
 from .capture import GameCapture
 from .input_handler import InputHandler
 from .persist import fs_read, fs_write
+from .runtime.runtime import IController, Runtime, cv2
 
 # from .classifier import predict
 
@@ -21,7 +24,23 @@ gc = GameCapture(title)
 ih = InputHandler(title)
 
 
+class Controller(IController):
+    async def get_frame(self) -> cv2.typing.MatLike:
+        return await gc.get_frame()
+
+    async def mouse_move(self, x: int, y: int) -> None:
+        return ih.mouse_move(x, y)
+
+    async def mouse_down(self) -> None:
+        return ih.mouse_down()
+
+    async def mouse_up(self) -> None:
+        return ih.mouse_up()
+
+
 class AcineServerProtocol(WebSocketServerProtocol):
+    rt: Runtime | None = None
+    current_task: asyncio.Task | None = None
 
     def onConnect(self, request):
         print("Client connecting: {}".format(request.peer))
@@ -37,8 +56,6 @@ class AcineServerProtocol(WebSocketServerProtocol):
             print("Text message received: {}".format(payload.decode("utf8")))
         """
 
-        # echo back message verbatim
-        # self.sendMessage(payload, isBinary)
         if isBinary:
             packet = Packet.FromString(payload)
             match packet.WhichOneof("type"):
@@ -51,8 +68,26 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "routine":
                     data = Routine.SerializeToString(packet.routine)
                     await fs_write(["rt.pb"], data)
+                    old_context = None
+                    if self.rt:
+                        # save and restore old position (if exists)
+                        old_context = self.rt.get_context()
+
+                        if self.current_task:
+                            self.current_task.cancel()
+                    self.rt = Runtime(
+                        packet.routine,
+                        Controller(),
+                        on_change_curr=self.on_change_curr,
+                        on_change_return=self.on_change_return,
+                    )
+                    print(old_context)
+                    if old_context:
+                        self.rt.restore_context(old_context)
                 case "get_routine":
                     await self.on_get_routine(packet)
+                case "goto":
+                    await self.on_goto(packet)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
@@ -116,6 +151,31 @@ class AcineServerProtocol(WebSocketServerProtocol):
         s = await fs_read(["rt.pb"])
         response = Packet(get_routine=Routine.FromString(s))
         self.sendMessage(response.SerializeToString(), isBinary=True)
+
+    def on_change_curr(self, node: Routine.Node):
+        response = Packet(set_curr=RuntimeState(current_node=node))
+        self.sendMessage(response.SerializeToString(), isBinary=True)
+
+    def on_change_return(self, return_stack: list[Routine.Node]):
+        pass
+        # response = Packet(set_stack=RuntimeState(return_stack=return_stack))
+        # self.sendMessage(response.SerializeToString(), isBinary=True)
+
+    async def on_goto(self, packet: Packet):
+        target_node = packet.goto.current_node
+        if self.rt and target_node.id in self.rt.nodes:
+            if self.current_task:
+                # abort previous goto (if still running)
+                self.current_task.cancel()
+
+            async def run_goto():
+                try:
+                    await self.rt.goto(target_node.id)
+                except asyncio.CancelledError:
+                    pass
+
+            self.current_task = asyncio.create_task(run_goto())
+            await self.current_task
 
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {}".format(reason))

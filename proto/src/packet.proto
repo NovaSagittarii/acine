@@ -5,6 +5,7 @@ package ac;
 import "frame.proto";
 import "input_event.proto";
 import "routine.proto";
+import "runtime.proto";
 
 message Packet {
   oneof type {
@@ -13,6 +14,9 @@ message Packet {
     Configuration configuration = 3;     // sync client with server
     ac.Routine routine = 4;              // sync server routine with client
     ac.Routine get_routine = 5;          // sync client routine with server
+    ac.RuntimeState set_curr = 6;        // sync client routine curr state
+    ac.RuntimeState set_stack = 7;       // sync client routine return stack
+    ac.RuntimeState goto = 8;            // client-triggered navigation
   }
 }
 

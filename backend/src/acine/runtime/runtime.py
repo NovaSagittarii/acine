@@ -122,8 +122,10 @@ class Runtime:
             if u and u.id not in self.nodes:
                 valid = False
         if valid:
-            self.context.curr = context.curr
+            self.set_curr(context.curr)
             self.context.return_stack = context.return_stack
+            if self.on_change_return:
+                self.on_change_return(self.context.return_stack)
 
     async def goto(self, id: str):
         if id not in self.nodes:

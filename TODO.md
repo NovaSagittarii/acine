@@ -13,14 +13,15 @@ budget issue tracker
   - [x] improve frame select (v2: autoselect)
   - [x] implement node default precondition; action default
   - [x] implement interrupt handler (send to state)
-- v0.1.1 Verification Features
+- Verification Features (design not ready)
   - [ ] improve frame select (v3: visual selector)
   - [ ] implement frame grouping (states!!)
   - [ ] implement threshold matching
-- v0.1.2 Runtime Frontend
   - [ ] query backend for which frames match a condition
-  - [ ] display runtime state (needed for debugging runtime)
-  - [ ] goto/queue_edge from frontend
+- v0.1.2 Runtime Frontend
+  - [x] display runtime state (needed for debugging runtime)
+  - [x] goto from frontend
+  - [ ] queue_edge from frontend
 - v0.1.3 Automation Features (dynamic)
   - [ ] implement template match
   - [ ] implement replay offset (on dynamic check)
@@ -33,6 +34,10 @@ budget issue tracker
   - [ ] implement scheduling groups
   - [ ] implement scheduler
   - [ ] implement runtime duration logging
+- Power Saving
+  - sleep and wake from sleep
+    https://learn.microsoft.com/en-us/windows/win32/api/powrprof/nf-powrprof-setsuspendstate
+    https://learn.microsoft.com/en-us/windows/win32/power/system-wake-up-events
 
 ### Lower Priority
 

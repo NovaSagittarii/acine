@@ -35,6 +35,8 @@ def redraw():
     line_points = []
     line_options = {}
 
+    clicks = 0
+
     def draw_line(event):
         nonlocal line_id
         line_points.extend((event.x, event.y))
@@ -42,10 +44,26 @@ def redraw():
             canvas.delete(line_id)
         if len(line_points) >= 4:
             line_id = canvas.create_line(line_points, **line_options)
+        motion(event)  # so it works while mousedown in recording
 
     def set_start(event):
         canvas.create_oval(event.x - 5, event.y - 5, event.x + 5, event.y + 5)
         line_points.extend((event.x, event.y))
+
+        # reset after a few clicks since you can't reliably click buttons via AHK
+        nonlocal clicks
+        clicks += 1
+        if clicks > 10:
+            redraw()
+
+    motionProgress = tkinter.IntVar()
+    motionProgress.set(0)
+
+    def motion(event):
+        if event.x < 10:
+            redraw()
+        else:
+            motionProgress.set(motionProgress.get() + 1)
 
     def end_line(event=None):
         nonlocal line_id
@@ -56,10 +74,14 @@ def redraw():
     canvas = tkinter.Canvas(f, background="white")
     canvas.grid(columnspan=5)
     canvas.create_rectangle(0, 0, 1000, 1000)
+    canvas.create_line(10, 0, 10, 1000)
 
+    canvas.bind("<Motion>", motion)  # holy moly something AHK works with
     canvas.bind("<Button-1>", set_start)
     canvas.bind("<B1-Motion>", draw_line)
     canvas.bind("<ButtonRelease-1>", end_line)
+
+    canvas.create_rectangle(0, 0, 1000, 1000)
 
     f2 = ttk.Frame(f)
     f2.grid(column=6, row=0, rowspan=3)
@@ -76,6 +98,7 @@ def redraw():
 
     ttk.Progressbar(f2, variable=X, maximum=3).grid()
     ttk.Progressbar(f2, variable=Y, maximum=3).grid()
+    ttk.Progressbar(f2, variable=motionProgress, maximum=100).grid()
 
 
 redraw()

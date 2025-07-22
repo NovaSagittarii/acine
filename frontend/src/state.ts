@@ -11,6 +11,7 @@ import {
   Routine,
   Routine_Node,
   Routine_State,
+  RuntimeState,
 } from 'acine-proto-dist';
 import InputSource from './client/input_source';
 
@@ -92,3 +93,8 @@ export const $selectedNode = atom<Routine_Node | null>(null);
  * forwarding replay events => client websocket => backend
  */
 export const $replayInputSource = atom<InputSource>(new InputSource());
+
+/**
+ * current runtime context, includes current node and return stack
+ */
+export const $runtimeContext = atom<RuntimeState>(RuntimeState.create());

@@ -11,6 +11,7 @@ import {
   loadRoutine,
   saveRoutine, // used in global scope
   $replayInputSource,
+  $runtimeContext,
 } from './state';
 import Button from './components/ui/Button';
 import StateList from './components/StateList';
@@ -75,6 +76,14 @@ ws.onmessage = async (data) => {
       loadRoutine(ws); // loads from base64 persistent
       break;
     }
+    case 'setCurr': {
+      const { setCurr: context } = packet.type;
+      let c = $runtimeContext.get();
+      c.currentNode = context.currentNode;
+      $runtimeContext.set(c);
+      break;
+    }
+    // TODO: setStack
     default:
       console.warn('Unhandled packet', packet);
   }
@@ -117,6 +126,25 @@ function persistFrame(frame: pb.Frame) {
  * this is a callback overridden each time client receives new frame through ws
  */
 let saveCurrentFrame = () => -1;
+
+/**
+ * Route the runtime to goto this particular node. If doesn't exist,
+ * nothing happens. (no feedback)
+ * @param id target node id
+ */
+export function runtimeGoto(id: string) {
+  const packet = pb.Packet.create({
+    type: {
+      $case: 'goto',
+      goto: {
+        currentNode: {
+          id,
+        },
+      },
+    },
+  });
+  ws.send(pb.Packet.encode(packet).finish());
+}
 
 function App() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
