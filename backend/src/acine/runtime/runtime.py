@@ -112,9 +112,16 @@ class Runtime:
 
     def restore_context(self, context: Context):
         """
-        restore past state
+        restore past state; ignores if nodes for the context are missing
+        possibly due to loading a new revision of the routine with deleted nodes
         """
-        if context.curr.id in self.nodes:
+        valid = True
+        if context.curr.id not in self.nodes:
+            valid = False
+        for u in context.return_stack:
+            if u and u.id not in self.nodes:
+                valid = False
+        if valid:
             self.context.curr = context.curr
             self.context.return_stack = context.return_stack
 
