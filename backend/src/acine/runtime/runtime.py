@@ -126,6 +126,8 @@ class Runtime:
             self.context.return_stack = context.return_stack
 
     async def goto(self, id: str):
+        if id not in self.nodes:
+            raise ValueError(id, "target does not exist in loaded routine")
         while self.context.curr.id != id:
             print(f"{self.context.curr.name} => {self.nodes[id].name}")
 

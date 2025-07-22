@@ -96,6 +96,13 @@ class TestRuntime:
         rt.restore_context(context)
         assert rt.get_context().curr == old_curr
 
+    @pytest.mark.asyncio
+    async def test_invalid_goto(self, mocker: MockerFixture, mocked_runtime):
+        now, sleep, controller, rt = mocked_runtime
+        with pytest.raises(ValueError) as info:
+            await rt.goto("INVALID ID")
+        assert "target does not exist" in str(info.value)
+
 
 class TestRuntimeIntegration:
     """
