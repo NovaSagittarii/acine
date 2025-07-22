@@ -84,6 +84,18 @@ class TestRuntime:
         now.assert_called()
         sleep.assert_called_once()
 
+    @pytest.mark.asyncio
+    async def test_invalid_restore_context(self, mocker: MockerFixture, mocked_runtime):
+        now, sleep, controller, rt = mocked_runtime
+
+        context = Runtime.Context()
+        context.curr = Routine.Node(id="INVALID ID")
+
+        old_curr = rt.get_context().curr
+        assert rt.get_context().curr == old_curr
+        rt.restore_context(context)
+        assert rt.get_context().curr == old_curr
+
 
 class TestRuntimeIntegration:
     """
