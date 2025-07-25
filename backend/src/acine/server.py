@@ -89,6 +89,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     await self.on_get_routine(packet)
                 case "goto":
                     await self.on_goto(packet)
+                case "queue_edge":
+                    await self.on_queue_edge(packet)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
@@ -176,6 +178,22 @@ class AcineServerProtocol(WebSocketServerProtocol):
             async def run_goto():
                 try:
                     await self.rt.goto(target_node.id)
+                except asyncio.CancelledError:
+                    pass
+
+            self.current_task = asyncio.create_task(run_goto())
+            await self.current_task
+
+    async def on_queue_edge(self, packet: Packet):
+        target_edge = packet.queue_edge.current_edge
+        if self.rt and target_edge.id in self.rt.edges:
+            if self.current_task:
+                # abort previous goto (if still running)
+                self.current_task.cancel()
+
+            async def run_goto():
+                try:
+                    await self.rt.queue_edge(target_edge.id)
                 except asyncio.CancelledError:
                     pass
 

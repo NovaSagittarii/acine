@@ -21,7 +21,7 @@ budget issue tracker
 - v0.1.2 Runtime Frontend
   - [x] display runtime state (needed for debugging runtime)
   - [x] goto from frontend
-  - [ ] queue_edge from frontend
+  - [x] queue_edge from frontend
 - v0.1.3 Automation Features (dynamic)
   - [ ] implement template match
   - [ ] implement replay offset (on dynamic check)

@@ -147,6 +147,25 @@ export function runtimeGoto(id: string) {
   ws.send(pb.Packet.encode(packet).finish());
 }
 
+/**
+ * Route the runtime to run this particular edge. If doesn't exist,
+ * nothing happens. (no feedback)
+ * @param id target edge id
+ */
+export function runtimeQueueEdge(id: string) {
+  const packet = pb.Packet.create({
+    type: {
+      $case: 'queueEdge',
+      queueEdge: {
+        currentEdge: {
+          id,
+        },
+      },
+    },
+  });
+  ws.send(pb.Packet.encode(packet).finish());
+}
+
 function App() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [dState, setDState] = useState(''); // debug state

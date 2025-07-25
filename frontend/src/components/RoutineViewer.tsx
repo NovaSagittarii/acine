@@ -2,7 +2,7 @@ import { $routine, $runtimeContext } from '@/state';
 import { useStore } from '@nanostores/react';
 import { useCallback } from 'react';
 import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
-import { runtimeGoto } from '../App';
+import { runtimeGoto, runtimeQueueEdge } from '../App';
 
 export default function RoutineViewer() {
   const routine = useStore($routine);
@@ -43,13 +43,13 @@ export default function RoutineViewer() {
         edgeInterpolation='curved' // make <-> 2-cycles more visible
         labelType='all'
         onNodeClick={(node) => runtimeGoto(node.id)}
+        onEdgeClick={(e) => runtimeQueueEdge(e.id)} // it does work (highlight bugged)
         selections={[
           context?.currentNode?.id?.toString() || '',
           context?.currentEdge?.id?.toString() || '',
         ].filter((x) => x)}
         edgeLabelPosition={'above'} // for label readability
         // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
-        // onEdgeClick={(e) => console.log(e)} // it does work (highlight bugged)
       />
     </div>
   );
