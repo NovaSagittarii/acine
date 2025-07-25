@@ -21,11 +21,11 @@ export default function RoutineViewer() {
     return routine.nodes.flatMap((n) =>
       n.edges
         .map(
-          (e, eid) =>
+          (e) =>
             ({
               source: n.id.toString(),
               target: e.to.toString(),
-              id: n.id + '+' + eid,
+              id: e.id,
               label: e.description.substring(0, 12),
               size: 3,
             }) as GraphEdge,
@@ -43,7 +43,10 @@ export default function RoutineViewer() {
         edgeInterpolation='curved' // make <-> 2-cycles more visible
         labelType='all'
         onNodeClick={(node) => runtimeGoto(node.id)}
-        selections={[context?.currentNode?.id?.toString() || '']}
+        selections={[
+          context?.currentNode?.id?.toString() || '',
+          context?.currentEdge?.id?.toString() || '',
+        ].filter((x) => x)}
         edgeLabelPosition={'above'} // for label readability
         // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
         // onEdgeClick={(e) => console.log(e)} // it does work (highlight bugged)

@@ -70,6 +70,7 @@ class Runtime:
         *,
         on_change_curr=None,
         on_change_return=None,
+        on_change_edge=None,
     ):
         self.routine = routine
         self.controller = controller
@@ -81,6 +82,7 @@ class Runtime:
         self.context.return_stack = [None]
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
+        self.on_change_edge = on_change_edge
         """ the call stack but only the return nodes "addresses" """
 
         for n in self.routine.nodes:
@@ -285,9 +287,15 @@ class Runtime:
         """
         Runs the precheck/action/postcheck of an action
         """
+
+        if self.on_change_edge:
+            self.on_change_edge(action)
+
         res = await self.__check(action, action.precondition, use_dest=False)
         if res != CheckResult.PASS:
             print("X ? ? precheck fail")
+            if self.on_change_edge:
+                self.on_change_edge(None)
             return
 
         match action.WhichOneof("action"):
@@ -304,6 +312,8 @@ class Runtime:
         res = await self.__check(action, action.postcondition, use_dest=True)
         if res != CheckResult.PASS:
             print("! ! X postcheck fail")
+            if self.on_change_edge:
+                self.on_change_edge(None)
             return
 
         if action.WhichOneof("action") == "subroutine":

@@ -79,7 +79,8 @@ ws.onmessage = async (data) => {
     case 'setCurr': {
       const { setCurr: context } = packet.type;
       let c = $runtimeContext.get();
-      c.currentNode = context.currentNode;
+      if (context.currentNode) c.currentNode = context.currentNode;
+      c.currentEdge = context.currentEdge; // if null, no longer processing edge
       $runtimeContext.set(c);
       break;
     }

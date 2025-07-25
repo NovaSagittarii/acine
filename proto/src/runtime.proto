@@ -20,6 +20,9 @@ message RuntimeState {
   // current node
   Routine.Node current_node = 1;
 
-  // desired next node
-  Routine.Node next_node = 2;
+  // desired target node
+  Routine.Node target_node = 2;
+
+  // non null if current processing edge (condition/action)
+  Routine.Edge current_edge = 3;
 }

@@ -80,6 +80,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
                         Controller(),
                         on_change_curr=self.on_change_curr,
                         on_change_return=self.on_change_return,
+                        on_change_edge=self.on_change_edge,
                     )
                     print(old_context)
                     if old_context:
@@ -160,6 +161,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
         pass
         # response = Packet(set_stack=RuntimeState(return_stack=return_stack))
         # self.sendMessage(response.SerializeToString(), isBinary=True)
+
+    def on_change_edge(self, edge: Routine.Edge):
+        response = Packet(set_curr=RuntimeState(current_edge=edge))
+        self.sendMessage(response.SerializeToString(), isBinary=True)
 
     async def on_goto(self, packet: Packet):
         target_node = packet.goto.current_node
