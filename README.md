@@ -1,11 +1,13 @@
 ## Setup
 
+Tested on Windows 11 (decent emulator support).
 Have an installation of Python and NodeJS.
 
 > Can get it with [chocolately](https://chocolatey.org/install)
 >
 > ```sh
 > choco install git python nvm
+> nvm use 20.10.0 # or lts
 > ```
 
 1. Precommit setup
@@ -22,7 +24,6 @@ Have an installation of Python and NodeJS.
 2. Build protobufs
 
    ```sh
-   npm i -g pnpm  # install pnpm
    cd proto       # go to /proto
    npm i          # setup envs (does a prepare cascade)
    npm run build  # run protoc
@@ -34,7 +35,7 @@ Have an installation of Python and NodeJS.
    ```sh
    cd backend  # go to /backend
    python -m uv venv --seed
-   # activate venv
+   .venv/Scripts/activate  # activate venv
    pip install uv
    uv pip install -r requirements.txt
    uv pip install -e . ../proto/dist/py
