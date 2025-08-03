@@ -1,0 +1,12 @@
+{
+  "name": "acine-helper-scripts",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently --kill-others -n \"FE,BE,TE\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" 'frontend\\start.bat' 'backend\\start.bat' 'testenv\\start.bat'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "NovaSagittarii",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
