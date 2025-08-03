@@ -72,23 +72,25 @@ export default function ConditionImageEditor() {
             onChange={(s) => setSrc(frames[s])}
             autofocus
           />
-          <RegionEditor
-            composite
-            regions={condition.regions}
-            width={width}
-            height={height}
-            onChange={(r) => {
-              condition.regions = r;
-              $routine.set(routine);
-              console.log(routine);
-            }}
-          >
-            <img
-              className='max-h-full pointer-events-none select-none'
-              src={src}
-              draggable={false}
-            />
-          </RegionEditor>
+          <div className='flex justify-center w-full'>
+            <RegionEditor
+              composite
+              regions={condition.regions}
+              width={width}
+              height={height}
+              onChange={(r) => {
+                condition.regions = r;
+                $routine.set(routine);
+                console.log(routine);
+              }}
+            >
+              <img
+                className='max-h-full pointer-events-none select-none'
+                src={src}
+                draggable={false}
+              />
+            </RegionEditor>
+          </div>
         </div>
       </Modal>
     )
