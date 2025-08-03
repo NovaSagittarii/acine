@@ -21,7 +21,7 @@ class TestCheck:
         """
         c = Routine.Condition(
             image=Routine.Condition.Image(
-                frame_id="FRAME_ID", tolerance=0.5, regions=[Rect()]
+                frame_id="FRAME_ID", threshold=0.5, regions=[Rect()]
             )
         )
         img = random.rand(2, 3, 4)

@@ -9,6 +9,7 @@ message Point {
 
 /**
  * Represents a rectangular region.
+ * Meant to be used as the region [left,right] x [top,bottom] (inclusive).
  *
  * When used for clickable regions (aka repeated Rect):
  * - This can represent a point (when left/top coincide with right/bottom)

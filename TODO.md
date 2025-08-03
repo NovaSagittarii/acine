@@ -24,6 +24,7 @@ budget issue tracker
   - [x] queue_edge from frontend
 - v0.1.3 Automation Features (dynamic)
   - [ ] implement template match
+  - [ ] interrupt during postcondition (after action)
   - [ ] implement replay offset (on dynamic check)
   - [ ] implement text match
 - v0.2.0 Routine Manager
@@ -44,6 +45,7 @@ budget issue tracker
 - [ ] implement search by node name (frontend editor)
 - [ ] implement graph based editor
 - [ ] route display
+- [ ] migrate venv to uv
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.

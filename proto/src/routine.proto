@@ -118,10 +118,30 @@ message Routine {
       bool auto = 23;
     }
 
-    message Image {          // wants to ensure some pixels match
+    /* Somewhat generalized pixel matching.
+     *
+     * | Type                   | `regions` | `allow_regions` |
+     * |------------------------|-----------|-----------------|
+     * | Pixel                  | [1x1]     | same as regions |
+     * | Region                 | [wxh]     | same as regions |
+     * | Composite region       | [wxh...]  | same as regions |
+     * | Loose region           | [wxh]     | [wxh]           |
+     * | Loose composite region | [wxh...]  | [wxh...]        |
+     */
+    message Image {
       string frame_id = 1;   // actual payload to check
-      double tolerance = 2;  // required similarity to pass; between 0.0 and 1.0
-      repeated Rect regions = 3;  // section that it checks
+      double threshold = 2;  // required similarity to pass; between 0.0 and 1.0
+      int32 padding = 5;  // required spacing between matches, can be negative
+      int32 match_limit = 6;  // limit how many matches are considered (for UX)
+
+      // section that it checks;
+      // crops base frame to get desired match frame.
+      repeated Rect regions = 3;
+
+      // section of the target frame you can check;
+      // crops target frame before comparing against match frame.
+      // if unset, assume regions==allow_regions (not dynamic)
+      repeated Rect allow_regions = 4;
     }
 
     message Text {                // wants to ensure it finds some text
