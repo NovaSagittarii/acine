@@ -1,2 +1,4 @@
 # https://stackoverflow.com/a/73218382
 *.ipynb filter=strip-notebook-output
+
+*.ipynb linguist-detectable=false
