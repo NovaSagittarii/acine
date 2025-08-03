@@ -6,14 +6,17 @@
   "scripts": {
     "prepare:py": "cd ./dist/py && pnpm i",
     "prepare:ts": "cd ./dist/ts && pnpm i",
-    "prepare": "npm run prepare:py & npm run prepare:ts",
+    "prepare": "concurrently -n \"py,ts\" -c \"bgBlue.bold,bgCyan.bold\" \"npm run prepare:py\" \"npm run prepare:ts\"",
     "build:py": "cd ./dist/py && npm run build",
     "build:ts": "cd ./dist/ts && npm run build",
-    "build": "npm run build:py & npm run build:ts",
+    "build": "concurrently -n \"py,ts\" -c \"bgBlue.bold,bgCyan.bold\" \"npm run build:py\" \"npm run build:ts\"",
     "test:py": "cd ./dist/py && npm test",
     "test:ts": "cd ./dist/ts && npm test",
-    "test": "npm run test:ts & npm run test:py"
+    "test": "concurrently -n \"py,ts\" -c \"bgBlue.bold,bgCyan.bold\" \"npm run test:py\" \"npm run test:ts\""
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
 }
