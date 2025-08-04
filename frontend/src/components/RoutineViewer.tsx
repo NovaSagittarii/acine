@@ -2,7 +2,7 @@ import { $routine, $runtimeContext } from '@/state';
 import { useStore } from '@nanostores/react';
 import { useCallback } from 'react';
 import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
-import { runtimeGoto, runtimeQueueEdge } from '../App';
+import { runtimeGoto, runtimeQueueEdge } from '../App.state';
 
 export default function RoutineViewer() {
   const routine = useStore($routine);

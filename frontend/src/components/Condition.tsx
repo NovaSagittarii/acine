@@ -9,7 +9,7 @@ import NumberInput from './ui/NumberInput';
 import useForceUpdate from './useForceUpdate';
 import { SelectAuto } from './ui/Select';
 import Button from './ui/Button';
-import { $condition } from './ConditionImageEditor';
+import { $condition } from './ConditionImageEditor.state';
 import { pluralize } from '../client/util';
 
 interface ConditionNumberInputProps<K extends keyof Routine_Condition> {

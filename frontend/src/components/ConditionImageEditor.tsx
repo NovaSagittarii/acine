@@ -1,14 +1,12 @@
-import { atom } from 'nanostores';
 import { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
-import { Routine_Condition_Image } from 'acine-proto-dist';
 
 import Modal from './ui/Modal';
 import Select from './ui/Select';
 import { $frames, $routine, $sourceDimensions } from '@/state';
 import RegionEditor from './ui/RegionEditor';
 
-export const $condition = atom<null | Routine_Condition_Image>(null);
+import { $condition } from './ConditionImageEditor.state';
 
 /**
  * Appears as a modal.
