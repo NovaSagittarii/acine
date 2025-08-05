@@ -54,7 +54,7 @@ class GameCapture:  # thanks joshua
 
             # print("got frame")
             # frame.save_as_image("./yooo.png")
-            self.data = frame.frame_buffer.copy()
+            self.data = frame.frame_buffer.copy()[:, :, :3]  # discard alpha
             self.dimensions = (frame.width, frame.height)
             self.capture_callback_semaphore.release()
 

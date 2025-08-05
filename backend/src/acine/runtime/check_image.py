@@ -4,10 +4,8 @@ Implements image similarity checks
 
 import cv2
 import numpy as np
+from acine.runtime.util import get_frame
 from acine_proto_dist.routine_pb2 import Routine
-from skimage.metrics import structural_similarity
-
-from ..persist import resolve
 
 
 class SimilarityResult:
@@ -104,25 +102,5 @@ def check_image(
 
     returns `True` if passes
     """
-    path = resolve("img", f"{condition.frame_id}.png")  # RGB
-    ref_img = cv2.imread(path)
-
-    scores: list[tuple[float, int]] = []
-    """[score, area], need to be converted to weighted score"""
-    for region in condition.regions:
-        x0, x1, y0, y1 = region.left, region.right, region.top, region.bottom
-        # print(len(img), len(img[0]), len(img[0][0]))
-        # print(len(ref_img), len(ref_img[0]), len(ref_img[0][0]))
-        # RGBA ???
-        observe = img[y0:y1, x0:x1, :3]  # discard alpha channel
-        expect = ref_img[y0:y1, x0:x1, :3]
-        score = structural_similarity(observe, expect, channel_axis=2)
-        # cv2.imwrite(resolve("res", "got.png"), observe)
-        # cv2.imwrite(resolve("res", "want.png"), expect)
-        scores.append((score, (y1 - y0) * (x1 - x0)))
-
-    tot = sum(w for _, w in scores)
-    wscore = sum(x * w for x, w in scores) / tot
-    # print("sim=", wscore)
-
-    return wscore > 0.7
+    ref_img = get_frame(condition.frame_id)
+    return len(check_similarity(condition, ref_img, img)) > 0
