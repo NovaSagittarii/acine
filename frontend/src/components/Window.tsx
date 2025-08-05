@@ -133,6 +133,9 @@ export default function Window({
         width={dimensions[0]}
         height={dimensions[1]}
         mousePressed={runtimeMousePressed}
+        outerUp='border-blue-400'
+        outerDown='border-blue-300/40'
+        innerDown='border-blue-400/80'
       />
       <div className='absolute pointer-events-none'>
         ({mouseX}, {mouseY}, {isMouseDown ? 'down' : 'up'})
@@ -147,12 +150,26 @@ interface PointerProps {
   width: number;
   height: number;
   mousePressed: number | boolean;
+  outerUp?: string; // apply style to outer when mouseUp
+  outerDown?: string; // apply style to outer when mouseDown
+  innerUp?: string; // apply style to inner when mouseUp
+  innerDown?: string; // apply style to inner when mouseDown
 }
 
 /**
  * draws pointer (with mousedown animation) over a div
  */
-function Pointer({ x, y, width, height, mousePressed }: PointerProps) {
+function Pointer({
+  x,
+  y,
+  width,
+  height,
+  mousePressed,
+  outerUp = 'border-amber-600',
+  outerDown = 'border-amber-500/40',
+  innerUp = 'border-transparent',
+  innerDown = 'border-amber-700/80',
+}: PointerProps) {
   return (
     <div
       className='absolute top-0 left-0 pointer-events-none'
@@ -166,13 +183,13 @@ function Pointer({ x, y, width, height, mousePressed }: PointerProps) {
           'bg-transparent w-3 h-3 overflow-hidden rounded-full border-2 ' +
           '-translate-x-[50%] -translate-y-[50%] transition-all ' +
           'flex justify-center items-center ' +
-          `${!mousePressed ? 'border-amber-600' : 'scale-125 border-amber-500/30'}`
+          `${!mousePressed ? outerUp : 'w-4 h-4 ' + outerDown}`
         }
       >
         <div
           className={
             'w-1 h-1 rounded-full border-4 ' +
-            `${!mousePressed ? 'border-transparent' : 'border-amber-700/80'}`
+            `${!mousePressed ? innerUp : innerDown}`
           }
         ></div>
       </div>
