@@ -8,6 +8,7 @@ import {
   FrameOperation,
   FrameOperation_Operation,
   Packet,
+  Point,
   Routine,
   Routine_Node,
   Routine_State,
@@ -98,3 +99,13 @@ export const $replayInputSource = atom<InputSource>(new InputSource());
  * current runtime context, includes current node and return stack
  */
 export const $runtimeContext = atom<RuntimeState>(RuntimeState.create());
+
+/**
+ * current runtime mouse state, position
+ */
+export const $runtimeMousePosition = atom<Point>(Point.create());
+
+/**
+ * current runtime mouse state, pressed (bitmask)
+ */
+export const $runtimeMousePressed = atom<number>(0);

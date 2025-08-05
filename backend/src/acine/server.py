@@ -33,16 +33,32 @@ ih = InputHandler(title)
 
 
 class Controller(IController):
+    ws: WebSocketServerProtocol
+
+    def __init__(self, websocket: WebSocketServerProtocol):
+        super().__init__()
+        self.ws = websocket
+
     async def get_frame(self) -> cv2.typing.MatLike:
         return await gc.get_frame()
 
     async def mouse_move(self, x: int, y: int) -> None:
+        p = Packet(input_event=InputEvent(move=Point(x=x, y=y)))
+        self.ws.sendMessage(p.SerializeToString(), isBinary=True)
         return ih.mouse_move(x, y)
 
     async def mouse_down(self) -> None:
+        p = Packet(
+            input_event=InputEvent(mouse_down=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
+        )
+        self.ws.sendMessage(p.SerializeToString(), isBinary=True)
         return ih.mouse_down()
 
     async def mouse_up(self) -> None:
+        p = Packet(
+            input_event=InputEvent(mouse_up=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
+        )
+        self.ws.sendMessage(p.SerializeToString(), isBinary=True)
         return ih.mouse_up()
 
 
@@ -85,7 +101,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
                             self.current_task.cancel()
                     self.rt = Runtime(
                         packet.routine,
-                        Controller(),
+                        Controller(self),
                         on_change_curr=self.on_change_curr,
                         on_change_return=self.on_change_return,
                         on_change_edge=self.on_change_edge,

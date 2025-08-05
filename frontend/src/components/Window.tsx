@@ -4,6 +4,8 @@ import * as pb from 'acine-proto-dist';
 import { handleInputEvent } from '../client/input_stream';
 import InputSource from '../client/input_source';
 import { toOutCoordinates, toPercentage } from '../client/util';
+import { useStore } from '@nanostores/react';
+import { $runtimeMousePosition, $runtimeMousePressed } from '@/state';
 
 interface WindowProps {
   websocket: WebSocket; // forward events towards here
@@ -26,6 +28,9 @@ export default function Window({
   dimensions,
   imageUrl = null,
 }: WindowProps) {
+  const runtimeMousePosition = useStore($runtimeMousePosition);
+  const runtimeMousePressed = useStore($runtimeMousePressed);
+
   const [mouseX, setMouseX] = useState(0);
   const [mouseY, setMouseY] = useState(0);
   const [isMouseDown, setMouseDown] = useState(false);
@@ -115,31 +120,61 @@ export default function Window({
           style={{ imageRendering: 'pixelated' }}
         />
       )}
+      <Pointer
+        x={mouseX}
+        y={mouseY}
+        width={dimensions[0]}
+        height={dimensions[1]}
+        mousePressed={isMouseDown}
+      />
+      <Pointer
+        x={runtimeMousePosition.x}
+        y={runtimeMousePosition.y}
+        width={dimensions[0]}
+        height={dimensions[1]}
+        mousePressed={runtimeMousePressed}
+      />
+      <div className='absolute pointer-events-none'>
+        ({mouseX}, {mouseY}, {isMouseDown ? 'down' : 'up'})
+      </div>
+    </div>
+  );
+}
+
+interface PointerProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  mousePressed: number | boolean;
+}
+
+/**
+ * draws pointer (with mousedown animation) over a div
+ */
+function Pointer({ x, y, width, height, mousePressed }: PointerProps) {
+  return (
+    <div
+      className='absolute top-0 left-0 pointer-events-none'
+      style={{
+        left: toPercentage(x / width),
+        top: toPercentage(y / height),
+      }}
+    >
       <div
-        className='absolute top-0 left-0 pointer-events-none'
-        style={{
-          left: toPercentage(mouseX / dimensions[0]),
-          top: toPercentage(mouseY / dimensions[1]),
-        }}
+        className={
+          'bg-transparent w-3 h-3 overflow-hidden rounded-full border-2 ' +
+          '-translate-x-[50%] -translate-y-[50%] transition-all ' +
+          'flex justify-center items-center ' +
+          `${!mousePressed ? 'border-amber-600' : 'scale-125 border-amber-500/30'}`
+        }
       >
         <div
           className={
-            'bg-transparent w-3 h-3 overflow-hidden rounded-full border-2 ' +
-            '-translate-x-[50%] -translate-y-[50%] transition-all ' +
-            'flex justify-center items-center ' +
-            `${!isMouseDown ? 'border-amber-600' : 'scale-125 border-amber-500/30'}`
+            'w-1 h-1 rounded-full border-4 ' +
+            `${!mousePressed ? 'border-transparent' : 'border-amber-700/80'}`
           }
-        >
-          <div
-            className={
-              'w-1 h-1 rounded-full border-4 ' +
-              `${!isMouseDown ? 'border-transparent' : 'border-amber-700/80'}`
-            }
-          ></div>
-        </div>
-      </div>
-      <div className='absolute pointer-events-none'>
-        ({mouseX}, {mouseY}, {isMouseDown ? 'down' : 'up'})
+        ></div>
       </div>
     </div>
   );

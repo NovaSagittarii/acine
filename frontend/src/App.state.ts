@@ -7,6 +7,8 @@ import {
   loadRoutine,
   saveRoutine, // used in global scope
   $runtimeContext,
+  $runtimeMousePosition as $mousePosition,
+  $runtimeMousePressed as $mousePressed,
 } from './state';
 import { frameToObjectURL } from './client/encoder';
 
@@ -50,6 +52,22 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
           $frames.set(frameOperation.frames.map(frameToObjectURL));
           break;
         }
+      }
+      break;
+    }
+    case 'inputEvent': {
+      const { inputEvent } = packet.type;
+      const { type: ie } = inputEvent;
+      switch (ie?.$case) {
+        case 'move':
+          $mousePosition.set(ie.move);
+          break;
+        case 'mouseDown':
+          $mousePressed.set($mousePressed.get() | ie.mouseDown.valueOf());
+          break;
+        case 'mouseUp':
+          $mousePressed.set($mousePressed.get() & ~ie.mouseUp.valueOf());
+          break;
       }
       break;
     }
