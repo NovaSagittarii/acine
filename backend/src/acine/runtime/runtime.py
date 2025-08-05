@@ -93,6 +93,8 @@ class Runtime:
                 e.u = n.id
                 self.edges[e.id] = e
 
+        self.set_curr(self.context.curr)  # pushes update on init
+
     def set_curr(self, node: Routine.Node):
         self.context.curr = node
         if self.on_change_curr:
