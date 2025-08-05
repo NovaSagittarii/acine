@@ -4,7 +4,7 @@
   "scripts": {
     "prepare": "cd ./proto && pnpm i",
     "build": "cd ./proto && npm run build",
-    "dev": "concurrently --kill-others -n \"FE,BE,TE\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" 'frontend\\start.bat' 'backend\\start.bat' 'testenv\\start.bat'",
+    "dev": "concurrently --kill-others -r -n \"FE,BE,TE\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"frontend\\start.bat\" \"backend\\start.bat\" \"testenv\\start.bat\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "NovaSagittarii",
