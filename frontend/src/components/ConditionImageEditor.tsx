@@ -3,9 +3,9 @@ import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
 
 import Button from './ui/Button';
+import ConditionOverlay from './ConditionOverlay';
 import Modal from './ui/Modal';
 import NumberInput from './ui/NumberInput';
-import Region from './ui/Region';
 import RegionEditor from './ui/RegionEditor';
 import Select from './ui/Select';
 
@@ -13,15 +13,6 @@ import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
 import { runtimeConditionQuery } from '../App.state';
 import useForceUpdate from './useForceUpdate';
-
-const RECT_DRAW_LIMIT = 300;
-
-enum MatchType {
-  PRIMARY = 0, // the highest scored match
-  SECONDARY = 1, // above threshold but not highest
-  BELOW_THRESHOLD = 2,
-  WEAK_PRIMARY = 3, // below threshold, but highest
-}
 
 /**
  * Appears as a modal.
@@ -91,44 +82,6 @@ export default function ConditionImageEditor() {
   const [preview, setPreview] = useState<
     Awaited<ReturnType<typeof runtimeConditionQuery>>
   >([]);
-  const [matchResults, setMatchResults] = useState<
-    {
-      rect: pb.Rect;
-      score: number;
-      matchType: MatchType;
-      firstInGroup: boolean;
-    }[]
-  >([]);
-  useEffect(() => {
-    if (condition) {
-      setMatchResults(
-        condition.regions
-          .flatMap(({ top, bottom, left, right }, rindex, a) =>
-            preview.flatMap((p) =>
-              p.matches.map(({ score, position }, index) => ({
-                rect: pb.Rect.create({
-                  top: position!.y + top - a[0].top,
-                  left: position!.x + left - a[0].left,
-                  bottom: position!.y + (bottom - a[0].top),
-                  right: position!.x + (right - a[0].left),
-                }),
-                score,
-                matchType:
-                  index === 0
-                    ? score >= condition.threshold
-                      ? MatchType.PRIMARY
-                      : MatchType.WEAK_PRIMARY
-                    : score >= condition.threshold
-                      ? MatchType.SECONDARY
-                      : MatchType.BELOW_THRESHOLD,
-                firstInGroup: rindex === 0,
-              })),
-            ),
-          )
-          .splice(0, RECT_DRAW_LIMIT), // limit to prevent lag
-      );
-    }
-  }, [preview, condition]);
 
   return (
     condition && (
@@ -167,7 +120,6 @@ export default function ConditionImageEditor() {
               property='padding'
               callback={forceUpdate}
             />
-            {matchResults.length}/{RECT_DRAW_LIMIT} drawn
           </div>
           <div className='flex'>
             <div className='flex justify-center w-full'>
@@ -218,30 +170,13 @@ export default function ConditionImageEditor() {
                     draggable={false}
                   />
                 ))}
-                {matchResults.map(
-                  ({ rect, score, matchType, firstInGroup }, index) => (
-                    <Region
-                      key={index}
-                      region={rect}
-                      width={width}
-                      height={height}
-                      color={
-                        [
-                          'outline-green-400/30',
-                          'outline-amber-300/20',
-                          'outline-red-300/15',
-                          'outline-green-100/20',
-                        ][matchType.valueOf()]
-                      }
-                    >
-                      <div
-                        className={`${firstInGroup || 'opacity-20'} ${matchType === MatchType.PRIMARY ? 'text-black/75' : 'text-black/20'}`}
-                      >
-                        {score.toFixed(5)}
-                      </div>
-                    </Region>
-                  ),
-                )}
+                <ConditionOverlay
+                  preview={preview}
+                  templateRegions={condition.regions}
+                  threshold={condition.threshold}
+                  width={width}
+                  height={height}
+                />
               </RegionEditor>
             </div>
           </div>
