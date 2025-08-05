@@ -10,6 +10,9 @@ import {
 } from './state';
 import { frameToObjectURL } from './client/encoder';
 
+/** callbacks for specific id's */
+const wsListeners: Record<number, (arg0: pb.Packet) => void> = {};
+
 export const ws = new WebSocket('ws://localhost:9000');
 ws.onopen = () => {
   console.log('ws open');
@@ -64,6 +67,11 @@ ws.onmessage = async (data) => {
       if (context.currentNode) c.currentNode = context.currentNode;
       c.currentEdge = context.currentEdge; // if null, no longer processing edge
       $runtimeContext.set(c);
+      break;
+    }
+    case 'sampleCondition': {
+      const cb = wsListeners[packet.id];
+      if (cb) cb(packet);
       break;
     }
     // TODO: setStack
@@ -137,4 +145,32 @@ export function runtimeQueueEdge(id: string) {
     },
   });
   ws.send(pb.Packet.encode(packet).finish());
+}
+
+/**
+ * Queries backend for candidate matches for a base condition. (budget RPC)
+ * @param condition what do u wanna query
+ */
+export async function runtimeConditionQuery(condition: pb.Routine_Condition) {
+  return new Promise<pb.ConditionProcessing_Frame[]>((resolve) => {
+    const id = Math.floor(Math.random() * -(1 << 31));
+    wsListeners[id] = (packet: pb.Packet) => {
+      if (packet.type?.$case === 'sampleCondition') {
+        resolve(packet.type.sampleCondition.frames);
+        delete wsListeners[id];
+      } else {
+        console.warn(`unexpected response for id ${id}`, packet);
+      }
+    };
+    const packet = pb.Packet.create({
+      id,
+      type: {
+        $case: 'sampleCondition',
+        sampleCondition: {
+          condition,
+        },
+      },
+    });
+    ws.send(pb.Packet.encode(packet).finish());
+  });
 }

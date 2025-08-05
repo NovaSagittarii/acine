@@ -4,27 +4,34 @@ package ac;
 
 import "frame.proto";
 import "input_event.proto";
+import "position.proto";
 import "routine.proto";
 import "runtime.proto";
 
 message Packet {
+  int32 id = 1;  // used to pair responses (budget rpc) if needed
   oneof type {
-    FrameOperation frame_operation = 1;  // various frame-related ops
-    ac.InputEvent input_event = 2;       // forwarding mouse up/down/move
-    Configuration configuration = 3;     // sync client with server
-    ac.Routine routine = 4;              // sync server routine with client
-    ac.Routine get_routine = 5;          // sync client routine with server
-    ac.RuntimeState set_curr = 6;        // sync client routine curr state/edge
-    ac.RuntimeState set_stack = 7;       // sync client routine return stack
-    ac.RuntimeState goto = 8;            // client-triggered navigation
-    ac.RuntimeState queue_edge = 9;      // client-triggered navigation
+    FrameOperation frame_operation = 2;  // various frame-related ops
+    ac.InputEvent input_event = 3;       // forwarding mouse up/down/move
+    Configuration configuration = 4;     // sync client with server
+    ac.Routine routine = 5;              // sync server routine with client
+    ac.Routine get_routine = 6;          // sync client routine with server
+    ac.RuntimeState set_curr = 7;        // sync client routine curr state/edge
+    ac.RuntimeState set_stack = 8;       // sync client routine return stack
+    ac.RuntimeState goto = 9;            // client-triggered navigation
+    ac.RuntimeState queue_edge = 10;     // client-triggered navigation
+    ConditionProcessing sample_condition = 11;  // request for processing (rpc)
   }
 }
 
 message FrameOperation {
   Operation type = 1;
-  Frame frame = 2;
-  repeated Frame frames = 3;  // frame/frames is mutually exclusive, based on op
+
+  ac.Frame frame = 2;
+  // mutually exclusive with frames; depends on operation
+  repeated ac.Frame frames = 3;
+  // mutually exclusive with frame; depends on operation
+
   enum Operation {
     OPERATION_UNSPECIFIED = 0;
     OPERATION_SAVE = 1;  // persist on backend (currently requires frame.data)
@@ -36,4 +43,17 @@ message FrameOperation {
 message Configuration {
   int32 width = 1;
   int32 height = 2;
+}
+
+message ConditionProcessing {
+  ac.Routine.Condition condition = 1;  // condition to process
+  repeated Frame frames = 2;           // results
+  message Frame {
+    ac.Frame frame = 1;  // which frame?
+    repeated Match matches = 2;
+  }
+  message Match {
+    ac.Point position = 2;  // top-left corner of the match
+    double score = 3;  // a normalized score in [-1.0, 1.0] (plz no nan/inf)
+  }
 }

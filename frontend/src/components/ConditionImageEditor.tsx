@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
+import * as pb from 'acine-proto-dist';
 
+import Button from './ui/Button';
 import Modal from './ui/Modal';
-import Select from './ui/Select';
-import { $frames, $routine, $sourceDimensions } from '@/state';
 import RegionEditor from './ui/RegionEditor';
+import Select from './ui/Select';
 
+import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
+import { runtimeConditionQuery } from '../App.state';
 
 /**
  * Appears as a modal.
@@ -60,6 +63,13 @@ export default function ConditionImageEditor() {
   //   }
   // }, [open]);
 
+  const [preview, setPreview] = useState<
+    Awaited<ReturnType<typeof runtimeConditionQuery>>
+  >([]);
+  useEffect(() => {
+    console.log('CURRPREVIEW', preview);
+  }, [preview]);
+
   return (
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
@@ -70,24 +80,93 @@ export default function ConditionImageEditor() {
             onChange={(s) => setSrc(frames[s])}
             autofocus
           />
-          <div className='flex justify-center w-full'>
-            <RegionEditor
-              composite
-              regions={condition.regions}
-              width={width}
-              height={height}
-              onChange={(r) => {
-                condition.regions = r;
-                $routine.set(routine);
-                console.log(routine);
+          <div className='flex'>
+            <Button
+              className='hover:bg-amber-100'
+              onClick={async () => {
+                condition.matchLimit = 4; // TODO: configurable
+                condition.threshold = 0.99;
+                const c = pb.Routine_Condition.create({
+                  condition: { $case: 'image', image: condition },
+                });
+                setPreview(await runtimeConditionQuery(c));
               }}
             >
-              <img
-                className='max-h-full pointer-events-none select-none'
-                src={src}
-                draggable={false}
-              />
-            </RegionEditor>
+              Query
+            </Button>
+          </div>
+          <div className='flex'>
+            <div className='flex justify-center w-full'>
+              <RegionEditor
+                composite
+                regions={condition.regions}
+                width={width}
+                height={height}
+                onChange={(r) => {
+                  condition.regions = r;
+                  $routine.set(routine);
+                }}
+              >
+                <img
+                  className='max-h-full pointer-events-none select-none'
+                  src={src}
+                  draggable={false}
+                />
+              </RegionEditor>
+            </div>
+            <div className='flex justify-center w-full'>
+              <RegionEditor
+                composite
+                regions={condition.allowRegions}
+                width={width}
+                height={height}
+                onChange={(r) => {
+                  condition.allowRegions = r;
+                  $routine.set(routine);
+                }}
+              >
+                {preview.map((p, index) => (
+                  <img
+                    className={
+                      'pointer-events-none select-none ' +
+                      (index && 'absolute left-0 top-0')
+                    }
+                    style={{ opacity: 1 / (index + 1) }}
+                    src={
+                      p.frame?.id &&
+                      frames[
+                        routine.frames.map((f) => f.id).indexOf(p.frame?.id)
+                      ]
+                    }
+                    draggable={false}
+                  />
+                ))}
+                <div className='absolute left-0 top-0 w-full h-full'>
+                  <RegionEditor
+                    composite
+                    regions={preview.flatMap((p) =>
+                      p.matches.map(({ position }) =>
+                        pb.Rect.create({
+                          top: position!.y,
+                          left: position!.x,
+                          bottom: position!.y + 15,
+                          right: position!.x + 25,
+                        }),
+                      ),
+                    )}
+                    width={width}
+                    height={height}
+                    onChange={() => {}}
+                  >
+                    <img
+                      className='pointer-events-none select-none opacity-0'
+                      src={src}
+                      draggable={false}
+                    />
+                  </RegionEditor>
+                </div>
+              </RegionEditor>
+            </div>
           </div>
         </div>
       </Modal>

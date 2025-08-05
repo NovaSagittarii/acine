@@ -6,6 +6,10 @@ Currently only contains time (sleep/now) functions.
 
 import asyncio
 import time
+from functools import lru_cache
+
+import cv2
+from acine.persist import resolve
 
 
 def now() -> int:
@@ -23,3 +27,12 @@ async def sleep(ms: int):
     `asyncio.sleep` (python in general) uses float seconds
     """
     await asyncio.sleep(ms / 1000)
+
+
+@lru_cache(maxsize=64, typed=True)
+def get_frame(frame_id: str) -> cv2.typing.MatLike:
+    """
+    Fetches the image data associated with a frame id. (has cache)
+    """
+    path = resolve("img", f"{frame_id}.png")  # probably in BGR
+    return cv2.imread(path)

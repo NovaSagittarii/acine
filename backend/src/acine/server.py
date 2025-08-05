@@ -1,10 +1,17 @@
 import asyncio
 import uuid
 
+from acine.runtime.util import get_frame
+
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
 from acine_proto_dist.input_event_pb2 import InputEvent
-from acine_proto_dist.packet_pb2 import Configuration, FrameOperation, Packet
+from acine_proto_dist.packet_pb2 import (
+    ConditionProcessing,
+    Configuration,
+    FrameOperation,
+    Packet,
+)
 from acine_proto_dist.position_pb2 import Point
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import RuntimeState
@@ -13,6 +20,7 @@ from autobahn.asyncio.websocket import WebSocketServerProtocol
 from .capture import GameCapture
 from .input_handler import InputHandler
 from .persist import fs_read, fs_write
+from .runtime.check_image import check_similarity
 from .runtime.runtime import IController, Runtime, cv2
 
 # from .classifier import predict
@@ -91,6 +99,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     await self.on_goto(packet)
                 case "queue_edge":
                     await self.on_queue_edge(packet)
+                case "sample_condition":
+                    await self.on_sample_condition(packet)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
@@ -199,6 +209,33 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
             self.current_task = asyncio.create_task(run_goto())
             await self.current_task
+
+    async def on_sample_condition(self, packet: Packet):
+        output = packet.sample_condition.frames
+        condition = packet.sample_condition.condition
+        condition_type = condition.WhichOneof("condition")
+        match condition_type:
+            case "image":
+                c = condition.image
+                ref = get_frame(c.frame_id)
+                for f in self.rt.routine.frames:
+                    img = get_frame(f.id)
+                    results = check_similarity(condition.image, ref, img)
+                    if not results:
+                        continue
+
+                    pb = ConditionProcessing.Frame(frame=f)
+                    for result in results:
+                        y, x = result.position
+                        pb.matches.append(
+                            ConditionProcessing.Match(
+                                position=Point(x=x, y=y), score=result.score
+                            )
+                        )
+                    output.append(pb)
+            case _:
+                raise NotImplementedError(f"No implementation for {condition_type}")
+        self.sendMessage(packet.SerializeToString(), isBinary=True)
 
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {}".format(reason))

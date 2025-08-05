@@ -38,6 +38,10 @@ def check_similarity(
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
     TODO: optimizations for single-region conditions
+
+    TODO: configurable pattern
+    TM_CCOEFF is really bad on small gray squares for some reason
+    TM_CCORR is less broken
     """
     if not condition.regions or condition.match_limit <= 0:
         return []
@@ -59,7 +63,7 @@ def check_similarity(
     ref_img = ref_img[ylo:yhi, xlo:xhi]
     mask = mask[ylo:yhi, xlo:xhi]
 
-    res = cv2.matchTemplate(img, ref_img, cv2.TM_CCOEFF_NORMED, mask=mask)
+    res = cv2.matchTemplate(img, ref_img, cv2.TM_CCORR_NORMED, mask=mask)
     res[np.isnan(res)] = 0
     res[np.isinf(res)] = 0
     # nan/inf bugged for matchTemplate + mask
@@ -74,7 +78,7 @@ def check_similarity(
     pn, pm = max(0, tn + condition.padding), max(0, tm + condition.padding)
     for coord, score in pts:
         if score < condition.threshold:
-            continue
+            break
 
         i, j = coord
         if vis[i][j]:

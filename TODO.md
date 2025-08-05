@@ -17,13 +17,13 @@ budget issue tracker
   - [ ] improve frame select (v3: visual selector)
   - [ ] implement frame grouping (states!!)
   - [ ] implement threshold matching
-  - [ ] query backend for which frames match a condition
+  - [x] query backend for which frames match a condition
 - v0.1.2 Runtime Frontend
   - [x] display runtime state (needed for debugging runtime)
   - [x] goto from frontend
   - [x] queue_edge from frontend
 - v0.1.3 Automation Features (dynamic)
-  - [ ] implement template match
+  - [x] implement template match
   - [ ] interrupt during postcondition (after action)
   - [ ] implement replay offset (on dynamic check)
   - [ ] implement text match
