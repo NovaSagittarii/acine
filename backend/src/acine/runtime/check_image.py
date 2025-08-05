@@ -35,7 +35,6 @@ def check_similarity(
 ) -> list[SimilarityResult]:
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
-    TODO: optimizations for single-region conditions
 
     TODO: configurable pattern
     TM_CCOEFF is really bad on small gray squares for some reason
@@ -45,11 +44,16 @@ def check_similarity(
         return []
     if not condition.allow_regions:
         condition.allow_regions.extend(condition.regions)
+
+    rxlo, rxhi, rylo, ryhi = img.shape[1], 0, img.shape[0], 0
     allowed = np.random.randint(0, 255, size=img.shape, dtype=img.dtype)
     for region in condition.allow_regions:
         x0, x1, y0, y1 = region.left, region.right + 1, region.top, region.bottom + 1
         allowed[y0:y1, x0:x1] = img[y0:y1, x0:x1]
+        rxlo, rxhi = min(rxlo, x0), max(rxhi, x1)
+        rylo, ryhi = min(rylo, y0), max(ryhi, y1)
     img = allowed
+    img = img[rylo:ryhi, rxlo:rxhi]
 
     mask = np.zeros(ref_img.shape, dtype=ref_img.dtype)
     xlo, xhi, ylo, yhi = mask.shape[1], 0, mask.shape[0], 0
@@ -85,7 +89,7 @@ def check_similarity(
         li, ri = max(0, i - pn), min(n, i + pn)
         lj, rj = max(0, j - pm), min(m, j + pm)
         vis[li : ri + 1, lj : rj + 1] = 1
-        result.append(SimilarityResult(score, (i, j)))
+        result.append(SimilarityResult(score, (i + rylo, j + rxlo)))
 
         if len(result) >= condition.match_limit:
             break
