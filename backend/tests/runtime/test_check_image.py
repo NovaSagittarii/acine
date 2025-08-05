@@ -20,7 +20,7 @@ triangle_img = cv2.imread(os.path.join(dirname, "triangle.png"))
 def condition1(mocker: MockerFixture) -> Routine.Condition.Image:
     """base condition (used for testing)"""
     condition = Routine.Condition.Image(
-        threshold=0.7,
+        threshold=0.999,
         padding=45,
         regions=[Rect(left=0, right=49, top=0, bottom=49)],
         allow_regions=[Rect(left=0, right=399, top=0, bottom=399)],
@@ -32,7 +32,7 @@ def condition1(mocker: MockerFixture) -> Routine.Condition.Image:
 class TestCheckSimilarity:
     def test_fixture(self, condition1: Routine.Condition.Image):
         """Just make sure condition1 initialized correctly."""
-        assert condition1.threshold == 0.7
+        assert condition1.threshold == 0.999
         assert condition1.padding == 45
 
     def test_compare_identity_exact(self, condition1: Routine.Condition.Image):
