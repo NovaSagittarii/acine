@@ -1,7 +1,7 @@
 import { Rect } from 'acine-proto-dist';
 import { ReactNode, useState } from 'react';
 
-import { toPercentage } from '../../client/util';
+import { toOutCoordinates, toPercentage } from '../../client/util';
 
 type MouseEventCallback = (
   ev: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -17,37 +17,6 @@ interface MouseRegionProps {
   onMouseDown?: MouseEventCallback;
   onMouseUp?: MouseEventCallback;
   onDragRegion?: (region: Rect) => void;
-}
-
-/**
- * Maps a MouseEvent relative location within a target (such as a div)
- * to another rectangular region.
- * @param outWidth
- * @param outHeight
- * @param ev
- * @returns
- */
-export function toOutCoordinates(
-  outWidth: number,
-  outHeight: number,
-  ev: React.MouseEvent,
-) {
-  const { left, top, width, height } = (
-    ev.target as HTMLDivElement
-  ).getBoundingClientRect();
-  const { pageX, pageY } = ev;
-
-  // relative to target
-  const rx = pageX - left;
-  const ry = pageY - top;
-
-  // console.log(rx, ry, width, height, outWidth, outHeight);
-
-  // mapped to output
-  const x = Math.floor((rx / width) * outWidth);
-  const y = Math.floor((ry / height) * outHeight);
-
-  return { x, y };
 }
 
 /**
@@ -68,10 +37,10 @@ function MouseRegion({
   onMouseUp = (_) => {},
   onDragRegion = () => {},
 }: MouseRegionProps) {
-  let [xy1, setMouseDownPosition] = useState<ReturnType<
+  const [xy1, setMouseDownPosition] = useState<ReturnType<
     typeof toOutCoordinates
   > | null>(null);
-  let [xy0, setMouseCurrentPosition] = useState<ReturnType<
+  const [xy0, setMouseCurrentPosition] = useState<ReturnType<
     typeof toOutCoordinates
   > | null>(null);
 

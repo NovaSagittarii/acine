@@ -26,7 +26,7 @@ function getRb64MiB() {
 }
 
 export function saveRoutine() {
-  let o = Routine.fromJSON(Routine.toJSON($routine.get()));
+  const o = Routine.fromJSON(Routine.toJSON($routine.get()));
 
   // scrub frame.data (its too big)
   o.frames.map((f) => (f.data = new Uint8Array(0)));
@@ -42,7 +42,7 @@ export function saveRoutine() {
  * @param ws websocket to backend
  */
 export function loadRoutine(ws: WebSocket) {
-  let r = Routine.fromJSON(JSON.parse($routineBase64.get()!));
+  const r = Routine.fromJSON(JSON.parse($routineBase64.get()!));
 
   // TODO: a part of the stuff that should be moved
   // into the client connection class

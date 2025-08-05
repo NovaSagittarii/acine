@@ -78,6 +78,7 @@ class InputStream {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace InputStream {
   /**
    * Various input event stream post-processing options.

@@ -37,7 +37,7 @@ export default function NumberInput<T, K extends keyof T>({
         <EditableText
           className={'min-w-4 w-fit ' + className}
           onChange={(s) => {
-            let x = +s;
+            const x = +s;
             if (!isNaN(x)) {
               (object[property] as number) = x;
             }
@@ -52,7 +52,7 @@ export default function NumberInput<T, K extends keyof T>({
       <EditableText
         className={className}
         onChange={(s) => {
-          let x = +s;
+          const x = +s;
           if (!isNaN(x)) {
             (object[property] as number) = x;
           }

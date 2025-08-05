@@ -27,11 +27,11 @@ export default function SubroutineEditor({ action }: SubroutineEditorProps) {
         (n) => n.type & Routine_Node_NodeType.NODE_TYPE_INIT,
       ),
     );
-  }, []);
+  }, [routine.nodes]);
   return (
     <Select
       value={options.findIndex((n) => n.id === action.subroutine)}
-      values={options.map((n) => [n.name, n.id] as [string, number])}
+      values={options.map((n) => [n.name, n.id] as [string, string])}
       onChange={(id) => (action.subroutine = id)}
     />
   );

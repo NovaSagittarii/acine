@@ -1,8 +1,9 @@
 import { Rect } from 'acine-proto-dist';
 import useForceUpdate from '../useForceUpdate';
-import MouseRegion, { toOutCoordinates } from './MouseRegion';
-import { constrain, toPercentage } from '../../client/util';
-import { useEffect, useState } from 'react';
+import MouseRegion from './MouseRegion';
+import { toOutCoordinates as _t } from 'src/client/util';
+import { constrain as _constrain, toPercentage } from '../../client/util';
+import { useEffect as _useEffect, useState } from 'react';
 
 interface RegionEditorProps {
   width: number;

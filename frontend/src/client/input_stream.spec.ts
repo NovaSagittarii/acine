@@ -9,7 +9,7 @@ type P = NonNullable<InputEvent['type']>['$case'];
 
 let t = 0;
 function getInputEvent(s: P = 'move') {
-  let e = InputEvent.create({
+  const e = InputEvent.create({
     timestamp: t++,
   });
   switch (s) {

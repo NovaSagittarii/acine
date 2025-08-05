@@ -31,7 +31,7 @@ export default function Select<T>({
   const ref = useRef<HTMLSelectElement>(null);
   useEffect(() => {
     if (autofocus && ref.current) ref.current.focus();
-  }, [ref]);
+  }, [ref, autofocus]);
   return (
     <select
       className={

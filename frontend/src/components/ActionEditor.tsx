@@ -35,7 +35,7 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
             !edge.action
               ? 0
               : ACTION_TYPES_DISPLAY.map((s) => s[0]).indexOf(
-                  edge.action?.$case!,
+                  edge.action?.$case ?? '', // surely $case is never empty?
                 )
           }
           values={ACTION_TYPES_DISPLAY}

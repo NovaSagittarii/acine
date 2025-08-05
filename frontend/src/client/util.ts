@@ -26,3 +26,33 @@ export function pluralize(
 ) {
   return `${amt} ${amt === 1 ? singular : plural}`;
 }
+
+/**
+ * Maps a MouseEvent relative location within a target (such as a div)
+ * to another rectangular region.
+ * @param outWidth
+ * @param outHeight
+ * @param ev
+ * @returns
+ */
+export function toOutCoordinates(
+  outWidth: number,
+  outHeight: number,
+  ev: React.MouseEvent,
+) {
+  const { left, top, width, height } = (
+    ev.target as HTMLDivElement
+  ).getBoundingClientRect();
+  const { pageX, pageY } = ev;
+
+  // relative to target
+  const rx = pageX - left;
+  const ry = pageY - top;
+
+  // console.log(rx, ry, width, height, outWidth, outHeight);
+  // mapped to output
+  const x = Math.floor((rx / width) * outWidth);
+  const y = Math.floor((ry / height) * outHeight);
+
+  return { x, y };
+}

@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as pb from 'acine-proto-dist';
 
-import { toOutCoordinates } from './ui/MouseRegion';
 import { handleInputEvent } from '../client/input_stream';
 import InputSource from '../client/input_source';
-import { toPercentage } from '../client/util';
+import { toOutCoordinates, toPercentage } from '../client/util';
 
 interface WindowProps {
   websocket: WebSocket; // forward events towards here
@@ -35,34 +34,38 @@ export default function Window({
    * 1. update mouseX/mouseY/mouseDown (for display)
    * 2. send to websocket
    */
-  const processEvent = (event: pb.InputEvent) => {
-    // 1. update display values
-    switch (event.type?.$case) {
-      case 'move':
-        const { x, y } = event.type.move;
-        setMouseX(x);
-        setMouseY(y);
-        break;
-      case 'mouseDown':
-        setMouseDown(true);
-        break;
-      case 'mouseUp':
-        setMouseDown(false);
-        break;
-    }
+  const processEvent = useCallback(
+    (event: pb.InputEvent) => {
+      // 1. update display values
+      switch (event.type?.$case) {
+        case 'move': {
+          const { x, y } = event.type.move;
+          setMouseX(x);
+          setMouseY(y);
+          break;
+        }
+        case 'mouseDown':
+          setMouseDown(true);
+          break;
+        case 'mouseUp':
+          setMouseDown(false);
+          break;
+      }
 
-    // 2. prepare and send to websocket
-    const pkt = pb.Packet.create({
-      type: {
-        $case: 'inputEvent',
-        inputEvent: event,
-      },
-    });
-    ws.send(pb.Packet.encode(pkt).finish());
-  };
+      // 2. prepare and send to websocket
+      const pkt = pb.Packet.create({
+        type: {
+          $case: 'inputEvent',
+          inputEvent: event,
+        },
+      });
+      ws.send(pb.Packet.encode(pkt).finish());
+    },
+    [ws],
+  );
   useEffect(() => {
     replaySource.setCallback(processEvent);
-  }, []);
+  }, [replaySource, processEvent]);
 
   return (
     <div

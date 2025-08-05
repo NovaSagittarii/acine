@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { ws, getFrame, persistFrame } from './App.state';
 
@@ -39,53 +39,56 @@ let saveCurrentFrame = () => -1;
 function App() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [dState, setDState] = useState(''); // debug state
-  let dSend = 0;
+  const [dSend, setDSend] = useState(0);
   const [dRecv, setDRecv] = useState(0);
 
-  const listen = async (ev: MessageEvent) => {
-    // todo: turn this into a EventEmitter
-    const { data }: { data: Blob } = ev;
+  const listen = useCallback(
+    async (ev: MessageEvent) => {
+      // todo: turn this into a EventEmitter
+      const { data }: { data: Blob } = ev;
 
-    const packet = pb.Packet.decode(new Uint8Array(await data.arrayBuffer()));
-    if (packet.type?.$case === 'frameOperation') {
-      const frameOperation = packet.type.frameOperation;
-      if (frameOperation.type === pb.FrameOperation_Operation.OPERATION_GET) {
-        const { frame } = frameOperation;
-        if (!frame) return;
-        const { data, state } = frame;
-        setDState(state);
-        setDRecv(Date.now() - dSend);
-        const blob = new Blob([data!]);
-        const imageUrl = URL.createObjectURL(blob);
-        saveCurrentFrame = () => {
-          const persistentURL = URL.createObjectURL(blob);
-          let newId = $frames.get().length;
-          $frames.set([...$frames.get(), persistentURL]);
-          $routine.get().frames.push(pb.Frame.create({ id: frame.id }));
-          persistFrame(frame);
-          return newId;
-        };
-        setImageUrl((prev) => {
-          // revoke old url if it exists
-          if (prev) URL.revokeObjectURL(prev);
-          return imageUrl;
-        });
-        // console.log(blob, imageUrl);
+      const packet = pb.Packet.decode(new Uint8Array(await data.arrayBuffer()));
+      if (packet.type?.$case === 'frameOperation') {
+        const frameOperation = packet.type.frameOperation;
+        if (frameOperation.type === pb.FrameOperation_Operation.OPERATION_GET) {
+          const { frame } = frameOperation;
+          if (!frame) return;
+          const { data, state } = frame;
+          setDState(state);
+          setDRecv(Date.now() - dSend);
+          const blob = new Blob([data!]);
+          const imageUrl = URL.createObjectURL(blob);
+          saveCurrentFrame = () => {
+            const persistentURL = URL.createObjectURL(blob);
+            const newId = $frames.get().length;
+            $frames.set([...$frames.get(), persistentURL]);
+            $routine.get().frames.push(pb.Frame.create({ id: frame.id }));
+            persistFrame(frame);
+            return newId;
+          };
+          setImageUrl((prev) => {
+            // revoke old url if it exists
+            if (prev) URL.revokeObjectURL(prev);
+            return imageUrl;
+          });
+          // console.log(blob, imageUrl);
+        }
       }
-    }
-  };
+    },
+    [dSend],
+  );
 
   useEffect(() => {
     ws.addEventListener('message', listen);
     return () => {
       ws.removeEventListener('message', listen);
     };
-  }, []);
+  }, [listen]);
 
   useEffect(() => {
     const int = setInterval(() => {
       getFrame();
-      dSend = Date.now();
+      setDSend(Date.now());
     }, 250);
     return () => {
       clearInterval(int);

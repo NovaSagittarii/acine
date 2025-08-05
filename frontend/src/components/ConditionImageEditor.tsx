@@ -54,7 +54,7 @@ export default function ConditionImageEditor() {
       }
       if (changed) forceUpdate();
     }
-  }, [condition]);
+  }, [condition, forceUpdate, frames, routine.frames]);
 
   const [imageChoices, setImageChoices] = useState<[string, number][]>([]);
   useEffect(() => {
@@ -69,7 +69,7 @@ export default function ConditionImageEditor() {
     const i = frames.indexOf(src);
     // console.log('sync image', src, 'idx=', i);
     if (condition) condition.frameId = routine.frames[i].id;
-  }, [src, open]);
+  }, [src, open, frames, condition, routine.frames]);
 
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
@@ -109,7 +109,7 @@ export default function ConditionImageEditor() {
           .splice(0, RECT_DRAW_LIMIT), // limit to prevent lag
       );
     }
-  }, [preview]);
+  }, [preview, condition]);
 
   return (
     condition && (
