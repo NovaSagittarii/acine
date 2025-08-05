@@ -16,7 +16,7 @@ budget issue tracker
 - Verification Features (design not ready)
   - [ ] improve frame select (v3: visual selector)
   - [ ] implement frame grouping (states!!)
-  - [ ] implement threshold matching
+  - [x] implement threshold matching
   - [x] query backend for which frames match a condition
 - v0.1.2 Runtime Frontend
   - [x] display runtime state (needed for debugging runtime)

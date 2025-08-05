@@ -217,10 +217,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
         match condition_type:
             case "image":
                 c = condition.image
+                c.threshold = 0.4  # let clientside can filter
                 ref = get_frame(c.frame_id)
                 for f in self.rt.routine.frames:
                     img = get_frame(f.id)
-                    results = check_similarity(condition.image, ref, img)
+                    results = check_similarity(c, ref, img)
                     if not results:
                         continue
 

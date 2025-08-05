@@ -14,7 +14,14 @@ import { $condition } from './ConditionImageEditor.state';
 import { runtimeConditionQuery } from '../App.state';
 import useForceUpdate from './useForceUpdate';
 
-const RECT_DRAW_LIMIT = 100;
+const RECT_DRAW_LIMIT = 300;
+
+enum MatchType {
+  PRIMARY = 0, // the highest scored match
+  SECONDARY = 1, // above threshold but not highest
+  BELOW_THRESHOLD = 2,
+  WEAK_PRIMARY = 3, // below threshold, but highest
+}
 
 /**
  * Appears as a modal.
@@ -85,7 +92,12 @@ export default function ConditionImageEditor() {
     Awaited<ReturnType<typeof runtimeConditionQuery>>
   >([]);
   const [matchResults, setMatchResults] = useState<
-    { rect: pb.Rect; score: number; main: boolean; firstInGroup: boolean }[]
+    {
+      rect: pb.Rect;
+      score: number;
+      matchType: MatchType;
+      firstInGroup: boolean;
+    }[]
   >([]);
   useEffect(() => {
     if (condition) {
@@ -101,7 +113,14 @@ export default function ConditionImageEditor() {
                   right: position!.x + (right - a[0].left),
                 }),
                 score,
-                main: index === 0,
+                matchType:
+                  index === 0
+                    ? score >= condition.threshold
+                      ? MatchType.PRIMARY
+                      : MatchType.WEAK_PRIMARY
+                    : score >= condition.threshold
+                      ? MatchType.SECONDARY
+                      : MatchType.BELOW_THRESHOLD,
                 firstInGroup: rindex === 0,
               })),
             ),
@@ -200,17 +219,26 @@ export default function ConditionImageEditor() {
                   />
                 ))}
                 {matchResults.map(
-                  ({ rect, score, main, firstInGroup }, index) => (
+                  ({ rect, score, matchType, firstInGroup }, index) => (
                     <Region
                       key={index}
                       region={rect}
                       width={width}
                       height={height}
                       color={
-                        main ? 'outline-green-300/30' : 'outline-amber-300/10'
+                        [
+                          'outline-green-400/30',
+                          'outline-amber-300/20',
+                          'outline-red-300/15',
+                          'outline-green-100/20',
+                        ][matchType.valueOf()]
                       }
                     >
-                      {firstInGroup ? score.toFixed(4) : undefined}
+                      <div
+                        className={`${firstInGroup || 'opacity-20'} ${matchType === MatchType.PRIMARY ? 'text-black/75' : 'text-black/20'}`}
+                      >
+                        {score.toFixed(5)}
+                      </div>
                     </Region>
                   ),
                 )}

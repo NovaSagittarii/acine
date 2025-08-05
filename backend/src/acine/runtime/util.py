@@ -29,7 +29,7 @@ async def sleep(ms: int):
     await asyncio.sleep(ms / 1000)
 
 
-@lru_cache(maxsize=64, typed=True)
+@lru_cache(maxsize=64)
 def get_frame(frame_id: str) -> cv2.typing.MatLike:
     """
     Fetches the image data associated with a frame id. (has cache)
