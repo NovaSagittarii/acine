@@ -28,6 +28,7 @@ export default function EditableRoutineProperty<T, K extends keyof T>({
   className = '',
 }: EditableRoutinePropertyProps<T, K>) {
   if (object && property && typeof object[property] !== 'string') {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw {
       error: 'T[K] must be string',
       T: object,

@@ -42,7 +42,7 @@ export function saveRoutine() {
  * @param ws websocket to backend
  */
 export function loadRoutine(ws: WebSocket) {
-  const r = Routine.fromJSON(JSON.parse($routineBase64.get()!));
+  const r = Routine.fromJSON(JSON.parse($routineBase64.get()));
 
   // TODO: a part of the stuff that should be moved
   // into the client connection class

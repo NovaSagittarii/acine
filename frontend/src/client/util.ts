@@ -10,7 +10,7 @@ export function toPercentage(x: number) {
 }
 
 export function constrain(x: number, lo: number, hi: number) {
-  if (lo > hi) throw `expect lo=${lo} <= hi=${hi}`;
+  if (lo > hi) throw new Error(`expect lo=${lo} <= hi=${hi}`);
   return Math.min(Math.max(x, lo), hi);
 }
 

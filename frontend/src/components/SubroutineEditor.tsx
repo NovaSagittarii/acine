@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import Select from './ui/Select';
 
 interface SubroutineEditorProps {
-  action: Routine_Edge['action'] & { $case: 'subroutine' };
+  action: NonNullable<Routine_Edge['action']>;
 }
 
 /**
@@ -18,7 +18,7 @@ interface SubroutineEditorProps {
 export default function SubroutineEditor({ action }: SubroutineEditorProps) {
   const routine = useStore($routine);
   if (action.$case !== 'subroutine') {
-    throw `invalid action type, got ${action.$case}`;
+    throw new Error(`invalid action type, got ${action.$case}`);
   }
   const [options, setOptions] = useState<Routine_Node[]>([]);
   useEffect(() => {

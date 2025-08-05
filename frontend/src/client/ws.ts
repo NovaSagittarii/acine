@@ -44,7 +44,7 @@ class ServerWS {
         }
       }
     };
-    persist();
+    void persist();
     return stop;
   }
 }

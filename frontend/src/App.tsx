@@ -43,7 +43,7 @@ function App() {
   const [dRecv, setDRecv] = useState(0);
 
   const listen = useCallback(
-    async (ev: MessageEvent) => {
+    async (ev: MessageEvent<Blob>) => {
       // todo: turn this into a EventEmitter
       const { data }: { data: Blob } = ev;
 
@@ -56,7 +56,7 @@ function App() {
           const { data, state } = frame;
           setDState(state);
           setDRecv(Date.now() - dSend);
-          const blob = new Blob([data!]);
+          const blob = new Blob([data]);
           const imageUrl = URL.createObjectURL(blob);
           saveCurrentFrame = () => {
             const persistentURL = URL.createObjectURL(blob);
@@ -79,9 +79,10 @@ function App() {
   );
 
   useEffect(() => {
-    ws.addEventListener('message', listen);
+    const callback = (e: MessageEvent<Blob>) => void listen(e);
+    ws.addEventListener('message', callback);
     return () => {
-      ws.removeEventListener('message', listen);
+      ws.removeEventListener('message', callback);
     };
   }, [listen]);
 
@@ -141,7 +142,7 @@ function App() {
               <div
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`hover:bg-amber-100 ${activeTab === index && 'font-bold'}`}
+                className={`hover:bg-amber-100 ${activeTab.valueOf() === index && 'font-bold'}`}
               >
                 {['states', 'nodes', 'graph'][index]}
               </div>

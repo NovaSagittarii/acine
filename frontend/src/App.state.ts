@@ -31,7 +31,7 @@ ws.onopen = () => {
   }
 };
 ws.onclose = () => console.log('ws close');
-ws.onmessage = async (data) => {
+ws.onmessage = async (data: MessageEvent<Blob>) => {
   const packet = pb.Packet.decode(
     new Uint8Array(await data.data.arrayBuffer()),
   );

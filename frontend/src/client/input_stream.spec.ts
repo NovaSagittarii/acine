@@ -84,7 +84,7 @@ test('2 listeners with partial overlap', async () => {
   const f = open();
   for (let i = 0; i < 3; ++i) handleEvent(a[i]);
   const g = open();
-  runInBackground();
+  void runInBackground();
   for (let i = 3; i < 7; ++i) handleEvent(a[i]);
   f.close();
   for (let i = 7; i < 9; ++i) handleEvent(a[i]);

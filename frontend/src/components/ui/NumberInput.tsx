@@ -22,6 +22,7 @@ export default function NumberInput<T, K extends keyof T>({
   label = property as string,
 }: NumberInputProps<T, K>) {
   if (object && property && typeof object[property] !== 'number') {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw {
       error: 'T[K] must be number',
       T: object,
