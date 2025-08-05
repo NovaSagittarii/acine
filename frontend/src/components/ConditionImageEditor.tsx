@@ -187,6 +187,7 @@ export default function ConditionImageEditor() {
                 />
                 {preview.map((p, index) => (
                   <img
+                    key={index}
                     className='pointer-events-none select-none absolute left-0 top-0'
                     style={{ opacity: 1 / (index + 1) }}
                     src={
