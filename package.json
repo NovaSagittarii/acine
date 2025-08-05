@@ -6,7 +6,7 @@
     "build": "cd ./proto && npm run build",
     "dev": "concurrently --kill-others -n \"FE,BE,TE,+B\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold,bgMagenta\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:testenv\" \"npm run dev:backend:pytest\"",
     "dev:backend": "cd backend && call .\\.venv\\Scripts\\activate.bat && python -u main.py",
-    "dev:backend:pytest": "cd backend && call .\\.venv\\Scripts\\activate.bat && ptw --now --ignore-patterns \".venv\" .",
+    "dev:backend:pytest": "cd backend && call .\\.venv\\Scripts\\activate.bat && ptw --ignore-patterns \".venv\" .",
     "dev:frontend": "cd frontend && npm run dev:nostdin",
     "dev:testenv": "cd testenv && python main.py",
     "test": "echo \"Error: no test specified\" && exit 1"
