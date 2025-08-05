@@ -60,6 +60,16 @@ class TestCheckSimilarity:
         assert SimilarityResult(approx(1.0), (0, 0)) in a
         assert SimilarityResult(approx(1.0), (100, 100)) in a
 
+    def test_compare_identity_restrict2(self, condition1: Routine.Condition.Image):
+        """Ensure comparsion works on identical inputs with allowed_regions."""
+        del condition1.allow_regions[:]
+        condition1.allow_regions.append(Rect(top=200, left=0, right=399, bottom=399))
+        a = check_similarity(condition1, triangle_img, triangle_img)
+
+        assert len(a) == 2, "Expect 2 after cropping top half."
+        assert SimilarityResult(approx(1.0), (200, 200)) in a
+        assert SimilarityResult(approx(1.0), (300, 300)) in a
+
     def test_compare_identity_none(self, condition1: Routine.Condition.Image):
         """Shouldn't break when there are no regions, just empty output."""
         del condition1.regions[:]
