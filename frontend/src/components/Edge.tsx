@@ -12,6 +12,7 @@ import { $routine } from '@/state';
 import Select from './ui/Select';
 import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
+import NumberInput from './ui/NumberInput';
 
 const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],

@@ -4,6 +4,7 @@ import * as pb from 'acine-proto-dist';
 
 import Button from './ui/Button';
 import Modal from './ui/Modal';
+import NumberInput from './ui/NumberInput';
 import Region from './ui/Region';
 import RegionEditor from './ui/RegionEditor';
 import Select from './ui/Select';
@@ -11,7 +12,9 @@ import Select from './ui/Select';
 import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
 import { runtimeConditionQuery } from '../App.state';
-import Region from './ui/Region';
+import useForceUpdate from './useForceUpdate';
+
+const RECT_DRAW_LIMIT = 100;
 
 /**
  * Appears as a modal.
@@ -21,6 +24,7 @@ export default function ConditionImageEditor() {
   const frames = useStore($frames);
   const [width, height] = useStore($sourceDimensions);
   const condition = useStore($condition);
+  const forceUpdate = useForceUpdate();
 
   const [open, setOpen] = useState(false);
   const close = () => {
@@ -37,6 +41,18 @@ export default function ConditionImageEditor() {
         setSrc(frames[routine.frames.map((f) => f.id).indexOf(frameId)]);
         // console.log("with condition, call set src", condition);
       }
+
+      // initialize to reasonable defaults
+      let changed = false;
+      if (!condition.threshold) {
+        condition.threshold = 0.99;
+        changed = true;
+      }
+      if (!condition.matchLimit) {
+        condition.matchLimit = 3;
+        changed = true;
+      }
+      if (changed) forceUpdate();
     }
   }, [condition]);
 
@@ -74,21 +90,23 @@ export default function ConditionImageEditor() {
   useEffect(() => {
     if (condition) {
       setMatchResults(
-        condition.regions.flatMap(({ top, bottom, left, right }, rindex, a) =>
-          preview.flatMap((p) =>
-            p.matches.map(({ score, position }, index) => ({
-              rect: pb.Rect.create({
-                top: position!.y + top - a[0].top,
-                left: position!.x + left - a[0].left,
-                bottom: position!.y + (bottom - a[0].top),
-                right: position!.x + (right - a[0].left),
-              }),
-              score,
-              main: index === 0,
-              firstInGroup: rindex === 0,
-            })),
-          ),
-        ),
+        condition.regions
+          .flatMap(({ top, bottom, left, right }, rindex, a) =>
+            preview.flatMap((p) =>
+              p.matches.map(({ score, position }, index) => ({
+                rect: pb.Rect.create({
+                  top: position!.y + top - a[0].top,
+                  left: position!.x + left - a[0].left,
+                  bottom: position!.y + (bottom - a[0].top),
+                  right: position!.x + (right - a[0].left),
+                }),
+                score,
+                main: index === 0,
+                firstInGroup: rindex === 0,
+              })),
+            ),
+          )
+          .splice(0, RECT_DRAW_LIMIT), // limit to prevent lag
       );
     }
   }, [preview]);
@@ -103,12 +121,10 @@ export default function ConditionImageEditor() {
             onChange={(s) => setSrc(frames[s])}
             autofocus
           />
-          <div className='flex'>
+          <div className='flex items-center gap-4'>
             <Button
               className='hover:bg-amber-100'
               onClick={async () => {
-                condition.matchLimit = 4; // TODO: configurable
-                condition.threshold = 0.99;
                 const c = pb.Routine_Condition.create({
                   condition: { $case: 'image', image: condition },
                 });
@@ -117,6 +133,22 @@ export default function ConditionImageEditor() {
             >
               Query
             </Button>
+            <NumberInput
+              object={condition}
+              property='threshold'
+              callback={forceUpdate}
+            />
+            <NumberInput
+              object={condition}
+              property='matchLimit'
+              callback={forceUpdate}
+            />
+            <NumberInput
+              object={condition}
+              property='padding'
+              callback={forceUpdate}
+            />
+            {matchResults.length}/{RECT_DRAW_LIMIT} drawn
           </div>
           <div className='flex'>
             <div className='flex justify-center w-full'>

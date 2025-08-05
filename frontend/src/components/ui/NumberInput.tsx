@@ -19,7 +19,7 @@ export default function NumberInput<T, K extends keyof T>({
   callback,
   format = (x) => x.toString(),
   className = '',
-  label = '',
+  label = property as string,
 }: NumberInputProps<T, K>) {
   if (object && property && typeof object[property] !== 'number') {
     throw {
