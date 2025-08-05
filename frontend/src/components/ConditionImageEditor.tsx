@@ -4,12 +4,14 @@ import * as pb from 'acine-proto-dist';
 
 import Button from './ui/Button';
 import Modal from './ui/Modal';
+import Region from './ui/Region';
 import RegionEditor from './ui/RegionEditor';
 import Select from './ui/Select';
 
 import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
 import { runtimeConditionQuery } from '../App.state';
+import Region from './ui/Region';
 
 /**
  * Appears as a modal.
@@ -66,8 +68,29 @@ export default function ConditionImageEditor() {
   const [preview, setPreview] = useState<
     Awaited<ReturnType<typeof runtimeConditionQuery>>
   >([]);
+  const [matchResults, setMatchResults] = useState<
+    { rect: pb.Rect; score: number; main: boolean; firstInGroup: boolean }[]
+  >([]);
   useEffect(() => {
-    console.log('CURRPREVIEW', preview);
+    if (condition) {
+      setMatchResults(
+        condition.regions.flatMap(({ top, bottom, left, right }, rindex, a) =>
+          preview.flatMap((p) =>
+            p.matches.map(({ score, position }, index) => ({
+              rect: pb.Rect.create({
+                top: position!.y + top - a[0].top,
+                left: position!.x + left - a[0].left,
+                bottom: position!.y + (bottom - a[0].top),
+                right: position!.x + (right - a[0].left),
+              }),
+              score,
+              main: index === 0,
+              firstInGroup: rindex === 0,
+            })),
+          ),
+        ),
+      );
+    }
   }, [preview]);
 
   return (
@@ -125,12 +148,14 @@ export default function ConditionImageEditor() {
                   $routine.set(routine);
                 }}
               >
+                <img
+                  className='pointer-events-none select-none opacity-0'
+                  src={src}
+                  draggable={false}
+                />
                 {preview.map((p, index) => (
                   <img
-                    className={
-                      'pointer-events-none select-none ' +
-                      (index && 'absolute left-0 top-0')
-                    }
+                    className='pointer-events-none select-none absolute left-0 top-0'
                     style={{ opacity: 1 / (index + 1) }}
                     src={
                       p.frame?.id &&
@@ -141,30 +166,21 @@ export default function ConditionImageEditor() {
                     draggable={false}
                   />
                 ))}
-                <div className='absolute left-0 top-0 w-full h-full'>
-                  <RegionEditor
-                    composite
-                    regions={preview.flatMap((p) =>
-                      p.matches.map(({ position }) =>
-                        pb.Rect.create({
-                          top: position!.y,
-                          left: position!.x,
-                          bottom: position!.y + 15,
-                          right: position!.x + 25,
-                        }),
-                      ),
-                    )}
-                    width={width}
-                    height={height}
-                    onChange={() => {}}
-                  >
-                    <img
-                      className='pointer-events-none select-none opacity-0'
-                      src={src}
-                      draggable={false}
-                    />
-                  </RegionEditor>
-                </div>
+                {matchResults.map(
+                  ({ rect, score, main, firstInGroup }, index) => (
+                    <Region
+                      key={index}
+                      region={rect}
+                      width={width}
+                      height={height}
+                      color={
+                        main ? 'outline-green-300/30' : 'outline-amber-300/10'
+                      }
+                    >
+                      {firstInGroup ? score.toFixed(4) : undefined}
+                    </Region>
+                  ),
+                )}
               </RegionEditor>
             </div>
           </div>
