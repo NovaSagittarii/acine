@@ -19,6 +19,7 @@ interface ConditionOverlayProps {
   threshold: number;
   width: number;
   height: number;
+  debug?: boolean; // whether to show extra information
 }
 
 /**
@@ -30,6 +31,7 @@ export default function ConditionOverlay({
   threshold,
   width,
   height,
+  debug = false,
 }: ConditionOverlayProps) {
   const [matchResults, setMatchResults] = useState<
     {
@@ -91,9 +93,11 @@ export default function ConditionOverlay({
           </div>
         </Region>
       ))}
-      <div className='absolute bottom-0 right-0 text-black/50'>
-        {matchResults.length}/{RECT_DRAW_LIMIT}
-      </div>
+      {debug && (
+        <div className='absolute bottom-0 right-0 text-black/50'>
+          {matchResults.length}/{RECT_DRAW_LIMIT}
+        </div>
+      )}
     </>
   );
 }
