@@ -61,14 +61,6 @@ export default function ConditionImageEditor() {
     if (images.length) setSrc((s) => (s ? s : images[0][0]));
   }, [frames]);
 
-  // sync condition image
-  useEffect(() => {
-    if (!open) return;
-    const i = frames.indexOf(src);
-    // console.log('sync image', src, 'idx=', i);
-    if (condition) condition.frameId = routine.frames[i].id;
-  }, [src, open, frames, condition, routine.frames]);
-
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
   // but currently many dependencies don't support it yet (as of 4/23/2025).
@@ -90,7 +82,10 @@ export default function ConditionImageEditor() {
           <Select
             value={frames.indexOf(src)}
             values={imageChoices}
-            onChange={(s) => setSrc(frames[s])}
+            onChange={(s) => {
+              condition.frameId = routine.frames[s].id;
+              forceUpdate();
+            }}
             autofocus
           />
           <div className='flex items-center gap-4'>
