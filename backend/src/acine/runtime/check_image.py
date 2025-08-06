@@ -36,7 +36,6 @@ def check_similarity(
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
 
-    TODO: configurable pattern
     TM_CCOEFF is really bad on small gray squares for some reason
     TM_CCORR is less broken
     """
@@ -44,6 +43,8 @@ def check_similarity(
         return []
     if not condition.allow_regions:
         condition.allow_regions.extend(condition.regions)
+    if not condition.method:
+        condition.method = Routine.Condition.Image.Method.METHOD_TM_CCORR_NORMED
 
     rxlo, rxhi, rylo, ryhi = img.shape[1], 0, img.shape[0], 0
     allowed = np.random.randint(0, 255, size=img.shape, dtype=img.dtype)
@@ -65,7 +66,20 @@ def check_similarity(
     ref_img = ref_img[ylo:yhi, xlo:xhi]
     mask = mask[ylo:yhi, xlo:xhi]
 
-    res = cv2.matchTemplate(img, ref_img, cv2.TM_CCORR_NORMED, mask=mask)
+    # not sure if mask affects quality?
+    # mask_kwarg = {"mask": mask} if len(condition.regions) >= 2 else {}
+
+    match condition.method:
+        case Routine.Condition.Image.Method.METHOD_TM_CCORR_NORMED:
+            res = cv2.matchTemplate(img, ref_img, cv2.TM_CCORR_NORMED, mask=mask)
+        case Routine.Condition.Image.Method.METHOD_TM_CCOEFF_NORMED:
+            # CCOEFF_NORMED mask does not seem to work?
+            res = cv2.matchTemplate(img, ref_img, cv2.TM_CCOEFF_NORMED)
+        case Routine.Condition.Image.Method.METHOD_TM_SQDIFF_NORMED:
+            res = cv2.matchTemplate(img, ref_img, cv2.TM_SQDIFF_NORMED, mask=mask)
+            res = np.e**-res
+        case _:
+            raise NotImplementedError(f"No impl for method={condition.method}")
     res[np.isnan(res)] = 0
     res[np.isinf(res)] = 0
     # nan/inf bugged for matchTemplate + mask

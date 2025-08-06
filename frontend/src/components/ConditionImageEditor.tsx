@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
+import { Routine_Condition_Image_Method as Method } from 'acine-proto-dist';
 
 import Button from './ui/Button';
 import ConditionOverlay from './ConditionOverlay';
@@ -13,6 +14,13 @@ import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
 import { runtimeConditionQuery } from '../App.state';
 import useForceUpdate from './useForceUpdate';
+
+const METHOD_TYPES_DISPLAY = [
+  ['unset (ccorr)', Method.METHOD_UNSPECIFIED],
+  ['ccoeff (mask not supported)', Method.METHOD_TM_CCOEFF_NORMED],
+  ['ccorr', Method.METHOD_TM_CCORR_NORMED],
+  ['sqdiff', Method.METHOD_TM_SQDIFF_NORMED],
+] as [string, Method][];
 
 /**
  * Appears as a modal.
@@ -83,6 +91,15 @@ export default function ConditionImageEditor() {
     Awaited<ReturnType<typeof runtimeConditionQuery>>
   >([]);
 
+  const refreshPreview = () => {
+    if (condition) {
+      const c = pb.Routine_Condition.create({
+        condition: { $case: 'image', image: condition },
+      });
+      runtimeConditionQuery(c).then((w) => setPreview(w));
+    }
+  };
+
   return (
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
@@ -92,36 +109,38 @@ export default function ConditionImageEditor() {
             values={imageChoices}
             onChange={(s) => {
               condition.frameId = routine.frames[s].id;
-              forceUpdate();
+              refreshPreview();
             }}
             autofocus
           />
-          <div className='flex items-center gap-4'>
-            <Button
-              className='hover:bg-amber-100'
-              onClick={async () => {
-                const c = pb.Routine_Condition.create({
-                  condition: { $case: 'image', image: condition },
-                });
-                setPreview(await runtimeConditionQuery(c));
-              }}
-            >
+          <div className='flex items-center gap-6'>
+            <Button className='hover:bg-amber-100' onClick={refreshPreview}>
               Query
             </Button>
+            <Select
+              value={METHOD_TYPES_DISPLAY.findIndex(
+                ([_, t]) => t === condition.method,
+              )}
+              values={METHOD_TYPES_DISPLAY}
+              onChange={(t) => {
+                condition.method = t;
+                refreshPreview();
+              }}
+            />
             <NumberInput
               object={condition}
               property='threshold'
-              callback={forceUpdate}
+              callback={refreshPreview}
             />
             <NumberInput
               object={condition}
               property='matchLimit'
-              callback={forceUpdate}
+              callback={refreshPreview}
             />
             <NumberInput
               object={condition}
               property='padding'
-              callback={forceUpdate}
+              callback={refreshPreview}
             />
           </div>
           <div className='flex'>
@@ -134,6 +153,7 @@ export default function ConditionImageEditor() {
                 onChange={(r) => {
                   condition.regions = r;
                   $routine.set(routine);
+                  refreshPreview();
                 }}
               >
                 <img
@@ -152,6 +172,7 @@ export default function ConditionImageEditor() {
                 onChange={(r) => {
                   condition.allowRegions = r;
                   $routine.set(routine);
+                  refreshPreview();
                 }}
               >
                 <img

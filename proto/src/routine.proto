@@ -133,6 +133,7 @@ message Routine {
       double threshold = 2;  // required similarity to pass; between 0.0 and 1.0
       int32 padding = 5;  // required spacing between matches, can be negative
       int32 match_limit = 6;  // limit how many matches are considered (for UX)
+      Method method = 7;      // how to calculate template?
 
       // section that it checks;
       // crops base frame to get desired match frame.
@@ -142,6 +143,13 @@ message Routine {
       // crops target frame before comparing against match frame.
       // if unset, assume regions==allow_regions (not dynamic)
       repeated Rect allow_regions = 4;
+
+      enum Method {
+        METHOD_UNSPECIFIED = 0;
+        METHOD_TM_SQDIFF_NORMED = 1;
+        METHOD_TM_CCORR_NORMED = 2;
+        METHOD_TM_CCOEFF_NORMED = 3;
+      }
     }
 
     message Text {                // wants to ensure it finds some text
