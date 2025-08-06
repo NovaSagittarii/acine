@@ -41,17 +41,20 @@ export default function ConditionOverlay({
       firstInGroup: boolean;
     }[]
   >([]);
+
   useEffect(() => {
+    const offsetTop = Math.min(...templateRegions.map((x) => x.top));
+    const offsetLeft = Math.min(...templateRegions.map((x) => x.left));
     setMatchResults(
       templateRegions
-        .flatMap(({ top, bottom, left, right }, rindex, a) =>
+        .flatMap(({ top, bottom, left, right }, rindex) =>
           preview.flatMap((p) =>
             p.matches.map(({ score, position }, index) => ({
               rect: pb.Rect.create({
-                top: position!.y + top - a[0].top,
-                left: position!.x + left - a[0].left,
-                bottom: position!.y + (bottom - a[0].top),
-                right: position!.x + (right - a[0].left),
+                top: position!.y + top - offsetTop,
+                left: position!.x + left - offsetLeft,
+                bottom: position!.y + (bottom - offsetTop),
+                right: position!.x + (right - offsetLeft),
               }),
               score,
               matchType:
