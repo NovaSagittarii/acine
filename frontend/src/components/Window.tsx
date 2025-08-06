@@ -152,7 +152,7 @@ export default function Window({
         outerDown='border-blue-300/40'
         innerDown='border-blue-400/80'
       />
-      <div className='absolute pointer-events-none'>
+      <div className='absolute'>
         ({mouseX}, {mouseY}, {isMouseDown ? 'down' : 'up'})
       </div>
     </div>
@@ -187,7 +187,7 @@ function Pointer({
 }: PointerProps) {
   return (
     <div
-      className='absolute top-0 left-0 pointer-events-none'
+      className='absolute top-0 left-0 select-none'
       style={{
         left: toPercentage(x / width),
         top: toPercentage(y / height),

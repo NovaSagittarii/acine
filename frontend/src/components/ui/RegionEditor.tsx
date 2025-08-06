@@ -96,9 +96,7 @@ export default function RegionEditor({
         return (
           <div
             key={index}
-            // need pointer-events-none to prevent it from affecting ev.target
-            // in the mouseregion listener
-            className='absolute outline-4 outline-amber-300 hover:outline-amber-600 pointer-events-auto select-none box-border overflow-x-visible whitespace-nowrap'
+            className='absolute outline-4 outline-amber-300 hover:outline-amber-600 select-none box-border overflow-x-visible whitespace-nowrap'
             draggable={false}
             onMouseOver={() => {
               setHoveredRegion(region);

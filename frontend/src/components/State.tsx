@@ -61,6 +61,7 @@ function State({ state, selected = false }: StateProps) {
             key={index}
             src={frames[sampleId]}
             className='absolute left-0 top-0 pointer-events-none'
+            // need pointer-events-none to prevent dragging the images
             style={{ opacity: 1 / (index + 1) }}
             // use harmonic series to have even opacity of all images
           />

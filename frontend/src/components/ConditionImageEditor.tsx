@@ -159,7 +159,7 @@ export default function ConditionImageEditor() {
                 }}
               >
                 <img
-                  className='max-h-full pointer-events-none select-none'
+                  className='max-h-full select-none'
                   src={src}
                   draggable={false}
                 />
@@ -178,14 +178,14 @@ export default function ConditionImageEditor() {
                 }}
               >
                 <img
-                  className='pointer-events-none select-none opacity-0'
+                  className='select-none opacity-0'
                   src={src}
                   draggable={false}
                 />
                 {preview.map((p, index) => (
                   <img
                     key={index}
-                    className='pointer-events-none select-none absolute left-0 top-0'
+                    className='select-none absolute left-0 top-0'
                     style={{ opacity: 1 / (index + 1) }}
                     src={
                       p.frame?.id &&
