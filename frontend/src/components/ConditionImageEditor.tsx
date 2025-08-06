@@ -68,7 +68,7 @@ export default function ConditionImageEditor() {
       }
       if (changed) forceUpdate();
     }
-  }, [condition, forceUpdate, frames, routine.frames]);
+  }, [condition, forceUpdate, frames, routine.frames, src]);
 
   const [imageChoices, setImageChoices] = useState<[string, number][]>([]);
   useEffect(() => {
@@ -96,7 +96,9 @@ export default function ConditionImageEditor() {
       const c = pb.Routine_Condition.create({
         condition: { $case: 'image', image: condition },
       });
-      runtimeConditionQuery(c).then((w) => setPreview(w));
+      runtimeConditionQuery(c)
+        .then((w) => setPreview(w))
+        .catch((e) => console.error('Failed condition query.', e));
     }
   };
 
