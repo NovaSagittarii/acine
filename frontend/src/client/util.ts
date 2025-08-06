@@ -40,8 +40,10 @@ export function toOutCoordinates(
   outHeight: number,
   ev: React.MouseEvent,
 ) {
+  // currentTarget so it is relative to original div
+  // target is whatever is on top (not always original div)
   const { left, top, width, height } = (
-    ev.target as HTMLDivElement
+    ev.currentTarget as HTMLDivElement
   ).getBoundingClientRect();
   const { pageX, pageY } = ev;
 
