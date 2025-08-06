@@ -87,7 +87,8 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
       $runtimeContext.set(c);
       break;
     }
-    case 'sampleCondition': {
+    case 'sampleCondition':
+    case 'sampleCurrent': {
       const cb = wsListeners[packet.id];
       if (cb) cb(packet);
       break;
@@ -168,27 +169,42 @@ export function runtimeQueueEdge(id: string) {
 /**
  * Queries backend for candidate matches for a base condition. (budget RPC)
  * @param condition what do u wanna query
+ * @param realtime if true, gets the CURRENT frame instead of saved frames
  */
-export async function runtimeConditionQuery(condition: pb.Routine_Condition) {
+export async function runtimeConditionQuery(
+  condition: pb.Routine_Condition,
+  realtime: boolean = false,
+) {
   return new Promise<pb.ConditionProcessing_Frame[]>((resolve) => {
     const id = Math.floor(Math.random() * -(1 << 31));
     wsListeners[id] = (packet: pb.Packet) => {
       if (packet.type?.$case === 'sampleCondition') {
         resolve(packet.type.sampleCondition.frames);
         delete wsListeners[id];
+      } else if (packet.type?.$case === 'sampleCurrent') {
+        resolve(packet.type.sampleCurrent.frames);
+        delete wsListeners[id];
       } else {
         console.warn(`unexpected response for id ${id}`, packet);
       }
     };
-    const packet = pb.Packet.create({
-      id,
-      type: {
-        $case: 'sampleCondition',
-        sampleCondition: {
-          condition,
-        },
-      },
-    });
+    // looks goofy (instead of lower level nesting like at type) since I was
+    // getting typescript errors
+    const packet = !realtime
+      ? pb.Packet.create({
+          id,
+          type: {
+            $case: 'sampleCondition',
+            sampleCondition: { condition },
+          },
+        })
+      : pb.Packet.create({
+          id,
+          type: {
+            $case: 'sampleCurrent',
+            sampleCurrent: { condition },
+          },
+        });
     ws.send(pb.Packet.encode(packet).finish());
   });
 }

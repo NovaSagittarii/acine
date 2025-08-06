@@ -59,7 +59,7 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
                 case 'subroutine':
                   edge.action = {
                     $case: v,
-                    subroutine: 0,
+                    subroutine: '',
                   };
                   break;
               }
@@ -73,7 +73,10 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
         <SubroutineEditor action={edge.action} />
       )}
       {edge.action?.$case === 'replay' && (
-        <ReplayEditor replay={edge.action.replay} />
+        <ReplayEditor
+          replay={edge.action.replay}
+          condition={edge.precondition}
+        />
       )}
     </div>
   );

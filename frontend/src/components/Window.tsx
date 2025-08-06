@@ -5,7 +5,12 @@ import { handleInputEvent } from '../client/input_stream';
 import InputSource from '../client/input_source';
 import { toOutCoordinates, toPercentage } from '../client/util';
 import { useStore } from '@nanostores/react';
-import { $runtimeMousePosition, $runtimeMousePressed } from '@/state';
+import {
+  $runtimeMousePosition,
+  $runtimeMousePressed,
+  $matchOverlay,
+} from '@/state';
+import ConditionOverlay from './ConditionOverlay';
 
 interface WindowProps {
   websocket: WebSocket; // forward events towards here
@@ -30,6 +35,7 @@ export default function Window({
 }: WindowProps) {
   const runtimeMousePosition = useStore($runtimeMousePosition);
   const runtimeMousePressed = useStore($runtimeMousePressed);
+  const matchOverlay = useStore($matchOverlay);
 
   const [mouseX, setMouseX] = useState(0);
   const [mouseY, setMouseY] = useState(0);
@@ -118,6 +124,15 @@ export default function Window({
           draggable={false}
           className='w-full object-cover'
           style={{ imageRendering: 'pixelated' }}
+        />
+      )}
+      {matchOverlay.image && (
+        <ConditionOverlay
+          preview={matchOverlay.preview}
+          threshold={matchOverlay.image.threshold}
+          templateRegions={matchOverlay.image.regions}
+          width={dimensions[0]}
+          height={dimensions[1]}
         />
       )}
       <Pointer

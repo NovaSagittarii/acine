@@ -5,11 +5,14 @@
 import { atom } from 'nanostores';
 import { persistentAtom } from '@nanostores/persistent';
 import {
+  ConditionProcessing_Frame,
   FrameOperation,
   FrameOperation_Operation,
   Packet,
   Point,
   Routine,
+  Routine_Condition,
+  Routine_Condition_Image,
   Routine_Node,
   Routine_State,
   RuntimeState,
@@ -109,3 +112,12 @@ export const $runtimeMousePosition = atom<Point>(Point.create());
  * current runtime mouse state, pressed (bitmask)
  */
 export const $runtimeMousePressed = atom<number>(0);
+
+interface MatchOverlay {
+  preview: ConditionProcessing_Frame[];
+  image?: Routine_Condition_Image;
+}
+/**
+ * this match result is displayed over the main window
+ */
+export const $matchOverlay = atom<MatchOverlay>({ preview: [] });

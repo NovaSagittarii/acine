@@ -116,7 +116,9 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "queue_edge":
                     await self.on_queue_edge(packet)
                 case "sample_condition":
-                    await self.on_sample_condition(packet)
+                    await self.on_sample_condition(packet, False)
+                case "sample_current":
+                    await self.on_sample_condition(packet, True)
 
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
@@ -226,17 +228,34 @@ class AcineServerProtocol(WebSocketServerProtocol):
             self.current_task = asyncio.create_task(run_goto())
             await self.current_task
 
-    async def on_sample_condition(self, packet: Packet):
-        output = packet.sample_condition.frames
-        condition = packet.sample_condition.condition
+    async def on_sample_condition(self, packet: Packet, curr=False):
+        """
+        Processes a batch of frames based on a condition.
+        """
+
+        match packet.WhichOneof("type"):
+            case "sample_condition":
+                imgs = [(f, get_frame(f.id)) for f in self.rt.routine.frames]
+                output = packet.sample_condition.frames
+                condition = packet.sample_condition.condition
+            case "sample_current":
+                emptyFrame = Frame(id="REALTIME")
+                imgs = [(emptyFrame, await gc.get_frame())]
+                output = packet.sample_current.frames
+                condition = packet.sample_current.condition
+            case _:
+                raise NotImplementedError(
+                    "Unsupported packet type for on_sample_condition: "
+                    + packet.WhichOneof("type")
+                )
         condition_type = condition.WhichOneof("condition")
         match condition_type:
             case "image":
                 c = condition.image
-                c.threshold = 0.4  # let clientside can filter
+                if not curr:
+                    c.threshold = 0.4  # clientside can filter
                 ref = get_frame(c.frame_id)
-                for f in self.rt.routine.frames:
-                    img = get_frame(f.id)
+                for f, img in imgs:
                     results = check_similarity(c, ref, img)
                     if not results:
                         continue

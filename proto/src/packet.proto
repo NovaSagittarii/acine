@@ -20,7 +20,8 @@ message Packet {
     ac.RuntimeState set_stack = 8;       // sync client routine return stack
     ac.RuntimeState goto = 9;            // client-triggered navigation
     ac.RuntimeState queue_edge = 10;     // client-triggered navigation
-    ConditionProcessing sample_condition = 11;  // request for processing (rpc)
+    ConditionProcessing sample_condition = 11;  // rpc: request for processing
+    ConditionProcessing sample_current = 12;  // rpc: run template on curr frame
   }
 }
 

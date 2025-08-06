@@ -1,15 +1,17 @@
-import { InputReplay } from 'acine-proto-dist';
+import { InputReplay, Routine_Condition } from 'acine-proto-dist';
 import { useState } from 'react';
 import { useStore } from '@nanostores/react';
-import { $replayInputSource } from '@/state';
+import { $replayInputSource, $matchOverlay } from '@/state';
 
 import Button from './ui/Button';
 import { open } from '../client/input_stream';
+import { runtimeConditionQuery } from '../App.state';
 
 interface ReplayEditorProps {
   replay: InputReplay;
+  condition?: Routine_Condition; // for offset calculation if relative replay
 }
-export default function ReplayEditor({ replay }: ReplayEditorProps) {
+export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
   const [isRecording, setRecording] = useState<boolean>(false);
   const [isPlaying, setPlaying] = useState<boolean>(false); // for replay
   const [stream, setStream] = useState<null | ReturnType<typeof open>>(null);
@@ -37,6 +39,21 @@ export default function ReplayEditor({ replay }: ReplayEditorProps) {
             >
               Record
             </Button>
+            {condition && (
+              <Button
+                className='p-1! w-full bg-black text-white'
+                onClick={async () => {
+                  if (condition.condition?.$case === 'image') {
+                    $matchOverlay.set({
+                      preview: await runtimeConditionQuery(condition, true),
+                      image: condition.condition.image,
+                    });
+                  }
+                }}
+              >
+                Query precondition
+              </Button>
+            )}
             {!isPlaying ? (
               <Button
                 className='p-1! w-full bg-black text-white'
@@ -58,12 +75,12 @@ export default function ReplayEditor({ replay }: ReplayEditorProps) {
                 </Button>
               </div>
             )}
-            <Button
+            {/* <Button
               className='p-1! w-full bg-black text-white'
               onClick={() => console.log(replay)}
             >
               console.log
-            </Button>
+            </Button> */}
           </>
         ) : (
           <Button
