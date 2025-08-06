@@ -50,6 +50,14 @@ export default function ConditionImageEditor() {
         condition.matchLimit = 3;
         changed = true;
       }
+      if (!frameId) {
+        // use previous one
+        const i = frames.indexOf(src);
+        if (i >= 0 && condition) {
+          condition.frameId = routine.frames[i].id;
+          changed = true;
+        }
+      }
       if (changed) forceUpdate();
     }
   }, [condition, forceUpdate, frames, routine.frames]);
