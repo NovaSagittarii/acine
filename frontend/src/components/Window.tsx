@@ -46,13 +46,13 @@ export default function Window({
    * 2. send to websocket
    */
   const processEvent = useCallback(
-    (event: pb.InputEvent) => {
+    (event: pb.InputEvent, dx: number = 0, dy: number = 0) => {
       // 1. update display values
       switch (event.type?.$case) {
         case 'move': {
           const { x, y } = event.type.move;
-          setMouseX(x);
-          setMouseY(y);
+          setMouseX(x + dx);
+          setMouseY(y + dy);
           break;
         }
         case 'mouseDown':

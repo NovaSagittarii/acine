@@ -8,7 +8,8 @@ from acine_proto_dist.input_event_pb2 import InputReplay
 from acine_proto_dist.routine_pb2 import Routine
 
 from .check import CheckResult, check, check_once
-from .util import now, sleep
+from .check_image import check_similarity
+from .util import get_frame, now, sleep
 
 
 class IController:
@@ -304,7 +305,16 @@ class Runtime:
             case None:
                 pass
             case "replay":
-                await self.run_replay(action.replay)
+                dx, dy = 0, 0
+                replay = action.replay
+                if replay.relative and replay.offset:
+                    offset = await self.acquire_offset(action.precondition)
+                    if offset:
+                        px, py = replay.offset.x, replay.offset.y
+                        y, x = offset
+                        dx, dy = x - px, y - py
+                        print(f"o({x},{y}) po({px},{py}) d({dx},{dy})")
+                await self.run_replay(replay, dx, dy)
                 print("REPLAY DONE")
             case "subroutine":
                 pass
@@ -330,7 +340,21 @@ class Runtime:
             # until after the subroutine completes
             self.set_curr(self.nodes[action.to])
 
-    async def run_replay(self, replay: InputReplay):
+    async def acquire_offset(self, condition: Routine.Condition):
+        print("what offset?")
+        print(condition)
+
+        if condition.WhichOneof("condition") == "image":
+            c = condition.image
+            ref = get_frame(c.frame_id)
+            img = await self.controller.get_frame()
+            matches = check_similarity(c, ref, img)
+            print(matches)
+            if matches:
+                return matches[0].position
+        return None
+
+    async def run_replay(self, replay: InputReplay, dx=0, dy=0):
         """
         simulate a replay in terms of controller calls
         """
@@ -340,7 +364,7 @@ class Runtime:
             await sleep(t1 - now())
             match e.WhichOneof("type"):
                 case "move":
-                    await self.controller.mouse_move(e.move.x, e.move.y)
+                    await self.controller.mouse_move(e.move.x + dx, e.move.y + dy)
                 case "mouse_down":
                     await self.controller.mouse_down()
                 case "mouse_up":

@@ -25,8 +25,11 @@ budget issue tracker
 - v0.1.3 Automation Features (dynamic)
   - [x] implement template match
   - [ ] interrupt during postcondition (after action)
-  - [ ] implement replay offset (on dynamic check)
+  - [x] implement replay offset (on dynamic check)
   - [ ] implement text match
+- v0.1.4 Automation Features (generalized)
+  - Multi-node Interrupt
+  - Dependency
 - v0.2.0 Routine Manager
   - Manage multiple routines
   - Handle routine export (handle frames as file)

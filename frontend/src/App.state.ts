@@ -9,6 +9,7 @@ import {
   $runtimeContext,
   $runtimeMousePosition as $mousePosition,
   $runtimeMousePressed as $mousePressed,
+  $matchOverlay,
 } from './state';
 import { frameToObjectURL } from './client/encoder';
 
@@ -207,4 +208,25 @@ export async function runtimeConditionQuery(
         });
     ws.send(pb.Packet.encode(packet).finish());
   });
+}
+
+/**
+ * Gets a template match offset
+ */
+export async function acquireOffset(condition: pb.Routine_Condition) {
+  switch (condition.condition?.$case) {
+    case 'image': {
+      const preview = await runtimeConditionQuery(condition, true);
+      const offset = preview[0]?.matches[0]?.position ?? undefined;
+      $matchOverlay.set({
+        preview,
+        image: condition.condition.image,
+        offset: offset,
+      });
+      return offset;
+    }
+    default:
+      console.warn(`unsupported type ${condition.condition?.$case}`, condition);
+  }
+  return undefined;
 }

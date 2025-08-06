@@ -11,7 +11,6 @@ import {
   Packet,
   Point,
   Routine,
-  Routine_Condition,
   Routine_Condition_Image,
   Routine_Node,
   Routine_State,
@@ -116,6 +115,7 @@ export const $runtimeMousePressed = atom<number>(0);
 interface MatchOverlay {
   preview: ConditionProcessing_Frame[];
   image?: Routine_Condition_Image;
+  offset?: Point;
 }
 /**
  * this match result is displayed over the main window

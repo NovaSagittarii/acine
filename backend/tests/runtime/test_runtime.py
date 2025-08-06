@@ -199,7 +199,7 @@ class TestRuntimeIntegration:
         assert rt.context.curr.id == to
         await rt.goto("n6")
         assert rt.context.curr.id == "n6"
-        expected_calls = [mocker.call(e.replay) for e in [e34, e45, e26]]
+        expected_calls = [mocker.call(e.replay, 0, 0) for e in [e34, e45, e26]]
         rt.run_replay.assert_has_calls(expected_calls)
 
     @pytest.mark.asyncio
@@ -231,7 +231,7 @@ class TestRuntimeIntegration:
         assert rt.context.curr.id == to
         await rt.goto("n6")
         assert rt.context.curr.id == "n6"
-        rt.run_replay.assert_called_once_with(e34.replay)
+        rt.run_replay.assert_called_once_with(e34.replay, 0, 0)
 
     @pytest.mark.parametrize("subtest", ("check pre", "check post", "check pre/post"))
     @pytest.mark.asyncio

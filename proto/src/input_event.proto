@@ -40,4 +40,18 @@ message InputEvent {
 message InputReplay {
   repeated InputEvent events = 1;  // for playback
   uint32 duration = 2;             // ms; needs to be computed
+  uint32 interrupts = 3;           // what can interrupt this? (bitmask)
+
+  enum InterruptSource {
+    INTERRUPT_SOURCE_UNSPECIFIED = 0;
+    INTERRUPT_SOURCE_POSTCONDITION = 1;   // do postcondition checks early
+    INTERRUPT_SOURCE_EVENT_LISTENER = 2;  // do interrupt checks during
+  }
+
+  ac.RelativePoint offset = 4;
+  // original match offset when recording, this only affects positional data
+
+  bool relative = 5;
+  // whether offset information should be used or not
+  // when true, requires a frame match before replay
 }

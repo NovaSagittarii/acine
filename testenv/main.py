@@ -1,3 +1,4 @@
+import random
 import tkinter
 from tkinter import ttk
 
@@ -75,6 +76,10 @@ def redraw():
     canvas.grid(columnspan=5)
     canvas.create_rectangle(0, 0, 1000, 1000)
     canvas.create_line(10, 0, 10, 1000)
+
+    # for testing relative replay (based on template match location)
+    x, y = random.randint(50, 250), random.randint(0, 200)
+    canvas.create_rectangle(x, y, x + 30, y + 30, fill="red", outline="red")
 
     canvas.bind("<Motion>", motion)  # holy moly something AHK works with
     canvas.bind("<Button-1>", set_start)

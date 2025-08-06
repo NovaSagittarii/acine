@@ -9,7 +9,7 @@ import { InputReplay, InputEvent } from 'acine-proto-dist';
 export default class InputSource {
   private timeout: null | number = null;
   private active: boolean = false;
-  private onEvent: (event: InputEvent) => void;
+  private onEvent: (event: InputEvent, dx: number, dy: number) => void;
   private onEnd: () => void = () => {};
   constructor(callback: (event: InputEvent) => void = () => {}) {
     this.onEvent = callback;
@@ -18,8 +18,10 @@ export default class InputSource {
   /**
    * starts a replay from InputReplay proto object.
    * automatically ends an ongoing replay (will interrupt).
+   *
+   * dx,dy is an offset applied to mouse position (default: 0,0)
    */
-  public play(replay: InputReplay) {
+  public play(replay: InputReplay, dx: number = 0, dy: number = 0) {
     this.stop();
     this.active = true;
     const t0 = Date.now();
@@ -36,7 +38,7 @@ export default class InputSource {
         next(); // queue next event
         const event = replay.events[i++];
         // goes over by one (since next will fail first)
-        if (event) this.onEvent(event);
+        if (event) this.onEvent(event, dx, dy);
       }, future - t);
     };
     next();

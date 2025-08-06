@@ -252,8 +252,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
         match condition_type:
             case "image":
                 c = condition.image
-                if not curr:
-                    c.threshold = 0.4  # clientside can filter
+                c.threshold = 0.4  # clientside can filter
                 ref = get_frame(c.frame_id)
                 for f, img in imgs:
                     results = check_similarity(c, ref, img)
