@@ -24,20 +24,22 @@ budget issue tracker
   - [x] queue_edge from frontend
 - v0.1.3 Automation Features (dynamic)
   - [x] implement template match
-  - [ ] interrupt during postcondition (after action)
+  - [ ] interrupt during postcondition (or action)
   - [x] implement replay offset (on dynamic check)
   - [ ] implement text match
 - v0.1.4 Automation Features (generalized)
-  - Multi-node Interrupt
-  - Dependency
+  - [ ] implement multi-node interrupt (event listener)
 - v0.2.0 Routine Manager
-  - Manage multiple routines
-  - Handle routine export (handle frames as file)
-  - Launch sequence
-- v0.3.0 Scheduler
+  - [ ] routine new/open/save (multi-instance)
+  - [ ] routine export (tar.bz2), include frames
+  - [ ] routine launch sequence
+  - [ ] attach width/height to positional data (handle rotation and scaling)
+- v0.3.0 Scheduler (with parallelism)
+  - [ ] implement dependency
   - [ ] implement scheduling groups
-  - [ ] implement scheduler
-  - [ ] implement runtime duration logging
+  - [ ] implement scheduler (multicore EDF, Postorder DFS)
+  - [ ] implement action duration logging
+  - [ ] implement scheduled action
 - Power Saving
   - sleep and wake from sleep
     https://learn.microsoft.com/en-us/windows/win32/api/powrprof/nf-powrprof-setsuspendstate
@@ -49,6 +51,7 @@ budget issue tracker
 - [ ] implement graph based editor
 - [ ] route display
 - [ ] migrate venv to uv
+- [ ] self loop with "sample"/"data source" action (text match parse)
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.
