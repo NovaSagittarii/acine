@@ -253,10 +253,20 @@ function RoutineSelector() {
               }}
             >
               <div className='text-lg font-semibold'>{routine.name}</div>
-              <div className='text-sm'>
+              <div className='text-sm flex flex-col'>
                 {routine.description || '<no description>'}
-                <div>start - {routine.startCommand || '<unset>'}</div>
-                <div>window - {routine.windowName || '<unset>'}</div>
+                <div className='flex gap-4'>
+                  startup
+                  <div className='font-mono'>
+                    {routine.startCommand || '<unset>'}
+                  </div>
+                </div>
+                <div className='flex gap-4'>
+                  window
+                  <div className='font-mono'>
+                    {routine.windowName || '<unset>'}
+                  </div>
+                </div>
               </div>
               <div className='text-xs'>{routine.id}</div>
             </div>

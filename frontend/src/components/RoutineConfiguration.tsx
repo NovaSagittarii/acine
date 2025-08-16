@@ -25,11 +25,13 @@ export default function RoutineConfiguration() {
         object={routine}
         property={'startCommand'}
         callback={forceUpdate}
+        className='font-mono'
       />
       <EditableRoutineProperty
         object={routine}
         property={'windowName'}
         callback={forceUpdate}
+        className='font-mono'
       />
     </div>
   );
