@@ -13,18 +13,26 @@ from windows_capture import Frame, InternalCaptureControl, WindowsCapture
 
 
 class GameCapture:  # thanks joshua
+    """
+    Window capture instance, need to call .close() afterwards.
+    """
+
     def __init__(self, window_name: str | None = None):
         self.data: cv2.typing.MatLike = None
         """cv2.MatLike frame data"""
 
-        self.window_name = window_name
+        self.window_name = window_name or None  # prefer None over empty string ""
         self.init()
         self.get_png_frame_lock = Lock()
         self.capture_callback_semaphore = Semaphore(0)
         self.dimensions: "tuple[int, int]" = (0, 0)
         """ screen dimensions """
 
-        self.close_callback = lambda: None
+        self.closed = False
+
+    def close(self) -> None:
+        """cleanup instance"""
+        self.closed = True
 
     def init(self) -> None:
         """set up WindowsCapture event listeners"""
@@ -33,13 +41,20 @@ class GameCapture:  # thanks joshua
             draw_border=False,
             monitor_index=None,
             window_name=self.window_name,
+            # if window_name=="", capture active window
+            # if window_name==None, capture current screen
         )
+        print("Capture Session Opened", self.window_name)
 
         @self.capture.event
         def on_frame_arrived(frame: Frame, control: InternalCaptureControl):
-            self.close_callback = control.stop
+            # Note: when minimized, this callback does not run
 
-            # Note: when minimized, this does not run
+            if self.closed:
+                # This won't appear until the window is unminimized.
+                print("Capture Session Closed (via control)")
+                control.stop()
+
             if self.get_png_frame_lock.locked():
                 return
             """
@@ -86,11 +101,11 @@ class GameCapture:  # thanks joshua
         await self.__next_frame()
         return self.data
 
-    async def get_png_frame(self) -> ndarray:
-        """gets a png encoded frame"""
+    async def get_png_frame(self) -> tuple[ndarray, int, int]:
+        """gets a png encoded frame (data, width, height)"""
         await self.__next_frame()
         _, framedata_png = cv2.imencode(".png", self.data)
-        return framedata_png
+        return (framedata_png, *self.dimensions)
 
 
 if __name__ == "__main__":
@@ -98,8 +113,10 @@ if __name__ == "__main__":
 
     async def run():
         g = GameCapture("Arknights")
-        f = await g.get_png_frame()
-        print("frame", f)
-        g.close_callback()
+        f, *dimensions = await g.get_png_frame()
+        print("frame", f, dimensions)
+        # from acine.persist import fs_write_sync as write
+        # write(["T.png"], f)
+        g.close()
 
     asyncio.run(run())

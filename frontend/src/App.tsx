@@ -12,6 +12,8 @@ import {
   loadRoutine,
   saveRoutine, // used in global scope
   $replayInputSource,
+  $loadedRoutine,
+  $backendConfiguration,
 } from './state';
 import Button from './components/ui/Button';
 import StateList from './components/StateList';
@@ -36,7 +38,7 @@ enum ActiveTab {
  */
 let saveCurrentFrame = () => -1;
 
-function App() {
+function RoutineEditor() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [dState, setDState] = useState(''); // debug state
   const [dSend, setDSend] = useState(0);
@@ -53,16 +55,19 @@ function App() {
         if (frameOperation.type === pb.FrameOperation_Operation.OPERATION_GET) {
           const { frame } = frameOperation;
           if (!frame) return;
-          const { data, state } = frame;
+          const { data, state, width, height } = frame;
+          $sourceDimensions.set([width, height]);
           setDState(state);
           setDRecv(Date.now() - dSend);
-          const blob = new Blob([data]);
+          const blob = new Blob([data as BlobPart]);
           const imageUrl = URL.createObjectURL(blob);
           saveCurrentFrame = () => {
+            const routine = $routine.get();
+            if (!routine) throw new Error('invalid routine ' + routine);
             const persistentURL = URL.createObjectURL(blob);
             const newId = $frames.get().length;
             $frames.set([...$frames.get(), persistentURL]);
-            $routine.get().frames.push(pb.Frame.create({ id: frame.id }));
+            routine.frames.push(pb.Frame.create({ id: frame.id }));
             persistFrame(frame);
             return newId;
           };
@@ -102,7 +107,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.STATE);
 
   return (
-    <div className='w-screen h-screen'>
+    <>
       <div className='w-full h-full flex gap-0 rounded-sm'>
         <div className='w-full'>
           <div className='h-full p-4 flex flex-col gap-4'>
@@ -162,10 +167,12 @@ function App() {
             <div
               className='hover:bg-amber-100'
               onClick={() => {
+                const routine = $routine.get();
+                if (!routine) throw new Error('invalid routine ' + routine);
                 const pkt = pb.Packet.create({
                   type: {
                     $case: 'routine',
-                    routine: $routine.get(),
+                    routine: routine,
                   },
                 });
                 console.log(pkt);
@@ -193,8 +200,64 @@ function App() {
         </div>
       </div>
       <ConditionImageEditor />
+    </>
+  );
+}
+
+function RoutineSelector() {
+  const config = useStore($backendConfiguration);
+
+  return (
+    <div className='flex flex-col p-8 gap-2 overflow-y-auto'>
+      Double click to load
+      <div
+        className='p-4 flex flex-col border border-black hover:bg-amber-100'
+        onDoubleClick={() => {
+          const packet = pb.Packet.create({
+            type: {
+              $case: 'createRoutine',
+              createRoutine: {
+                name: 'Untitled Routine',
+                description: 'A newly created unconfigured routine.',
+                windowName: 'TestEnv',
+              },
+            },
+          });
+          ws.send(pb.Packet.encode(packet).finish());
+        }}
+      >
+        new
+      </div>
+      {config.routines.map((routine, index) => (
+        <div
+          key={index}
+          className='p-4 flex flex-col border border-black hover:bg-amber-100 rounded-sm'
+          onDoubleClick={() => {
+            const packet = pb.Packet.create({
+              type: {
+                $case: 'loadRoutine',
+                loadRoutine: routine,
+              },
+            });
+            ws.send(pb.Packet.encode(packet).finish());
+          }}
+        >
+          <div className='text-lg font-semibold'>{routine.name}</div>
+          <div className='text-sm'>
+            {routine.description || '<no description>'}
+          </div>
+          <div className='text-xs'>{routine.id}</div>
+        </div>
+      ))}
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  const loadedRoutine = useStore($loadedRoutine);
+  return (
+    <div className='w-screen h-screen'>
+      {loadedRoutine ? <RoutineEditor /> : <RoutineSelector />}
+    </div>
+  );
+}

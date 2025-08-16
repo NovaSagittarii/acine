@@ -2,14 +2,13 @@ syntax = "proto3";
 
 package ac;
 
-// represents an image frame in a sequence
 message Frame {
-  // sequence (ms since unix epoch)
-  // safe against MAX_SAFE_INT in js (using doubles) of (2<<53)-1
-  // which is after the year 144683 for 2<<52
-  string id = 1;
+  // represents an image frame in a sequence
+  // width/height information used on frontend to compute offsets
 
-  bytes data = 2;  // frame data for screenshot; don't use high res
-
-  string state = 3;  // (debug info) print current state name
+  string id = 1;      // uuid v4
+  bytes data = 2;     // frame data for screenshot; don't use high res
+  string state = 3;   // (debug info) print current state name
+  uint32 width = 4;   // in pixels
+  uint32 height = 5;  // in pixels
 }

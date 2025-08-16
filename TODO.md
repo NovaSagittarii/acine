@@ -30,7 +30,7 @@ budget issue tracker
 - v0.1.4 Automation Features (generalized)
   - [ ] implement multi-node interrupt (event listener)
 - v0.2.0 Routine Manager
-  - [ ] routine new/open/save (multi-instance)
+  - [x] routine new/open/save (multi-instance)
   - [ ] routine export (tar.bz2), include frames
   - [ ] routine launch sequence
   - [ ] attach width/height to positional data (handle rotation and scaling)
@@ -52,6 +52,8 @@ budget issue tracker
 - [ ] route display
 - [ ] migrate venv to uv
 - [ ] self loop with "sample"/"data source" action (text match parse)
+- [ ] move comments to after
+- [ ] map<> instead of repeated
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.

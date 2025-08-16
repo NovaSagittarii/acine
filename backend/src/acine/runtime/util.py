@@ -30,9 +30,11 @@ async def sleep(ms: int):
 
 
 @lru_cache(maxsize=64)
-def get_frame(frame_id: str) -> cv2.typing.MatLike:
+def get_frame(routine_id: str, frame_id: str) -> cv2.typing.MatLike:
     """
     Fetches the image data associated with a frame id. (has cache)
     """
-    path = resolve("img", f"{frame_id}.png")  # probably in BGR
+    assert routine_id, "routine_id not set"
+    assert frame_id, "frame_id not set"
+    path = resolve(routine_id, "img", f"{frame_id}.png")  # probably in BGR
     return cv2.imread(path)

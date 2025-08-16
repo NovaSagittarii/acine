@@ -7,13 +7,23 @@ import "input_event.proto";
 import "position.proto";
 
 message Routine {
-  uint32 id = 1;              // metadata
+  string id = 1;              // metadata
   string name = 2;            // metadata
   string description = 3;     // metadata
   repeated Frame frames = 4;  // indexed by id
   repeated State states = 5;  // indexed by id
   repeated Node nodes = 6;    // indexed by id
   repeated SchedulingGroup sgroups = 7;
+
+  string start_command = 8;
+  /* Executes this command in `cmd.exe` to start target application.
+   * Run a script (like `start.bat`) if it's not a single command.
+   */
+
+  string window_name = 9;
+  /* Window name to look for after running `start_command`.
+   * TODO: handle "" window_name denoting entire desktop (see AHK)
+   */
 
   // basically unused at the moment
   message State {

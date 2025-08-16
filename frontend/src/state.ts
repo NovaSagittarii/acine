@@ -5,6 +5,7 @@
 import { atom } from 'nanostores';
 import { persistentAtom } from '@nanostores/persistent';
 import {
+  BackendConfiguration,
   ConditionProcessing_Frame,
   FrameOperation,
   FrameOperation_Operation,
@@ -18,7 +19,20 @@ import {
 } from 'acine-proto-dist';
 import InputSource from './client/input_source';
 
-export const $routine = atom(Routine.create());
+export const $backendConfiguration = atom(BackendConfiguration.create());
+
+/**
+ * if null, no routine has been selected yet
+ * TODO: some day merge with $routine ? (use useContext or propagate routine dependency ?)
+ */
+export const $loadedRoutine = atom<Routine | null>(null);
+
+/**
+ * routine being edited (most code references this and assumes it exists)
+ * TEMPORARY WORKAROUND: use $loadedRoutine to check if it exists or not instead.
+ */
+export const $routine = atom<Routine>(Routine.create());
+
 export const $routineBase64 = persistentAtom<string>(
   'rb64',
   JSON.stringify(Routine.toJSON(Routine.create())),
@@ -29,7 +43,10 @@ function getRb64MiB() {
 }
 
 export function saveRoutine() {
-  const o = Routine.fromJSON(Routine.toJSON($routine.get()));
+  const r = $routine.get();
+  if (!r) throw new Error('Cannot save routine when routine is null.');
+
+  const o = Routine.fromJSON(Routine.toJSON(r));
 
   // scrub frame.data (its too big)
   o.frames.map((f) => (f.data = new Uint8Array(0)));
@@ -47,10 +64,24 @@ export function saveRoutine() {
 export function loadRoutine(ws: WebSocket) {
   const r = Routine.fromJSON(JSON.parse($routineBase64.get()));
 
+  prepareRoutineFrames(ws, r);
+
+  $routine.set(r);
+  // $frames.set(fr.frames.map(frameToObjectURL));
+  // can't set since dependent on server now...
+  console.log(`loaded ${getRb64MiB()} MiB (in base64)`);
+}
+
+/**
+ * Batch requests a routine's frames from backend.
+ * @param ws websocket connected to backend
+ * @param routine routine with frames that need to be loaded
+ */
+export function prepareRoutineFrames(ws: WebSocket, routine: Routine) {
   // TODO: a part of the stuff that should be moved
   // into the client connection class
   const f = FrameOperation.create();
-  f.frames = r.frames;
+  f.frames = routine.frames;
   f.type = FrameOperation_Operation.OPERATION_BATCH_GET;
   const pkt = Packet.create({
     type: {
@@ -59,11 +90,6 @@ export function loadRoutine(ws: WebSocket) {
     },
   });
   ws.send(Packet.encode(pkt).finish());
-
-  $routine.set(r);
-  // $frames.set(fr.frames.map(frameToObjectURL));
-  // can't set since dependent on server now...
-  console.log(`loaded ${getRb64MiB()} MiB (in base64)`);
 }
 
 /**

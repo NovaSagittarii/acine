@@ -10,6 +10,8 @@ import {
   $runtimeMousePosition as $mousePosition,
   $runtimeMousePressed as $mousePressed,
   $matchOverlay,
+  $backendConfiguration,
+  $loadedRoutine,
 } from './state';
 import { frameToObjectURL } from './client/encoder';
 
@@ -21,17 +23,18 @@ ws.onopen = () => {
   console.log('ws open');
   const req = pb.Packet.create({
     type: {
-      $case: 'configuration',
-      configuration: {},
+      $case: 'getConfiguration',
+      getConfiguration: {},
     },
   });
   ws.send(pb.Packet.encode(req).finish());
-  // autoload on connect (nice QoL)
-  if ($frames.get().length === 0) {
-    // but only when no frames exist (don't repeatedly fire on hot reload)
-    // ... doesn't seem to work properly ($frames cleared on hot reload)
-    loadRoutine(ws);
-  }
+  // // autoload on connect (nice QoL)
+  // if ($frames.get().length === 0) {
+  //   // but only when no frames exist (don't repeatedly fire on hot reload)
+  //   // ... doesn't seem to work properly ($frames cleared on hot reload)
+  //   // ^ is that true still??
+  //   loadRoutine(ws);
+  // }
 };
 ws.onclose = () => console.log('ws close');
 ws.onmessage = async (data: MessageEvent<Blob>) => {
@@ -39,9 +42,20 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
     new Uint8Array(await data.data.arrayBuffer()),
   );
   switch (packet.type?.$case) {
+    case 'getConfiguration': {
+      $backendConfiguration.set(packet.type.getConfiguration);
+      break;
+    }
     case 'configuration': {
+      console.warn('deprecated packet `configuration`', packet);
       const conf = packet.type.configuration;
-      dimensions.set([conf.width, conf.height]);
+      if (
+        dimensions.get()[0] != conf.width ||
+        dimensions.get()[1] != conf.height
+      ) {
+        dimensions.set([conf.width, conf.height]);
+      }
+
       console.log('set dimensions', dimensions.get());
       break;
     }
@@ -75,6 +89,10 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
     case 'getRoutine': {
       const { getRoutine: routine } = packet.type;
       console.log('rcv', routine);
+      if (!$loadedRoutine.get()) {
+        $loadedRoutine.set(routine);
+        // mark as exists
+      }
       $routine.set(routine); // set internal routine
       saveRoutine(); // this saves it in b64 persistent
       loadRoutine(ws); // loads from base64 persistent
@@ -100,6 +118,10 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
   }
 };
 
+/**
+ * - (if `!id`) request the current frame
+ * - (if `id`) request a specific frame
+ */
 export function getFrame(id: string = '') {
   const frameOperation = pb.FrameOperation.create();
   frameOperation.type = pb.FrameOperation_Operation.OPERATION_GET;

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import uuid
 
@@ -17,9 +19,10 @@ from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import RuntimeState
 from autobahn.asyncio.websocket import WebSocketServerProtocol
 
+from . import instance_manager
 from .capture import GameCapture
 from .input_handler import InputHandler
-from .persist import fs_read, fs_write
+from .persist import PrefixedFilesystem
 from .runtime.check_image import check_similarity
 from .runtime.runtime import IController, Runtime, cv2
 
@@ -28,60 +31,95 @@ from .runtime.runtime import IController, Runtime, cv2
 # title = "Arknights"
 title = "TestEnv"
 # title = "Untitled - Paint"
-gc = GameCapture(title)
-ih = InputHandler(title)
+# ih = InputHandler(title)  # ahk waits for window
+# gc = GameCapture(title)  # windows_capture doesn't wait for window
 
 
 class Controller(IController):
     ws: WebSocketServerProtocol
+    gc: GameCapture
+    ih: InputHandler
 
-    def __init__(self, websocket: WebSocketServerProtocol):
+    def __init__(
+        self,
+        websocket: WebSocketServerProtocol,
+        game_capture: GameCapture,
+        input_handler: InputHandler,
+    ):
         super().__init__()
         self.ws = websocket
+        self.gc = game_capture
+        self.ih = input_handler
 
     async def get_frame(self) -> cv2.typing.MatLike:
-        return await gc.get_frame()
+        return await self.gc.get_frame()
 
     async def mouse_move(self, x: int, y: int) -> None:
         p = Packet(input_event=InputEvent(move=Point(x=x, y=y)))
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return ih.mouse_move(x, y)
+        return self.ih.mouse_move(x, y)
 
     async def mouse_down(self) -> None:
         p = Packet(
             input_event=InputEvent(mouse_down=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
         )
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return ih.mouse_down()
+        return self.ih.mouse_down()
 
     async def mouse_up(self) -> None:
         p = Packet(
             input_event=InputEvent(mouse_up=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
         )
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return ih.mouse_up()
+        return self.ih.mouse_up()
 
 
 class AcineServerProtocol(WebSocketServerProtocol):
+    gc: GameCapture | None = None
+    ih: InputHandler | None = None
     rt: Runtime | None = None
+    fs = PrefixedFilesystem()
     current_task: asyncio.Task | None = None
 
     def onConnect(self, request):
+        """WebSocketServerProtocol method, 'connect' event"""
         print("Client connecting: {}".format(request.peer))
 
     def onOpen(self):
+        """WebSocketServerProtocol method, 'open' event"""
         print("WebSocket connection open.")
 
+    def onClose(self, wasClean, code, reason):
+        print("WebSocket connection closed: {}".format(reason))
+
+        # cleanup
+        if self.gc:
+            print("run cleanup")
+            self.gc.close()
+            self.gc = None
+            self.ih = None
+
     async def onMessage(self, payload, isBinary):
-        """
-        if isBinary:
-            print("Binary message received: {} bytes".format(len(payload)))
-        else:
-            print("Text message received: {}".format(payload.decode("utf8")))
-        """
+        """WebSocketServerProtocol method, 'message' event"""
+        # if isBinary:
+        #     print("Binary message received: {} bytes".format(len(payload)))
+        # else:
+        #     print("Text message received: {}".format(payload.decode("utf8")))
 
         if isBinary:
             packet = Packet.FromString(payload)
+            match packet.WhichOneof("type"):
+                case "create_routine":
+                    await self.on_create_routine(packet)
+                case "load_routine":
+                    await self.on_load_routine(packet)
+                case "get_configuration":
+                    await self.on_get_configuration(packet)
+
+            if self.gc is None:
+                return
+                # capture should be online before any routine-specific code runs
+
             match packet.WhichOneof("type"):
                 case "frame_operation":
                     await self.on_frame_operation(packet)
@@ -91,24 +129,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     await self.on_configuration(packet)
                 case "routine":
                     data = Routine.SerializeToString(packet.routine)
-                    await fs_write(["rt.pb"], data)
-                    old_context = None
-                    if self.rt:
-                        # save and restore old position (if exists)
-                        old_context = self.rt.get_context()
-
-                        if self.current_task:
-                            self.current_task.cancel()
-                    self.rt = Runtime(
-                        packet.routine,
-                        Controller(self),
-                        on_change_curr=self.on_change_curr,
-                        on_change_return=self.on_change_return,
-                        on_change_edge=self.on_change_edge,
-                    )
-                    print(old_context)
-                    if old_context:
-                        self.rt.restore_context(old_context)
+                    await self.fs.write(["rt.pb"], data)
+                    self.load_routine(packet.routine)
                 case "get_routine":
                     await self.on_get_routine(packet)
                 case "goto":
@@ -120,10 +142,52 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "sample_current":
                     await self.on_sample_condition(packet, True)
 
+    def prepare_routine(self, routine: Routine):
+        """
+        Updates input_handler/game_capture and FS prefix based on the routine.
+        """
+
+        self.ih = InputHandler(routine.window_name)
+        if self.gc:
+            self.gc.close()
+        self.gc = GameCapture(routine.window_name)
+        self.fs.set_prefix([routine.id])
+
+    def load_routine(self, routine: Routine):
+        """
+        Reloads the runtime with an updated routine.
+        Retains context if possible, i.e. same current_node still exists.
+        """
+
+        old_context = None
+        if self.rt:
+            # save and restore old position (if exists)
+            old_context = self.rt.get_context()
+
+            if self.current_task:
+                self.current_task.cancel()
+
+            if self.rt.routine.window_name != routine.window_name:
+                # if window_name is different, recreate gc/ih
+                self.prepare_routine(routine)
+        else:
+            # no routine existed before so gc/ih are unset
+            self.prepare_routine(routine)
+
+        self.rt = Runtime(
+            routine,
+            Controller(self, self.gc, self.ih),
+            on_change_curr=self.on_change_curr,
+            on_change_return=self.on_change_return,
+            on_change_edge=self.on_change_edge,
+        )
+        if old_context:
+            self.rt.restore_context(old_context)
+
     async def on_frame_operation(self, packet: Packet):
         match packet.frame_operation.type:
             case FrameOperation.OPERATION_GET:
-                img = await gc.get_png_frame()
+                img, width, height = await self.gc.get_png_frame()
                 state = "DISABLED"  # predict(img)
                 data = img.tobytes()
                 p = Packet(
@@ -136,6 +200,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                             id=str(uuid.uuid4()),
                             data=data,
                             state=state,
+                            width=width,
+                            height=height,
                         ),
                     )
                 )
@@ -146,11 +212,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 )
             case FrameOperation.OPERATION_SAVE:
                 f: Frame = packet.frame_operation.frame
-                await fs_write(["img", f"{f.id}.png"], f.data)
+                await self.fs.write(["img", f"{f.id}.png"], f.data)
             case FrameOperation.OPERATION_BATCH_GET:
                 # populate requested frames
                 for i, f in enumerate(packet.frame_operation.frames):
-                    f.data = await fs_read(["img", f"{f.id}.png"])
+                    f.data = await self.fs.read(["img", f"{f.id}.png"])
                 self.sendMessage(
                     packet.SerializeToString(),
                     isBinary=True,
@@ -161,25 +227,26 @@ class AcineServerProtocol(WebSocketServerProtocol):
         match event_type:
             case "move":
                 pos: Point = packet.input_event.move
-                ih.mouse_move(pos.x, pos.y)
+                self.ih.mouse_move(pos.x, pos.y)
             case "mouse_up" | "mouse_down":
                 if event_type == "mouse_up":
                     button = packet.input_event.mouse_up
-                    ih.mouse_up()
+                    self.ih.mouse_up()
                 else:
                     button = packet.input_event.mouse_down
-                    ih.mouse_down()
+                    self.ih.mouse_down()
                 match button:
                     case InputEvent.MouseButton.MOUSE_BUTTON_LEFT:
                         pass
 
     async def on_configuration(self, packet: Packet):
-        w, h = gc.dimensions
+        raise DeprecationWarning("Prefer frame stream dimensions")
+        w, h = self.gc.dimensions
         response = Packet(configuration=Configuration(width=w, height=h))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     async def on_get_routine(self, packet: Packet):
-        s = await fs_read(["rt.pb"])
+        s = await self.fs.read(["rt.pb"])
         response = Packet(get_routine=Routine.FromString(s))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
@@ -240,7 +307,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 condition = packet.sample_condition.condition
             case "sample_current":
                 emptyFrame = Frame(id="REALTIME")
-                imgs = [(emptyFrame, await gc.get_frame())]
+                imgs = [(emptyFrame, await self.gc.get_frame())]
                 output = packet.sample_current.frames
                 condition = packet.sample_current.condition
             case _:
@@ -272,5 +339,19 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 raise NotImplementedError(f"No implementation for {condition_type}")
         self.sendMessage(packet.SerializeToString(), isBinary=True)
 
-    def onClose(self, wasClean, code, reason):
-        print("WebSocket connection closed: {}".format(reason))
+    async def on_create_routine(self, packet: Packet):
+        routine = instance_manager.create_routine(packet.create_routine)
+        packet = Packet(get_routine=routine)
+        self.sendMessage(packet.SerializeToString(), isBinary=True)
+
+    async def on_load_routine(self, packet: Packet):
+        routine = instance_manager.get_routine(packet.load_routine)
+        self.load_routine(routine)
+
+        packet = Packet(get_routine=routine)
+        self.sendMessage(packet.SerializeToString(), isBinary=True)
+
+    async def on_get_configuration(self, packet: Packet):
+        packet.get_configuration.Clear()
+        packet.get_configuration.routines.extend(instance_manager.get_routines())
+        self.sendMessage(packet.SerializeToString(), isBinary=True)

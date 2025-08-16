@@ -25,8 +25,9 @@ class TestCheck:
             )
         )
         img = random.rand(2, 3, 4)
+        ref_img = random.rand(2, 3, 4)
 
         p = mocker.patch("acine.runtime.check.check_image")
         p.return_value = ret
-        assert check_once(c, img) == ret
-        p.assert_called_once_with(c.image, img)
+        assert check_once(c, img, ref_img) == ret
+        p.assert_called_once_with(c.image, img, ref_img)

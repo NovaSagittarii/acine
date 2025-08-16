@@ -6,7 +6,7 @@ from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture, MockType
 
-r1 = Routine(id=1, name="Test Routine", frames=[], nodes=[Routine.Node()])
+r1 = Routine(id="1", name="Test Routine", frames=[], nodes=[Routine.Node()])
 
 
 @pytest.fixture

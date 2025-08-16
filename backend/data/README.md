@@ -1,8 +1,10 @@
 All the persistent screenshot data goes over here.
 
-ID system is based on the assumptions that:
+- `/data`
+  - `[routine_id]`
+    - `rt.pb` routine proto file with metadata (no frame data)
+    - `img` image folder
+      - `[frame_id].png` individual frame
 
-- Application used in the years 1970 (unix epoch) through 144000.
-  - Uses int64 to represent, but JS has max safe int (double).
-- No two screenshots are taken in the same millisecond.
-  - ID _is_ ms since epoch.
+Frames exist as separate files so filesystem cache can do its thing and easier
+to view individual frames with local image viewer application.

@@ -79,7 +79,7 @@ class Runtime:
         self.nodes = {}
         self.edges = {}
         self.G = nx.DiGraph()
-        self.context.curr = routine.nodes[0]
+        self.context.curr = routine.nodes[0] if routine.nodes else None
         self.context.return_stack = [None]
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
@@ -265,7 +265,10 @@ class Runtime:
         processes condition before calling `check`
         """
         condition = self.__process_condition(edge, condition, use_dest=use_dest)
-        return check(condition, self.controller.get_frame, no_delay=no_delay)
+        ref_img: cv2.typing.MatLike | None = None
+        if condition.WhichOneof("condition") == "image":
+            ref_img = get_frame(self.routine.id, condition.image.frame_id)
+        return check(condition, self.controller.get_frame, ref_img, no_delay=no_delay)
 
     def __check_once(
         self,
@@ -278,7 +281,10 @@ class Runtime:
         processes condition before calling `check_once`
         """
         condition = self.__process_condition(edge, condition, use_dest=use_dest)
-        return check_once(condition, img)
+        ref_img: cv2.typing.MatLike | None = None
+        if condition.WhichOneof("condition") == "image":
+            ref_img = get_frame(self.routine.id, condition.image.frame_id)
+        return check_once(condition, img, ref_img)
 
     def __precheck_action(self, action: Routine.Edge, img: cv2.typing.MatLike):
         """
@@ -346,7 +352,7 @@ class Runtime:
 
         if condition.WhichOneof("condition") == "image":
             c = condition.image
-            ref = get_frame(c.frame_id)
+            ref = get_frame(self.routine.id, c.frame_id)
             img = await self.controller.get_frame()
             matches = check_similarity(c, ref, img)
             print(matches)

@@ -1,5 +1,9 @@
 """
 gRPC service rpc handlers for acine runtime
+
+**currently not implemented**
+
+if programming is needed, just work with runtime directly
 """
 
 import asyncio
@@ -10,10 +14,7 @@ import google.protobuf.empty_pb2 as Empty
 import grpc
 from acine_proto_dist.routine_pb2 import Routine
 
-from ..persist import fs_read_sync as fs_read
-
-rt = Routine.FromString(fs_read(["rt.pb"]))
-curr = Routine.Node()
+rt = Routine()
 
 
 class RuntimeService(runtime_grpc.RuntimeServicer):

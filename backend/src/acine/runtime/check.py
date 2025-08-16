@@ -23,6 +23,7 @@ class CheckResult(Enum):
 async def check(
     condition: Routine.Condition,
     get_img: GetImageCallableType,
+    ref_img: cv2.typing.MatLike | None = None,
     *,
     no_delay: bool = False,
 ) -> CheckResult:
@@ -49,7 +50,7 @@ async def check(
         if now() > timeout:
             return CheckResult.TIMEOUT
 
-        if check_once(condition, await get_img()):
+        if check_once(condition, await get_img(), ref_img):
             print("[== OK ==]", ct)
             return CheckResult.PASS
 
@@ -60,7 +61,11 @@ async def check(
         await sleep(next - now())
 
 
-def check_once(condition: Routine.Condition, img: cv2.typing.MatLike) -> bool:
+def check_once(
+    condition: Routine.Condition,
+    img: cv2.typing.MatLike,
+    ref_img: cv2.typing.MatLike | None = None,
+) -> bool:
     """
     Runs a check once, returns True if pass
     """
@@ -69,7 +74,8 @@ def check_once(condition: Routine.Condition, img: cv2.typing.MatLike) -> bool:
         case None:
             return True
         case "image":
-            if check_image(condition.image, img):
+            assert ref_img is not None, "Reference image required for image"
+            if check_image(condition.image, img, ref_img):
                 return True
         case "text":
             raise NotImplementedError()

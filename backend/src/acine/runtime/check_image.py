@@ -4,7 +4,6 @@ Implements image similarity checks
 
 import cv2
 import numpy as np
-from acine.runtime.util import get_frame
 from acine_proto_dist.routine_pb2 import Routine
 
 
@@ -30,8 +29,8 @@ class SimilarityResult:
 
 def check_similarity(
     condition: Routine.Condition.Image,
-    ref_img: cv2.typing.MatLike,
     img: cv2.typing.MatLike,
+    ref_img: cv2.typing.MatLike,
 ) -> list[SimilarityResult]:
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
@@ -114,11 +113,11 @@ def check_similarity(
 def check_image(
     condition: Routine.Condition.Image,
     img: cv2.typing.MatLike,
+    ref_img: cv2.typing.MatLike,
 ) -> bool:
     """
     checks condition "image" type
 
     returns `True` if passes
     """
-    ref_img = get_frame(condition.frame_id)
-    return len(check_similarity(condition, ref_img, img)) > 0
+    return len(check_similarity(condition, img, ref_img)) > 0
