@@ -187,7 +187,9 @@ function Pointer({
 }: PointerProps) {
   return (
     <div
-      className='absolute top-0 left-0 select-none'
+      className='absolute top-0 left-0 select-none pointer-events-none'
+      // requires pointer-events-none to prevent moving the pointer off the
+      // parent screen (since this is a child of the parent element)
       style={{
         left: toPercentage(x / width),
         top: toPercentage(y / height),
