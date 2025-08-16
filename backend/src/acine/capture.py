@@ -5,7 +5,7 @@ NOTE: Capture does not capture (seems to fail) when the window is visible,
 but partially offscreen.
 """
 
-from asyncio import Lock, Semaphore
+from asyncio import Lock, Semaphore, sleep
 
 import cv2
 from numpy import ndarray
@@ -24,6 +24,8 @@ class GameCapture:  # thanks joshua
         self.dimensions: "tuple[int, int]" = (0, 0)
         """ screen dimensions """
 
+        self.close_callback = lambda: None
+
     def init(self) -> None:
         """set up WindowsCapture event listeners"""
         self.capture = WindowsCapture(
@@ -34,7 +36,9 @@ class GameCapture:  # thanks joshua
         )
 
         @self.capture.event
-        def on_frame_arrived(frame: Frame, _: InternalCaptureControl):
+        def on_frame_arrived(frame: Frame, control: InternalCaptureControl):
+            self.close_callback = control.stop
+
             # Note: when minimized, this does not run
             if self.get_png_frame_lock.locked():
                 return
@@ -66,8 +70,14 @@ class GameCapture:  # thanks joshua
         self.capture.start_free_threaded()
 
     async def __next_frame(self):
-        """requests a frame until it gets the next frame"""
-        return  # bursty frames??
+        """waits it gets the next frame"""
+        while self.data is None:
+            await sleep(0.1)
+
+        # how to handle bursty frames??
+        # sometimes it stops captures (no draw update),
+        # this might cause a backlog
+        return
         async with self.get_png_frame_lock:
             await self.capture_callback_semaphore.acquire()
 
@@ -90,5 +100,6 @@ if __name__ == "__main__":
         g = GameCapture("Arknights")
         f = await g.get_png_frame()
         print("frame", f)
+        g.close_callback()
 
     asyncio.run(run())
