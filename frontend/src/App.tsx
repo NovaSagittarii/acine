@@ -206,49 +206,58 @@ function RoutineEditor() {
 
 function RoutineSelector() {
   const config = useStore($backendConfiguration);
+  const [isBusy, setBusy] = useState(false);
 
   return (
     <div className='flex flex-col p-8 gap-2 overflow-y-auto'>
-      Double click to load
-      <div
-        className='p-4 flex flex-col border border-black hover:bg-amber-100'
-        onDoubleClick={() => {
-          const packet = pb.Packet.create({
-            type: {
-              $case: 'createRoutine',
-              createRoutine: {
-                name: 'Untitled Routine',
-                description: 'A newly created unconfigured routine.',
-                windowName: 'TestEnv',
-              },
-            },
-          });
-          ws.send(pb.Packet.encode(packet).finish());
-        }}
-      >
-        new
-      </div>
-      {config.routines.map((routine, index) => (
-        <div
-          key={index}
-          className='p-4 flex flex-col border border-black hover:bg-amber-100 rounded-sm'
-          onDoubleClick={() => {
-            const packet = pb.Packet.create({
-              type: {
-                $case: 'loadRoutine',
-                loadRoutine: routine,
-              },
-            });
-            ws.send(pb.Packet.encode(packet).finish());
-          }}
-        >
-          <div className='text-lg font-semibold'>{routine.name}</div>
-          <div className='text-sm'>
-            {routine.description || '<no description>'}
+      {isBusy ? (
+        'Loading... probably (check console and server if it hangs).'
+      ) : (
+        <>
+          Double click to load
+          <div
+            className='p-4 flex flex-col border border-black hover:bg-amber-100'
+            onDoubleClick={() => {
+              const packet = pb.Packet.create({
+                type: {
+                  $case: 'createRoutine',
+                  createRoutine: {
+                    name: 'Untitled Routine',
+                    description: 'A newly created unconfigured routine.',
+                    windowName: 'TestEnv',
+                  },
+                },
+              });
+              ws.send(pb.Packet.encode(packet).finish());
+              setBusy(true);
+            }}
+          >
+            new
           </div>
-          <div className='text-xs'>{routine.id}</div>
-        </div>
-      ))}
+          {config.routines.map((routine, index) => (
+            <div
+              key={index}
+              className='p-4 flex flex-col border border-black hover:bg-amber-100 rounded-sm'
+              onDoubleClick={() => {
+                const packet = pb.Packet.create({
+                  type: {
+                    $case: 'loadRoutine',
+                    loadRoutine: routine,
+                  },
+                });
+                ws.send(pb.Packet.encode(packet).finish());
+                setBusy(true);
+              }}
+            >
+              <div className='text-lg font-semibold'>{routine.name}</div>
+              <div className='text-sm'>
+                {routine.description || '<no description>'}
+              </div>
+              <div className='text-xs'>{routine.id}</div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
