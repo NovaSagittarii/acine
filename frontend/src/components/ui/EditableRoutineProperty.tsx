@@ -2,7 +2,7 @@ import EditableText from './EditableText';
 
 interface EditableRoutinePropertyProps<T, K extends keyof T> {
   object: T;
-  property: K;
+  property: K & string;
   callback: () => void;
   className?: string;
 }
@@ -46,7 +46,11 @@ export default function EditableRoutineProperty<T, K extends keyof T>({
         }}
         className={className}
       >
-        {object[property] as string}
+        {object[property] ? (
+          (object[property] as string)
+        ) : (
+          <div className='opacity-50'>{'<unset>'}</div>
+        )}
       </EditableText>
     )
   );

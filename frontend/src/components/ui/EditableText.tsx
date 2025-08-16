@@ -1,5 +1,5 @@
 interface EditableTextProps {
-  children: string;
+  children: React.ReactNode | string;
   className?: string;
   onChange: (newText: string) => void; // called when text updated
 }
