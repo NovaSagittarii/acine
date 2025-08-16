@@ -21,8 +21,10 @@ import NodeList from './components/NodeList';
 import ConditionImageEditor from './components/ConditionImageEditor';
 import Window from './components/Window';
 import RoutineViewer from './components/RoutineViewer';
+import RoutineConfiguration from './components/RoutineConfiguration';
 
 enum ActiveTab {
+  CONFIG,
   STATE,
   NODE,
   GRAPH,
@@ -149,7 +151,7 @@ function RoutineEditor() {
                 onClick={() => setActiveTab(index)}
                 className={`hover:bg-amber-100 ${activeTab.valueOf() === index && 'font-bold'}`}
               >
-                {['states', 'nodes', 'graph'][index]}
+                {['config', 'states', 'nodes', 'graph'][index]}
               </div>
             ))}
             <div className='hover:bg-amber-100' onClick={saveRoutine}>
@@ -194,6 +196,7 @@ function RoutineEditor() {
               pull
             </div>
           </div>
+          {activeTab === ActiveTab.CONFIG && <RoutineConfiguration />}
           {activeTab === ActiveTab.STATE && <StateList />}
           {activeTab === ActiveTab.NODE && <NodeList />}
           {activeTab === ActiveTab.GRAPH && <RoutineViewer />}
