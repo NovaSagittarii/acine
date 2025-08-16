@@ -106,7 +106,7 @@ function RoutineEditor() {
   const replayInputSource = useStore($replayInputSource);
   const selectedState = useStore($selectedState);
   const dimensions = useStore($sourceDimensions);
-  const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.STATE);
+  const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.CONFIG);
 
   return (
     <>
@@ -235,12 +235,12 @@ function RoutineSelector() {
               setBusy(true);
             }}
           >
-            new
+            Create new
           </div>
           {config.routines.map((routine, index) => (
             <div
               key={index}
-              className='p-4 flex flex-col border border-black hover:bg-amber-100 rounded-sm'
+              className='p-4 gap-2 flex flex-col border border-black hover:bg-amber-100 rounded-sm'
               onDoubleClick={() => {
                 const packet = pb.Packet.create({
                   type: {
@@ -255,6 +255,8 @@ function RoutineSelector() {
               <div className='text-lg font-semibold'>{routine.name}</div>
               <div className='text-sm'>
                 {routine.description || '<no description>'}
+                <div>start - {routine.startCommand || '<unset>'}</div>
+                <div>window - {routine.windowName || '<unset>'}</div>
               </div>
               <div className='text-xs'>{routine.id}</div>
             </div>
