@@ -83,3 +83,10 @@ class InputHandler:
         flags = "D NA" if self.is_mouse_down else "U NA"
         self.win.click(x=self.x, y=self.y, button="L", options=flags)
         # print(self.x, self.y, flags)
+
+
+if __name__ == "__main__":
+    s = "Arknights"
+    print(f"looking for {s}")
+    ih = InputHandler(s)
+    print("found")
