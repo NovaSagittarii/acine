@@ -50,9 +50,8 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
             }}
           />
         </div>
-        <div className='flex flex-row text-sm font-mono'>
+        <div className='flex flex-row'>
           <Select
-            className='p-0 appearance-none'
             value={TRIGGER_TYPES_DISPLAY.findIndex(
               ([_, t]) => t === edge.trigger,
             )}
@@ -66,12 +65,18 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         </div>
 
         <ActionEditor edge={edge} />
-        <Collapse label={'precondition ' + edge.precondition?.condition?.$case}>
+        <Collapse
+          label={
+            'precondition ' + (edge.precondition?.condition?.$case || 'true')
+          }
+        >
           precondition
           <Condition condition={edge.precondition!} allowAuto />
         </Collapse>
         <Collapse
-          label={'postcondition ' + edge.postcondition?.condition?.$case}
+          label={
+            'postcondition ' + (edge.postcondition?.condition?.$case || 'true')
+          }
         >
           postcondition
           <Condition condition={edge.postcondition!} allowAuto />

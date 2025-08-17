@@ -20,15 +20,15 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
   const forceUpdate = useForceUpdate();
 
   return (
-    <div className='font-mono'>
-      <NumberInput
+    <div className=''>
+      {/* <NumberInput
         className='min-w-8 w-fit'
         object={edge}
         property={'limit'}
         label={'limit'}
         callback={forceUpdate}
         format={(x) => (x > 0 ? x.toString() : x < 0 ? 'INF' : 'disabled')}
-      />
+      /> */}
       <div>
         <Select
           value={

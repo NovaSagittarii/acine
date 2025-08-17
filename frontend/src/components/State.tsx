@@ -25,7 +25,7 @@ function State({ state, selected = false }: StateProps) {
           object={state}
           property='name'
           callback={forceUpdate}
-          className='flex-grow font-semibold font-mono'
+          className='flex-grow font-semibold'
         />
         <div className='flex flex-row text-xs'>
           id={state.id} ({state.samples.length} samples)

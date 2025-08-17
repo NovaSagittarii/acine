@@ -40,7 +40,7 @@ function Node({ node, selected = false }: NodeProps) {
           object={node}
           property={'name'}
           callback={forceUpdate}
-          className='font-semibold font-mono grow'
+          className='font-semibold grow'
         />
         <div className='flex flex-row text-xs'>
           id={node.id} (outdegree={node.edges.length})
@@ -52,7 +52,7 @@ function Node({ node, selected = false }: NodeProps) {
         callback={forceUpdate}
         className='text-sm'
       />
-      <div className='flex flex-row text-sm font-mono'>
+      <div className='flex flex-row'>
         <Select
           className='p-0 appearance-none'
           value={NODE_TYPES_DISPLAY.findIndex(([_, t]) => t === node.type)}
@@ -66,7 +66,10 @@ function Node({ node, selected = false }: NodeProps) {
       </div>
       {node.defaultCondition && (
         <Collapse
-          label={'defaultCondition ' + node.defaultCondition.condition?.$case}
+          label={
+            'defaultCondition ' +
+            (node.defaultCondition.condition?.$case || 'true')
+          }
         >
           defaultCondition
           <Condition condition={node.defaultCondition} />

@@ -47,7 +47,7 @@ export default function Condition({
   const forceUpdate = useForceUpdate();
 
   return (
-    <div className='pl-1 border border-black font-mono'>
+    <div className='pl-1 border border-black'>
       {condition.condition?.$case === 'image' && (
         <div className='float-right flex gap-2 items-center font-sans'>
           <div
@@ -59,7 +59,7 @@ export default function Condition({
             {pluralize(condition.condition.image.regions.length, 'region')}
           </div>
           <Button
-            className='p-1.5! w-fit bg-black text-white scale-100!'
+            className='px-1.5! py-0! w-fit bg-black text-white scale-100!'
             onClick={() => {
               // duplicate conditional to make typescript happy
               if (condition.condition?.$case === 'image') {
@@ -73,9 +73,9 @@ export default function Condition({
       )}
 
       {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
-      <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' />
-      <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' />
-      <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' />
+      {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' /> */}
+      {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' /> */}
+      {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' /> */}
       <div>
         <SelectAuto
           value={(() => {
