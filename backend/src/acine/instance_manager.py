@@ -51,7 +51,7 @@ def get_routines() -> list[Routine]:
                 window_name=r.window_name,
             )
         )
-    return out
+    return sorted(out, key=lambda x: x.name)
 
 
 def validate_routine(routine: Routine) -> bool:
