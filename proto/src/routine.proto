@@ -88,16 +88,26 @@ message Routine {
       InputReplay replay = 15;  // recording playback
     };
 
-    EdgeTriggerType trigger = 10;  // standard or interrupt
+    EdgeTriggerType trigger = 10;  // restriction on when it can be taken
+
+    repeated Dependency dependencies = 16;
+    // need to satisfy these before scheduling
 
     enum EdgeTriggerType {
       EDGE_TRIGGER_TYPE_UNSPECIFIED = 0;
-      EDGE_TRIGGER_TYPE_STANDARD = 1;  // can be taken or not
+      EDGE_TRIGGER_TYPE_STANDARD = 1;  // can freely choose to take
+      EDGE_TRIGGER_TYPE_INTERRUPT = 2;
       /* must be taken if possible -- forced action
+       *
        * if precondition passes, goto is forced (an unplaned async event)
+       *
        * recommended to use auto postcondition
        */
-      EDGE_TRIGGER_TYPE_INTERRUPT = 2;
+
+      EDGE_TRIGGER_TYPE_SCHEDULED = 3;
+      /* special case of standard edge, must be scheduled to take.
+       * cannot be used for navigation.
+       */
     }
 
     message ScheduleInstance {
@@ -190,5 +200,32 @@ message Routine {
     SCHEDULING_TYPE_FIRM_REALTIME = 2;  // few misses are ok
     SCHEDULING_TYPE_CHECK = 8;          // tries `retry_attempts` times
     SCHEDULING_TYPE_EXECUTE = 16;       // requires action to happen
+  }
+
+  message Dependency {
+    /* Dependencies are taken into account at the scheduling stage.
+     *
+     * Used for requiring some actions that must happen before another.
+     */
+
+    string id = 1;               // what is the dependency on? (edge id)
+    int32 count = 2;             // how many times it needs to happen
+    DependencyType type = 3;     // what counts as meeting it?
+    bool explicit = 4;           // whether you MUST manually schedule it
+    int32 persist_duration = 5;  // ms; when do counts expire?
+  }
+  enum DependencyType {
+    /* During edge processing, the following occurs:
+     * 1. Precondition attempt, if fail, abort
+     * 2. Action attempt (possibly interrupted)
+     * 3. Postcondition attempt, if fail, abort
+     * 4. Completion
+     */
+
+    DEPENDENCY_TYPE_UNSPECIFIED = 0;  // default: completion
+    DEPENDENCY_TYPE_CHECK = 1;        // requires precondition attempt
+    DEPENDENCY_TYPE_ATTEMPT = 2;      // requires action start
+    DEPENDENCY_TYPE_EXECUTE = 3;      // requires postcondition attempt
+    DEPENDENCY_TYPE_COMPLETION = 4;   // requires postcondition pass
   }
 }
