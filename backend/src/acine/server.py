@@ -302,7 +302,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
         match packet.WhichOneof("type"):
             case "sample_condition":
-                imgs = [(f, get_frame(f.id)) for f in self.rt.routine.frames]
+                imgs = [
+                    (f, get_frame(self.rt.routine.id, f.id))
+                    for f in self.rt.routine.frames
+                ]
                 output = packet.sample_condition.frames
                 condition = packet.sample_condition.condition
             case "sample_current":
@@ -320,7 +323,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
             case "image":
                 c = condition.image
                 c.threshold = 0.4  # clientside can filter
-                ref = get_frame(c.frame_id)
+                ref = get_frame(self.rt.routine.id, c.frame_id)
                 for f, img in imgs:
                     results = check_similarity(c, ref, img)
                     if not results:
