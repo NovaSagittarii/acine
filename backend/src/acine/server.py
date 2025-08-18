@@ -338,6 +338,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
                             )
                         )
                     output.append(pb)
+                output.sort(key=lambda x: x.matches[0].score, reverse=True)
             case _:
                 raise NotImplementedError(f"No implementation for {condition_type}")
         self.sendMessage(packet.SerializeToString(), isBinary=True)

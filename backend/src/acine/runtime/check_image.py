@@ -34,6 +34,7 @@ def check_similarity(
 ) -> list[SimilarityResult]:
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
+    Positions are sorted descending.
 
     TM_CCOEFF is really bad on small gray squares for some reason
     TM_CCORR is less broken
