@@ -94,14 +94,10 @@ function RoutineEditor() {
   }, [listen]);
 
   useEffect(() => {
-    const int = setInterval(() => {
-      getFrame();
-      setDSend(Date.now());
-    }, 250);
-    return () => {
-      clearInterval(int);
-    };
-  }, []);
+    // whenever imageUrl updates, received a new frame so... request another!
+    getFrame();
+    setDSend(Date.now());
+  }, [imageUrl]);
 
   const replayInputSource = useStore($replayInputSource);
   const selectedState = useStore($selectedState);
