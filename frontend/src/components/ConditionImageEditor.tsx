@@ -207,6 +207,27 @@ export default function ConditionImageEditor() {
               </RegionEditor>
             </div>
           </div>
+          <div className='grid grid-cols-8 overflow-y-auto h-full'>
+            {preview.map((x, index) => (
+              <div key={index} className='h-fit w-fit relative'>
+                <img
+                  className='select-none w-full'
+                  src={
+                    x.frame?.id &&
+                    frames[routine.frames.map((f) => f.id).indexOf(x.frame?.id)]
+                  }
+                  draggable={false}
+                />
+                <ConditionOverlay
+                  preview={[x]}
+                  templateRegions={condition.regions}
+                  threshold={condition.threshold}
+                  width={width}
+                  height={height}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </Modal>
     )
