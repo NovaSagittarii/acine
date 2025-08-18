@@ -47,12 +47,17 @@ export default function Window({
    */
   const processEvent = useCallback(
     (event: pb.InputEvent, dx: number = 0, dy: number = 0) => {
+      event = pb.InputEvent.create(event); // copy by reference
+
       // 1. update display values
       switch (event.type?.$case) {
         case 'move': {
+          // changes need to apply when inputEvent is sent
+          event.type.move.x += dx;
+          event.type.move.y += dy;
           const { x, y } = event.type.move;
-          setMouseX(x + dx);
-          setMouseY(y + dy);
+          setMouseX(x);
+          setMouseY(y);
           break;
         }
         case 'mouseDown':
