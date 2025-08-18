@@ -20,6 +20,15 @@ interface ConditionOverlayProps {
   width: number;
   height: number;
   debug?: boolean; // whether to show extra information
+  max?: boolean; // whether to show highest score
+}
+
+/**
+ * How to format the normalized scores.
+ */
+function format(x: number): string {
+  // return x.toString(5); // reasonable amount of decimals
+  return Math.round(x * 1e6).toString();
 }
 
 /**
@@ -32,6 +41,7 @@ export default function ConditionOverlay({
   width,
   height,
   debug = false,
+  max = false,
 }: ConditionOverlayProps) {
   const [matchResults, setMatchResults] = useState<
     {
@@ -96,6 +106,15 @@ export default function ConditionOverlay({
           </div>
         </Region>
       ))}
+      {max && (
+        <div
+          className={`absolute top-0 text-green-900 ${matchResults[0].score < threshold && 'text-red-900 opacity-75'}`}
+          style={{ textShadow: '0 0 1px rgba(255, 255, 255)' }}
+          // textShadow for readability (otherwise hard to see dark on dark)
+        >
+          {format(matchResults[0].score)}
+        </div>
+      )}
       {debug && (
         <div className='absolute bottom-0 right-0 text-black/50'>
           {matchResults.length}/{RECT_DRAW_LIMIT}

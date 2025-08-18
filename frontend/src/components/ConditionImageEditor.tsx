@@ -224,6 +224,7 @@ export default function ConditionImageEditor() {
                   threshold={condition.threshold}
                   width={width}
                   height={height}
+                  max
                 />
               </div>
             ))}
