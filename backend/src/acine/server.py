@@ -325,7 +325,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 c.threshold = 0.4  # clientside can filter
                 ref = get_frame(self.rt.routine.id, c.frame_id)
                 for f, img in imgs:
-                    results = check_similarity(c, ref, img)
+                    results = check_similarity(c, img, ref)
                     if not results:
                         continue
 

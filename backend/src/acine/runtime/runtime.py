@@ -354,7 +354,7 @@ class Runtime:
             c = condition.image
             ref = get_frame(self.routine.id, c.frame_id)
             img = await self.controller.get_frame()
-            matches = check_similarity(c, ref, img)
+            matches = check_similarity(c, img, ref)
             print(matches)
             if matches:
                 return matches[0].position
