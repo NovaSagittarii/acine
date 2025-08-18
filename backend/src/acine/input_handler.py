@@ -42,6 +42,8 @@ With further testing, turns out this is a result of changing to v2.
 > offset by exactly 36 pixels (the height of the window title bar)
 """
 
+from os import system
+
 from ahk import AHK
 
 AHK(version="v1")
@@ -49,8 +51,10 @@ ahk = AHK(version="v2")
 
 
 class InputHandler:
-    def __init__(self, title: str):
+    def __init__(self, title: str, cmd: str):
         if title:
+            if cmd and not ahk.list_windows(title=title):
+                system(cmd)
             self.title = title
             self.win = ahk.win_wait(title=title, timeout=30, detect_hidden_windows=True)
             print(self.win.title, self.win)

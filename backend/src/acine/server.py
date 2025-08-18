@@ -147,7 +147,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
         Updates input_handler/game_capture and FS prefix based on the routine.
         """
 
-        self.ih = InputHandler(routine.window_name)
+        self.ih = InputHandler(routine.window_name, cmd=routine.start_command)
         if self.gc:
             self.gc.close()
         self.gc = GameCapture(routine.window_name)
