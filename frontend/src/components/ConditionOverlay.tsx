@@ -106,7 +106,7 @@ export default function ConditionOverlay({
           </div>
         </Region>
       ))}
-      {max && (
+      {max && matchResults[0] && (
         <div
           className={`absolute top-0 text-green-900 ${matchResults[0].score < threshold && 'text-red-900 opacity-75'}`}
           style={{ textShadow: '0 0 1px rgba(255, 255, 255)' }}
@@ -114,6 +114,9 @@ export default function ConditionOverlay({
         >
           {format(matchResults[0].score)}
         </div>
+      )}
+      {!matchResults[0] && (
+        <div className='absolute top-0 left-0 text-red-900'>No matches</div>
       )}
       {debug && (
         <div className='absolute bottom-0 right-0 text-black/50'>
