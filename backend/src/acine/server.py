@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from copy import deepcopy
 
 from acine.runtime.util import get_frame
 
@@ -162,7 +163,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
         old_context = None
         if self.rt:
             # save and restore old position (if exists)
-            old_context = self.rt.get_context()
+            old_context = deepcopy(self.rt.get_context())
 
             if self.current_task:
                 self.current_task.cancel()

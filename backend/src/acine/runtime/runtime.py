@@ -97,7 +97,7 @@ class Runtime:
         self.set_curr(self.context.curr)  # pushes update on init
 
     def set_curr(self, node: Routine.Node):
-        self.context.curr = node
+        self.context.curr = self.nodes[node.id]
         if self.on_change_curr:
             self.on_change_curr(self.context.curr)
 
