@@ -38,12 +38,17 @@ export default function EdgeList({ node }: EdgeListProps) {
             const newEdge = Routine_Edge.create({
               id: uuidv4(),
               precondition: Routine_Condition.create({
-                delay: 50,
-                interval: 100,
+                // precondition timeout sort of doesn't make sense
+                // since it needed to pass before it is taken...
+                delay: 0,
+                interval: 0,
+                timeout: 50,
               }),
               postcondition: Routine_Condition.create({
-                delay: 50,
-                interval: 100,
+                delay: 0,
+                interval: 10,
+                // unset timeout (defaults to 30 seconds)
+
                 // you probably want to use the destination node
                 // default_condition since most transitions are
                 // state transitions

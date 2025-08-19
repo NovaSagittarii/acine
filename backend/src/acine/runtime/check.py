@@ -43,21 +43,25 @@ async def check(
 
     ct = 0
     while True:
-        print("[?] check", ct, end="\r")
+        timeout_info = f"{(timeout - now()) / 1000:.1f}s left"
+        print("[?] check", ct, timeout_info, end="\r")
         ct += 1
 
         next = now() + condition.interval
-        if now() > timeout:
-            return CheckResult.TIMEOUT
 
         if check_once(condition, await get_img(), ref_img):
             print("[== OK ==]", ct)
             return CheckResult.PASS
 
-        # schedule for next check
-        if next > timeout:
-            await sleep(timeout - now())
+        # allow at least one check before timeout
+        if now() > timeout or next > timeout:
+            print(f"[X] check timeout after {timeout_duration / 1000:.1f}s")
             return CheckResult.TIMEOUT
+
+        # schedule for next check
+        # if next > timeout:
+        #     await sleep(max(0, timeout - now())) # probably no need to wait
+        #     return CheckResult.TIMEOUT
         await sleep(next - now())
 
 

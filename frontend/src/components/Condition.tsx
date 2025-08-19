@@ -73,7 +73,7 @@ export default function Condition({
       )}
 
       {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
-      {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' /> */}
+      <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' />
       {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' /> */}
       {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' /> */}
       <div>
