@@ -1,10 +1,16 @@
 import { $frames, $routine, $runtimeContext } from '@/state';
+import { atom } from 'nanostores';
 import { useStore } from '@nanostores/react';
 import { useCallback } from 'react';
 import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
 import { runtimeGoto, runtimeQueueEdge } from '../App.state';
+import Checkbox from './ui/Checkbox';
+
+const $is3d = atom(false);
 
 export default function RoutineViewer() {
+  const is3d = useStore($is3d); // persist between menu change
+
   const routine = useStore($routine);
   const context = useStore($runtimeContext);
   const frames = useStore($frames);
@@ -45,6 +51,8 @@ export default function RoutineViewer() {
   return (
     <div className='relative block w-full h-full'>
       <GraphCanvas
+        layoutType={!is3d ? 'forceDirected2d' : 'forceDirected3d'}
+        cameraMode={!is3d ? 'pan' : 'rotate'}
         nodes={nodes()}
         edges={edges()}
         edgeInterpolation='curved' // make <-> 2-cycles more visible
@@ -57,6 +65,12 @@ export default function RoutineViewer() {
         ].filter((x) => x)}
         edgeLabelPosition={'above'} // for label readability
         // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
+      />
+      <Checkbox
+        className='absolute top-0 left-0'
+        value={is3d}
+        onChange={(x) => $is3d.set(x)}
+        label='3D'
       />
       <div className='absolute bottom-0 left-0'>
         {context?.stackNodes.map((r) => r.name).join(', ') || 'Empty stack'}
