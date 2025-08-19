@@ -81,13 +81,19 @@ export default function Condition({
           value={(() => {
             if (!condition.condition) return 0; // undefined
             if (condition.condition.$case === 'image') return 1;
-            if (condition.condition.$case === 'auto') return 2;
+            if (condition.condition.$case === 'text') return 2;
+            if (condition.condition.$case === 'auto') return 3;
+            if (condition.condition.$case === 'target') return 4;
             return -1;
           })()}
           values={
-            ['true', 'image' /*, 'text'*/, allowAuto ? 'auto' : null].filter(
-              (x) => x,
-            ) as (
+            [
+              'true',
+              'image',
+              'text',
+              allowAuto ? 'auto' : null,
+              allowAuto ? 'target' : null,
+            ].filter((x) => x) as (
               | Exclude<Routine_Condition['condition'], undefined>['$case']
               | 'true'
             )[]
@@ -113,6 +119,12 @@ export default function Condition({
                 condition.condition = {
                   $case: 'auto',
                   auto: true,
+                };
+                break;
+              case 'target':
+                condition.condition = {
+                  $case: 'target',
+                  target: true,
                 };
                 break;
             }

@@ -251,6 +251,8 @@ class Runtime:
         """
         if condition.WhichOneof("condition") == "auto":
             condition = self.nodes[edge.to if use_dest else edge.u].default_condition
+        if condition.WhichOneof("condition") == "target":
+            condition = self.nodes[edge.to].default_condition
         return condition
 
     def __check(

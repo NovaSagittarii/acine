@@ -126,6 +126,12 @@ message Routine {
        * CANNOT be used as a node's default condition
        */
       bool auto = 23;
+
+      /* inherits target node's default condition.
+       * useful in e-transitions.
+       * CANNOT be used as a node's default condition
+       */
+      bool target = 24;
     }
 
     /* Somewhat generalized pixel matching.
