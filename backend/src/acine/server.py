@@ -270,14 +270,18 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 # abort previous goto (if still running)
                 self.current_task.cancel()
 
-            async def run_goto():
-                try:
-                    await self.rt.goto(target_node.id)
-                except asyncio.CancelledError:
-                    pass
+            # for debug purposes, it's easier to just set state
+            # on_queue_edge (click edge) can be used to test navigation
+            self.rt.set_curr(target_node)
 
-            self.current_task = asyncio.create_task(run_goto())
-            await self.current_task
+            # async def run_goto():
+            #     try:
+            #         await self.rt.goto(target_node.id)
+            #     except asyncio.CancelledError:
+            #         pass
+
+            # self.current_task = asyncio.create_task(run_goto())
+            # await self.current_task
 
     async def on_queue_edge(self, packet: Packet):
         target_edge = packet.queue_edge.current_edge
