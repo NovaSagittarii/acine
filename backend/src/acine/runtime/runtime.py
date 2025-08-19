@@ -141,7 +141,7 @@ class Runtime:
             # handle pop stack (return nodes)
             # note: type=RETURN nodes have no fixed edges!
             if self.context.curr.type & Routine.Node.NODE_TYPE_RETURN:
-                self.context.curr = self.context.return_stack.pop()
+                self.context.curr = self.pop()
                 continue
 
             # is deepcopy needed?
