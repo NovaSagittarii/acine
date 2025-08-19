@@ -1,4 +1,4 @@
-import { $routine, $runtimeContext } from '@/state';
+import { $frames, $routine, $runtimeContext } from '@/state';
 import { useStore } from '@nanostores/react';
 import { useCallback } from 'react';
 import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
@@ -7,15 +7,22 @@ import { runtimeGoto, runtimeQueueEdge } from '../App.state';
 export default function RoutineViewer() {
   const routine = useStore($routine);
   const context = useStore($runtimeContext);
+  const frames = useStore($frames);
   const nodes = useCallback(() => {
-    return routine.nodes.map(
-      (n) =>
-        ({
-          id: n.id,
-          label: n.name,
-          subLabel: n.description,
-        }) as GraphNode,
-    );
+    return routine.nodes.map((n) => {
+      let extra = {} as GraphNode;
+      if (n.defaultCondition?.condition?.$case === 'image') {
+        const { frameId } = n.defaultCondition.condition.image;
+        const url = frames[routine.frames.map((f) => f.id).indexOf(frameId)];
+        extra.icon = url;
+      }
+      return {
+        ...extra,
+        id: n.id,
+        label: n.name,
+        subLabel: n.description,
+      } as GraphNode;
+    });
   }, [routine]);
   const edges = useCallback(() => {
     return routine.nodes.flatMap((n) =>
