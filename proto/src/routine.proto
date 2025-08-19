@@ -88,21 +88,34 @@ message Routine {
       InputReplay replay = 15;  // recording playback
     };
 
-    EdgeTriggerType trigger = 10;  // standard or interrupt
+    EdgeTriggerType trigger = 10;  // restriction on when it can be taken
+
+    repeated Dependency dependencies = 16;
+    // Need to satisfy these before scheduling.
+    // Interrupt with dependency does not make sense because interrupt is a
+    // navigation related reaction and cannot be scheduled.
 
     enum EdgeTriggerType {
       EDGE_TRIGGER_TYPE_UNSPECIFIED = 0;
-      EDGE_TRIGGER_TYPE_STANDARD = 1;  // can be taken or not
+      EDGE_TRIGGER_TYPE_STANDARD = 1;  // can freely choose to take
+      EDGE_TRIGGER_TYPE_INTERRUPT = 2;
       /* must be taken if possible -- forced action
-       * if precondition passes, goto is forced (an unplaned async event)
+       *
+       * if precondition passes, goto is forced (an unplanned async event)
+       *
        * recommended to use auto postcondition
        */
-      EDGE_TRIGGER_TYPE_INTERRUPT = 2;
+
+      EDGE_TRIGGER_TYPE_SCHEDULED = 3;
+      /* special case of standard edge, must be scheduled to take.
+       * cannot be used for navigation.
+       */
     }
 
     message ScheduleInstance {
       string scheduling_group_id = 1;  // which scheduling group this references
       int32 count = 2;                 // multiplicity
+      RequirementType requirement = 3;  // what counts?
     }
   }
 
@@ -182,19 +195,59 @@ message Routine {
     string name = 2;
     string description = 3;
     int32 retry_interval = 4;  // ms; time between attempts
-    int32 retry_attempts = 5;  // max amount of attempts before backing off
-    int32 reschedule = 6;      // ms; rescheduled time after a backoff
+    int32 retry_attempts = 5;  // ?? max amount of attempts before backing off
+    int32 reschedule = 6;      // ?? ms; rescheduled time after a backoff
     int32 deadline = 7;        // ms; allowed duration to complete task
     int32 period = 8;          // ms; duration of a scheduling period
-    repeated int32 dispatch_times = 9;  // ms; dispatch times within a period
-    SchedulingType type = 10;
+    Period period_preset = 9;  // overrides period with a preset
+    repeated int32 dispatch_times = 10;  // ms; dispatch times within a period
+    reserved 11;
+    // SchedulingType type = 11;
+
+    enum Period {
+      PERIOD_UNSPECIFIED = 0;
+      PERIOD_DAILY = 1;     // every 00:00 UTC
+      PERIOD_WEEKLY = 2;    // every Sunday UTC
+      PERIOD_BIWEEKLY = 3;  // every 1st and 3rd Sunday UTC
+      PERIOD_MONTHLY = 4;   // every 1st day of month UTC
+    }
   }
-  enum SchedulingType {
-    // SCHEDULING_TYPE_HARD_REALTIME = 4;  // no misses are ok
-    SCHEDULING_TYPE_UNSPECIFIED = 0;
-    SCHEDULING_TYPE_SOFT_REALTIME = 1;  // still useful if deadline is missed
-    SCHEDULING_TYPE_FIRM_REALTIME = 2;  // few misses are ok
-    SCHEDULING_TYPE_CHECK = 8;          // tries `retry_attempts` times
-    SCHEDULING_TYPE_EXECUTE = 16;       // requires action to happen
+  // enum SchedulingType {
+  //   // SCHEDULING_TYPE_HARD_REALTIME = 4;  // no misses are ok
+  //   SCHEDULING_TYPE_UNSPECIFIED = 0;
+  //   SCHEDULING_TYPE_SOFT_REALTIME = 1;  // still useful if deadline is missed
+  //   SCHEDULING_TYPE_FIRM_REALTIME = 2;  // few misses are ok
+  //   SCHEDULING_TYPE_CHECK = 8;          // tries `retry_attempts` times
+  //   SCHEDULING_TYPE_EXECUTE = 16;       // requires action to happen
+  // }
+
+  message Dependency {
+    /* Dependencies are taken into account at the scheduling stage.
+     *
+     * Used for requiring some actions that must happen before another.
+     */
+
+    string id = 1;
+    string requires = 2;              // what is the dependency on? (edge id)
+    int32 count = 3;                  // how many times it needs to happen
+    RequirementType requirement = 4;  // what counts as meeting it?
+    bool explicit = 5;                // whether you MUST manually schedule it
+    // note: currently explicit==true (have not implemented implicit pass)
+
+    int32 persist_duration = 6;  // ms; when do counts expire?
+  }
+  enum RequirementType {
+    /* During edge processing, the following occurs:
+     * 1. Precondition attempt, if fail, abort
+     * 2. Action attempt (possibly interrupted)
+     * 3. Postcondition attempt, if fail, abort
+     * 4. Completion
+     */
+
+    REQUIREMENT_TYPE_UNSPECIFIED = 0;  // default: completion
+    REQUIREMENT_TYPE_CHECK = 1;        // requires precondition attempt
+    REQUIREMENT_TYPE_CHECK_PASS = 2;   // requires precondition pass
+    REQUIREMENT_TYPE_EXECUTE = 3;      // requires postcondition attempt
+    REQUIREMENT_TYPE_COMPLETION = 4;   // requires postcondition pass
   }
 }
