@@ -349,9 +349,6 @@ class Runtime:
             self.set_curr(self.nodes[action.to])
 
     async def acquire_offset(self, condition: Routine.Condition):
-        print("what offset?")
-        print(condition)
-
         if condition.WhichOneof("condition") == "image":
             c = condition.image
             ref = get_frame(self.routine.id, c.frame_id)

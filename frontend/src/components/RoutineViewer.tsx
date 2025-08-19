@@ -51,6 +51,9 @@ export default function RoutineViewer() {
         edgeLabelPosition={'above'} // for label readability
         // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
       />
+      <div className='absolute bottom-0 left-0'>
+        {context?.stackNodes.map((r) => r.name).join(', ') || 'Empty stack'}
+      </div>
     </div>
   );
 }

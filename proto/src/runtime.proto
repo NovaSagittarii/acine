@@ -17,12 +17,8 @@ service Runtime {
 }
 
 message RuntimeState {
-  // current node
-  Routine.Node current_node = 1;
-
-  // desired target node
-  Routine.Node target_node = 2;
-
-  // non null if current processing edge (condition/action)
-  Routine.Edge current_edge = 3;
+  Routine.Node current_node = 1;  // current node
+  Routine.Node target_node = 2;   // desired target node
+  Routine.Edge current_edge = 3;  // current processed edge, null if idling
+  repeated Routine.Node stack_nodes = 4;  // return stack
 }

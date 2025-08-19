@@ -106,13 +106,19 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
       $runtimeContext.set(c);
       break;
     }
+    case 'setStack': {
+      const { setStack: context } = packet.type;
+      const c = $runtimeContext.get();
+      if (context.stackNodes) c.stackNodes = context.stackNodes;
+      $runtimeContext.set(c);
+      break;
+    }
     case 'sampleCondition':
     case 'sampleCurrent': {
       const cb = wsListeners[packet.id];
       if (cb) cb(packet);
       break;
     }
-    // TODO: setStack
     default:
       console.warn('Unhandled packet', packet);
   }
