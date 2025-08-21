@@ -32,7 +32,7 @@ export default function Collapse({
       <div
         className={
           'absolute right-0 top-0 w-6 h-6 mx-4 flex justify-center items-center ' +
-          'font-mono font-bold select-none transition-all ' +
+          'font-mono font-bold select-none z-10 transition-all ' +
           'group-hover:text-amber-700 hover:text-amber-700 ' +
           'border-2 border-transparent group-hover:border-black/20 hover:border-black/20 group-hover:bg-white hover:bg-white ' +
           `${isOpen && 'rotate-90'} `

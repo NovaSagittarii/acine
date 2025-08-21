@@ -3,6 +3,7 @@ import {
   Routine_Edge_EdgeTriggerType as TriggerType,
 } from 'acine-proto-dist';
 
+import { getEdgeDisplay } from './Edge.util';
 import { Selectable } from './types';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import Condition from './Condition';
@@ -29,7 +30,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
 
   return (
     <Collapse
-      label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${edge.description.substring(0, 50)} (id=${edge.id})`}
+      label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${getEdgeDisplay(edge).substring(0, 50)} (id=${edge.id})`}
     >
       <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
         <EditableRoutineProperty

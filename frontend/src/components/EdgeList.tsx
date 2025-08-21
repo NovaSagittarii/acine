@@ -55,7 +55,7 @@ export default function EdgeList({ node }: EdgeListProps) {
                 condition: { $case: 'auto', auto: true },
               }),
               limit: -1,
-              description: 'desc',
+              // empty description defaults to destination node name
             });
             node.edges.push(newEdge);
             forceUpdate();

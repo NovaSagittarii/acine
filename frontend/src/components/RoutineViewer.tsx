@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
 import { runtimeGoto, runtimeQueueEdge } from '../App.state';
 import Checkbox from './ui/Checkbox';
+import { getEdgeDisplay } from './Edge.util';
 
 const $is3d = atom(false);
 
@@ -39,7 +40,7 @@ export default function RoutineViewer() {
               source: n.id.toString(),
               target: e.to.toString(),
               id: e.id,
-              label: e.description.substring(0, 12),
+              label: getEdgeDisplay(e).substring(0, 16),
               size: 3,
             }) as GraphEdge,
         )
