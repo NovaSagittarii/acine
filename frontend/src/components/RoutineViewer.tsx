@@ -8,9 +8,11 @@ import Checkbox from './ui/Checkbox';
 import { getEdgeDisplay } from './Edge.util';
 
 const $is3d = atom(false);
+const $showSelected = atom(true);
 
 export default function RoutineViewer() {
   const is3d = useStore($is3d); // persist between menu change
+  const showSelected = useStore($showSelected);
 
   const routine = useStore($routine);
   const context = useStore($runtimeContext);
@@ -60,19 +62,25 @@ export default function RoutineViewer() {
         labelType='all'
         onNodeClick={(node) => runtimeGoto(node.id)}
         onEdgeClick={(e) => runtimeQueueEdge(e.id)} // it does work (highlight bugged)
-        selections={[
-          context?.currentNode?.id?.toString() || '',
-          context?.currentEdge?.id?.toString() || '',
-        ].filter((x) => x)}
+        selections={
+          showSelected
+            ? [
+                context?.currentNode?.id?.toString() || '',
+                context?.currentEdge?.id?.toString() || '',
+              ].filter((x) => x)
+            : []
+        }
         edgeLabelPosition={'above'} // for label readability
         // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
       />
-      <Checkbox
-        className='absolute top-0 left-0'
-        value={is3d}
-        onChange={(x) => $is3d.set(x)}
-        label='3D'
-      />
+      <div className='absolute top-0 left-0 flex flex-col'>
+        <Checkbox value={is3d} onChange={(x) => $is3d.set(x)} label='3D' />
+        <Checkbox
+          value={showSelected}
+          onChange={(x) => $showSelected.set(x)}
+          label='Show selected'
+        />
+      </div>
       <div className='absolute bottom-0 left-0'>
         {context?.stackNodes.map((r) => r.name).join(', ') || 'Empty stack'}
       </div>
