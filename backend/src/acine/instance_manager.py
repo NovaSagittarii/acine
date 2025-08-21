@@ -25,6 +25,9 @@ def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
         description=routine.description,
         start_command=routine.start_command,
         window_name=routine.window_name,
+        nodes=[
+            Routine.Node(id="init", name="start", type=Routine.Node.NODE_TYPE_STANDARD)
+        ],
     )
     mkdir([id])
     fs_write_sync([id, "rt.pb"], r.SerializeToString())
