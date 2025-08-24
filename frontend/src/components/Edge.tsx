@@ -39,7 +39,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         callback={forceUpdate}
       />
       <div>
-        to
+        to →
         <Select
           value={edge.to}
           values={routine.nodes.map((n) => [
