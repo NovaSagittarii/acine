@@ -66,6 +66,18 @@ export default function Select<T>({
   );
 }
 
+export function LabeledSelect<T>({
+  label,
+  ...props
+}: SelectProps<T> & { label: string }) {
+  return (
+    <div className='flex flex-row'>
+      <Select {...props} />
+      <div className='opacity-50'> : {label} </div>
+    </div>
+  );
+}
+
 type SelectAutoProps<T> = {
   value: T;
   values: T[];
