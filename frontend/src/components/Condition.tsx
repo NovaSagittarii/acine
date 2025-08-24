@@ -78,14 +78,7 @@ export default function Condition({
       {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' /> */}
       <div>
         <SelectAuto
-          value={(() => {
-            if (!condition.condition) return 0; // undefined
-            if (condition.condition.$case === 'image') return 1;
-            if (condition.condition.$case === 'text') return 2;
-            if (condition.condition.$case === 'auto') return 3;
-            if (condition.condition.$case === 'target') return 4;
-            return -1;
-          })()}
+          value={condition.condition?.$case || 'true'}
           values={
             [
               'true',

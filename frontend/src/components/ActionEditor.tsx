@@ -31,13 +31,7 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
       /> */}
       <div>
         <Select
-          value={
-            !edge.action
-              ? 0
-              : ACTION_TYPES_DISPLAY.map((s) => s[0]).indexOf(
-                  edge.action?.$case ?? '', // surely $case is never empty?
-                )
-          }
+          value={edge.action?.$case || null}
           values={ACTION_TYPES_DISPLAY}
           onChange={(v) => {
             if (v === null) {

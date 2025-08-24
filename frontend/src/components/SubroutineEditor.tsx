@@ -30,7 +30,7 @@ export default function SubroutineEditor({ action }: SubroutineEditorProps) {
   }, [routine.nodes]);
   return (
     <Select
-      value={options.findIndex((n) => n.id === action.subroutine)}
+      value={action.subroutine}
       values={options.map((n) => [n.name, n.id] as [string, string])}
       onChange={(id) => (action.subroutine = id)}
     />

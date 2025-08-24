@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SelectProps<T> {
   className?: string;
   /** current displayed index (this is a controlled element) */
-  value: number;
+  value: T | undefined;
 
   /** list of options; an option consists of [display, value] */
   values: [string, T][];
@@ -27,29 +27,38 @@ export default function Select<T>({
   className = '',
   autofocus = false,
 }: SelectProps<T>) {
-  // const [selectedIndex, setSelectedIndex] = useState(value);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  useEffect(() => {
+    if (value === undefined) setSelectedIndex(-1);
+    else if (!values[selectedIndex] || values[selectedIndex][1] !== value) {
+      setSelectedIndex(values.findIndex(([_, x]) => x === value));
+    }
+  }, [value, selectedIndex]);
+
   const ref = useRef<HTMLSelectElement>(null);
   useEffect(() => {
     if (autofocus && ref.current) ref.current.focus();
   }, [ref, autofocus]);
+
   return (
     <select
       className={
         'hover:bg-black/5 hover:cursor-text transition-colors ' + className
       }
       onChange={(ev) => {
-        const index = +ev.target.value - 1; // unset placeholder
-        // setSelectedIndex(index);
+        const index = +ev.target.value; // unset placeholder
+        setSelectedIndex(index);
         onChange(values[index][1]);
       }}
-      value={isNaN(value) ? 0 : value + 1}
+      value={selectedIndex.toString()}
       ref={ref}
     >
-      <option value='0' disabled>
+      <option value='-1' disabled>
         --- N/A ---
       </option>
       {values.map(([s, _v], i) => (
-        <option value={(i + 1).toString()} key={i}>
+        <option value={i.toString()} key={i}>
           {s}
         </option>
       ))}
@@ -58,8 +67,9 @@ export default function Select<T>({
 }
 
 type SelectAutoProps<T> = {
+  value: T;
   values: T[];
-} & Pick<SelectProps<T>, 'className' | 'value' | 'onChange'>;
+} & Pick<SelectProps<T>, 'className' | 'onChange' | 'autofocus'>;
 
 /**
  * Special case of <Select> where you are setting a string and the display
@@ -67,9 +77,10 @@ type SelectAutoProps<T> = {
  */
 export function SelectAuto<T>({
   className,
-  value = 0,
+  value,
   values,
   onChange,
+  autofocus = false,
 }: SelectAutoProps<T>) {
   return (
     <Select
@@ -77,6 +88,7 @@ export function SelectAuto<T>({
       value={value}
       values={values.map((s) => [s + '', s] as [string, T])}
       onChange={onChange}
+      autofocus={autofocus}
     />
   );
 }

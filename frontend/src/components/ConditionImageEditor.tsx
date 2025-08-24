@@ -120,9 +120,7 @@ export default function ConditionImageEditor() {
               Query
             </Button>
             <Select
-              value={METHOD_TYPES_DISPLAY.findIndex(
-                ([_, t]) => t === condition.method,
-              )}
+              value={condition.method}
               values={METHOD_TYPES_DISPLAY}
               onChange={(t) => {
                 condition.method = t;

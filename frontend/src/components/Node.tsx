@@ -57,7 +57,7 @@ function Node({ node, selected = false }: NodeProps) {
       <div className='flex flex-row'>
         <Select
           className='p-0 appearance-none'
-          value={NODE_TYPES_DISPLAY.findIndex(([_, t]) => t === node.type)}
+          value={node.type}
           values={NODE_TYPES_DISPLAY}
           onChange={(t) => {
             node.type = t;

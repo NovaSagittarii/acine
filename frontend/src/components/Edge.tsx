@@ -44,7 +44,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         <div>
           to
           <Select
-            value={routine.nodes.map((n) => n.id).indexOf(edge.to)}
+            value={edge.to}
             values={routine.nodes.map((n) => [
               `${n.name} - ${n.description.substring(0, 24)}`,
               n.id,
@@ -56,9 +56,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         </div>
         <div className='flex flex-row'>
           <Select
-            value={TRIGGER_TYPES_DISPLAY.findIndex(
-              ([_, t]) => t === edge.trigger,
-            )}
+            value={edge.trigger}
             values={TRIGGER_TYPES_DISPLAY}
             onChange={(t) => {
               edge.trigger = t;
