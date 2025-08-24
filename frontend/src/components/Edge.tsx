@@ -30,64 +30,60 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
   const forceUpdate = useForceUpdate();
 
   return (
-    <Collapse
-      label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${getEdgeDisplay(edge).substring(0, 50)} (id=${edge.id})`}
+    <div
+      className={`pl-1 border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
     >
-      <div
-        className={`pl-1 border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
-      >
-        <EditableRoutineProperty
-          object={edge}
-          property={'description'}
-          callback={forceUpdate}
+      <EditableRoutineProperty
+        object={edge}
+        property={'description'}
+        callback={forceUpdate}
+      />
+      <div>
+        to
+        <Select
+          value={edge.to}
+          values={routine.nodes.map((n) => [
+            `${n.name} - ${n.description.substring(0, 24)}`,
+            n.id,
+          ])}
+          onChange={(v) => {
+            edge.to = v;
+          }}
         />
-        <div>
-          to
-          <Select
-            value={edge.to}
-            values={routine.nodes.map((n) => [
-              `${n.name} - ${n.description.substring(0, 24)}`,
-              n.id,
-            ])}
-            onChange={(v) => {
-              edge.to = v;
-            }}
-          />
-        </div>
-        <div className='flex flex-row'>
-          <Select
-            value={edge.trigger}
-            values={TRIGGER_TYPES_DISPLAY}
-            onChange={(t) => {
-              edge.trigger = t;
-              forceUpdate();
-            }}
-          />
-          <div className='opacity-50'> : type </div>
-        </div>
-
-        <ActionEditor edge={edge} />
-        <Collapse
-          label={
-            'precondition ' + (edge.precondition?.condition?.$case || 'true')
-          }
-        >
-          precondition
-          <Condition condition={edge.precondition!} allowAuto />
-        </Collapse>
-        <Collapse
-          label={
-            'postcondition ' + (edge.postcondition?.condition?.$case || 'true')
-          }
-        >
-          postcondition
-          <Condition condition={edge.postcondition!} allowAuto />
-        </Collapse>
-        <Collapse label={`dependency (${edge.dependencies.length})`}>
-          dependency
-          <DependencyList dependencies={edge.dependencies} />
-        </Collapse>
       </div>
-    </Collapse>
+      <div className='flex flex-row'>
+        <Select
+          value={edge.trigger}
+          values={TRIGGER_TYPES_DISPLAY}
+          onChange={(t) => {
+            edge.trigger = t;
+            forceUpdate();
+          }}
+        />
+        <div className='opacity-50'> : type </div>
+      </div>
+
+      <ActionEditor edge={edge} />
+      <Collapse
+        label={
+          'precondition ' + (edge.precondition?.condition?.$case || 'true')
+        }
+      >
+        precondition
+        <Condition condition={edge.precondition!} allowAuto />
+      </Collapse>
+      <Collapse
+        label={
+          'postcondition ' + (edge.postcondition?.condition?.$case || 'true')
+        }
+      >
+        postcondition
+        <Condition condition={edge.postcondition!} allowAuto />
+      </Collapse>
+      <Collapse label={`dependency (${edge.dependencies.length})`}>
+        dependency
+        <DependencyList dependencies={edge.dependencies} />
+      </Collapse>
+    </div>
   );
 }

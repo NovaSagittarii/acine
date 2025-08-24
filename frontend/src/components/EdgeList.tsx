@@ -6,10 +6,12 @@ import {
 } from 'acine-proto-dist';
 import { v4 as uuidv4 } from 'uuid';
 
-import Button from '@/ui/Button';
+import Button, { CloseButton } from '@/ui/Button';
 import Edge from '@/components/Edge';
-import { $selectedNode } from '@/state';
+import { $routine, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
+import Collapse from './ui/Collapse';
+import { getEdgeDisplay } from './Edge.util';
 
 interface EdgeListProps {
   node: Routine_Node;
@@ -19,6 +21,7 @@ interface EdgeListProps {
  * Editor for nodes & transitions of the DFA.
  */
 export default function EdgeList({ node }: EdgeListProps) {
+  const routine = useStore($routine);
   const selectedNode = useStore($selectedNode);
   const forceUpdate = useForceUpdate();
   return (
@@ -26,9 +29,19 @@ export default function EdgeList({ node }: EdgeListProps) {
       <div className='max-h-full overflow-y-auto'>
         {node.edges.length === 0 && 'no edges (type=RETURN)'}
         {node.edges.map((edge, index) => (
-          <div key={index}>
+          <Collapse
+            className='relative'
+            key={index}
+            label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${getEdgeDisplay(edge).substring(0, 50)} (id=${edge.id})`}
+          >
             <Edge edge={edge} />
-          </div>
+            <CloseButton
+              onClick={() => {
+                node.edges.splice(index, 1);
+                forceUpdate();
+              }}
+            />
+          </Collapse>
         ))}
       </div>
       {selectedNode === node && (

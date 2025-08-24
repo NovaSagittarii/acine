@@ -7,7 +7,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { $routine, $selectedNode } from '@/state';
-import Button from '@/ui/Button';
+import Button, { CloseButton } from '@/ui/Button';
 import Node from '@/components/Node';
 import useForceUpdate from './useForceUpdate';
 
@@ -23,9 +23,19 @@ export default function NodeList() {
     <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
       <div className='h-full overflow-y-scroll'>
         {routine.nodes.length === 0 && 'No nodes yet.'}
-        {routine.nodes.map((node) => (
-          <div key={node.id} onClick={() => $selectedNode.set(node)}>
+        {routine.nodes.map((node, index) => (
+          <div
+            key={node.id}
+            className='relative'
+            onClick={() => $selectedNode.set(node)}
+          >
             <Node node={node} selected={node == selectedNode} />
+            <CloseButton
+              onClick={() => {
+                routine.nodes.splice(index, 1);
+                forceUpdate();
+              }}
+            />
           </div>
         ))}
       </div>

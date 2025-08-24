@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import useForceUpdate from './useForceUpdate';
 import { Routine_Dependency, Routine_RequirementType } from 'acine-proto-dist';
 import Dependency from './Dependency';
+import { CloseButton } from './ui/Button';
 
 interface DependencyListProps {
   dependencies: Routine_Dependency[];
@@ -13,7 +14,15 @@ export default function DependencyList({ dependencies }: DependencyListProps) {
   return (
     <div className='m-2 flex flex-col gap-2'>
       {dependencies.map((dependency, index) => (
-        <Dependency key={index} dependency={dependency} />
+        <div className='relative' key={index}>
+          <Dependency dependency={dependency} />
+          <CloseButton
+            onClick={() => {
+              dependencies.splice(index, 1);
+              forceUpdate();
+            }}
+          />
+        </div>
       ))}
       <div
         className='hover:bg-amber-100 border border-black p-1'
