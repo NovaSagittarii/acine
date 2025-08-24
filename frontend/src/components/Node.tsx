@@ -34,7 +34,9 @@ function Node({ node, selected = false }: NodeProps) {
   }, [node]);
 
   return (
-    <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
+    <div
+      className={`pl-1 border ${selected ? 'border-amber-800 bg-amber-50' : 'border-black'}`}
+    >
       <div className='w-full flex flex-row justify-between items-center'>
         <EditableRoutineProperty
           object={node}

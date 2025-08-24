@@ -13,6 +13,7 @@ import { $routine } from '@/state';
 import Select from './ui/Select';
 import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
+import DependencyList from './DependencyList';
 
 const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
@@ -32,7 +33,9 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
     <Collapse
       label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${getEdgeDisplay(edge).substring(0, 50)} (id=${edge.id})`}
     >
-      <div className={`pl-1 border border-black ${selected && 'bg-amber-100'}`}>
+      <div
+        className={`pl-1 border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
+      >
         <EditableRoutineProperty
           object={edge}
           property={'description'}
@@ -81,6 +84,10 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         >
           postcondition
           <Condition condition={edge.postcondition!} allowAuto />
+        </Collapse>
+        <Collapse label={`dependency (${edge.dependencies.length})`}>
+          dependency
+          <DependencyList dependencies={edge.dependencies} />
         </Collapse>
       </div>
     </Collapse>
