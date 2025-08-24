@@ -222,7 +222,9 @@ message Routine {
   // }
 
   message Dependency {
-    /* Dependencies are taken into account at the scheduling stage.
+    /* **Dependencies** are taken into account at the scheduling stage.
+     * A dependency acts like subscribing to the dependency and then
+     * waits for N events (not one-to-one).
      *
      * Used for requiring some actions that must happen before another.
      */
@@ -233,8 +235,6 @@ message Routine {
     RequirementType requirement = 4;  // what counts as meeting it?
     bool explicit = 5;                // whether you MUST manually schedule it
     // note: currently explicit==true (have not implemented implicit pass)
-
-    int32 persist_duration = 6;  // ms; when do counts expire?
   }
   enum RequirementType {
     /* During edge processing, the following occurs:

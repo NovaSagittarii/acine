@@ -35,11 +35,15 @@ budget issue tracker
   - [ ] routine launch sequence
   - [ ] attach width/height to positional data (handle rotation and scaling)
 - v0.3.0 Scheduler (with parallelism)
-  - [ ] implement dependency
+  - [ ] implement dependency (implicit)
   - [ ] implement scheduling groups
   - [ ] implement scheduler (multicore EDF, Postorder DFS)
   - [ ] implement action duration logging
   - [ ] implement scheduled action
+  - [ ] implement dependency (implicit) with navigation listen
+- v0.4.0 Optimization
+  - [ ] implement variables (explicit dependency)
+  - linear programming
 - Power Saving
   - sleep and wake from sleep
     https://learn.microsoft.com/en-us/windows/win32/api/powrprof/nf-powrprof-setsuspendstate
@@ -52,8 +56,9 @@ budget issue tracker
 - [ ] route display
 - [ ] migrate venv to uv
 - [ ] self loop with "sample"/"data source" action (text match parse)
-- [ ] move comments to after
-- [ ] map<> instead of repeated
+- [ ] move (py, proto) comments to after
+- [ ] proto map<> instead of repeated
+- [ ] ts alias, import sorting
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.
