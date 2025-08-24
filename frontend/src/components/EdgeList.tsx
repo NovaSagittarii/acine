@@ -2,6 +2,7 @@ import { useStore } from '@nanostores/react';
 import {
   Routine_Condition,
   Routine_Edge,
+  Routine_Edge_EdgeTriggerType,
   Routine_Node,
 } from 'acine-proto-dist';
 import { v4 as uuidv4 } from 'uuid';
@@ -50,6 +51,7 @@ export default function EdgeList({ node }: EdgeListProps) {
           onClick={() => {
             const newEdge = Routine_Edge.create({
               id: uuidv4(),
+              trigger: Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_STANDARD,
               precondition: Routine_Condition.create({
                 // precondition timeout sort of doesn't make sense
                 // since it needed to pass before it is taken...

@@ -3,7 +3,6 @@ import {
   Routine_Edge_EdgeTriggerType as TriggerType,
 } from 'acine-proto-dist';
 
-import { getEdgeDisplay } from './Edge.util';
 import { Selectable } from './types';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import Condition from './Condition';
@@ -19,6 +18,7 @@ const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
   ['standard', TriggerType.EDGE_TRIGGER_TYPE_STANDARD],
   ['interrupt', TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT],
+  ['scheduled', TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED],
 ] as [string, TriggerType][];
 
 interface EdgeProps extends Selectable {
