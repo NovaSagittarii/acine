@@ -93,8 +93,9 @@ class TestBasic:
         goto.assert_called_with(edges[3])
         assert goto.call_count == 4
 
-        # this ordering can be relaxed (but currently not set up)
-        goto.assert_has_calls([call(edges[i]) for i in (0, 1, 2, 3)])
+        # this doesn't check ordering
+        for i in (0, 1, 2, 3):
+            goto.assert_any_call(edges[i])
 
 
 class MockRuntime:
@@ -184,7 +185,6 @@ class MockRuntime:
         self.blocked_tasks = nblocked
 
     def schedule(self, id: int) -> None:
-        print("SCHEDULE", id)
         self.scheduler.schedule(self.edges[id], 10000)
 
     def step(self, iterations: int) -> None:
@@ -226,7 +226,6 @@ class TestMockRuntime:
 
 
 class TestOrdering:
-    # @pytest.mark.skip()
     @pytest.mark.parametrize("n", (2, 4, 7, 15, 16, 99))
     @pytest.mark.parametrize("b", (2, 5))
     def test_tree(self, n: int, b: int):
@@ -247,7 +246,6 @@ class TestOrdering:
         assert not a.next(), "Should finish within `5kn + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
-    @pytest.mark.xfail(reason="TODO: figure out why reschedule happens so much")
     @pytest.mark.parametrize("n", (99,))
     @pytest.mark.parametrize("b", (2, 10))
     @pytest.mark.parametrize("k", (10,))
@@ -273,9 +271,9 @@ class TestOrdering:
                 expected = [randint(0, n - 1) for _ in range(k)]
                 for eid in expected:
                     a.schedule(eid)
-                    # a.step(3)  # a bit of offset between scheduling
-                a.step(5 * k * n)
-                assert not a.next(), "Should finish within 5n avg steps per scheduled."
+                    a.step(3)  # a bit of offset between scheduling
+                a.step(2 * k * n)
+                assert not a.next(), "Should finish within 2n avg steps per scheduled."
                 for eid in expected:
                     a.goto.assert_any_call(a.edges[eid])
             except AssertionError as e:
