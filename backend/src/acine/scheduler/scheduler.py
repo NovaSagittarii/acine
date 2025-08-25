@@ -184,11 +184,11 @@ class Scheduler:
             for dep in entry.deps.values():
                 e = self.edges[dep.dependency.requires]
                 e.subscribe(entry)
-                self.schedule(e.edge, deadline)
+                for _ in range(max(0, dep.dependency.count - e.pending)):
+                    self.schedule(e.edge, deadline + 1)
             return True
 
         # Able to run now.
-
         assert e.pending >= 1, "should've been scheduled before exec"
         e.fail_count = 0
         e.pending -= 1
@@ -197,7 +197,6 @@ class Scheduler:
         result = self.interface.goto(edge)
 
         candidates = e.broadcast(result)
-
         for entry in candidates:
             assert not entry.deps, "Should have no unmet dependencies."
             heapq.heappush(self.ready_queue, entry)

@@ -279,3 +279,22 @@ class TestOrdering:
             except AssertionError as e:
                 extra = [f"Failed on test {id} -- {e.args[0]}", f"edges={edges}"]
                 raise AssertionError("\n".join((*extra, *e.args)))
+
+    def test_transitive(self):
+        a = MockRuntime([(0, 4), (0, 2), (2, 4)])
+        a.schedule(0)
+        a.step(4)
+        assert not a.next(), "Should finish"
+        a.goto.assert_any_call(a.edges[0])
+
+    def test_overlap(self):
+        edges = []
+        for k in range(5):
+            for i in range(10):
+                for j in range(10):
+                    edges.append((i + 10 * k + 10, j + 10 * k))
+        a = MockRuntime(edges)
+        a.schedule(0)
+        a.step(100)
+        assert not a.next(), "Should finish within 100 steps. (50 exec, 50 run)"
+        a.goto.assert_any_call(a.edges[0])
