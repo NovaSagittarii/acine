@@ -54,9 +54,11 @@ export default function Select<T>({
       value={selectedIndex.toString()}
       ref={ref}
     >
-      <option value='-1' disabled>
-        --- N/A ---
-      </option>
+      {selectedIndex === -1 && (
+        <option value='-1' disabled>
+          {'<unset>'}
+        </option>
+      )}
       {values.map(([s, _v], i) => (
         <option value={i.toString()} key={i}>
           {s}
