@@ -189,18 +189,24 @@ message Routine {
 
   /**
    * Scheduling group with how frequently to check and how to handle retrying.
+   *
+   * Uses seconds since ms precision is unnecessary. And Python datetime uses
+   * seconds as base unit.
    */
   message SchedulingGroup {
     string id = 1;
     string name = 2;
     string description = 3;
-    int32 retry_interval = 4;  // ms; time between attempts
+    int32 retry_interval = 4;  // seconds; time between attempts
     int32 retry_attempts = 5;  // ?? max amount of attempts before backing off
-    int32 reschedule = 6;      // ?? ms; rescheduled time after a backoff
-    int32 deadline = 7;        // ms; allowed duration to complete task
-    int32 period = 8;          // ms; duration of a scheduling period
+    int32 reschedule = 6;      // ?? seconds; rescheduled time after a backoff
+    int32 deadline = 7;        // seconds; allowed duration to complete task
+    int32 period = 8;          // seconds; duration of a scheduling period
     Period period_preset = 9;  // overrides period with a preset
-    repeated int32 dispatch_times = 10;  // ms; dispatch times within a period
+    repeated int32 dispatch_times = 10;
+    // seconds; dispatch times within a period.
+    // [0] if unset
+
     reserved 11;
     // SchedulingType type = 11;
 
