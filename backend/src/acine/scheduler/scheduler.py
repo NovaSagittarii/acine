@@ -89,6 +89,9 @@ class ISchedulerRoutineInterface:
         """
         raise NotImplementedError("goto is not implemented", e)
 
+    def on_scheduled(self, edge: Routine.Edge) -> None:
+        pass
+
 
 class Scheduler:
     """
@@ -136,7 +139,7 @@ class Scheduler:
         e = self.edges[edge.id]
         deadline = entry.deadline
 
-        print("EXEC", entry.edge.id, [d.target.id for d in e.dependencies])
+        print("EXEC", entry.edge.id, [d.dependency.requires for d in e.dependencies])
 
         if not self.__schedulable(edge):
             return False
@@ -183,14 +186,17 @@ class Scheduler:
         return progressing
 
     def next(self) -> bool:
-        """attempts to run the next scheduled item, returns False when nothing"""
+        """
+        attempts to run the next scheduled item,
+        returns False when nothing to run (empty pq)
+        """
         if not self.pq:
             return False
 
         entry = heapq.heappop(self.pq)
         edge = entry.edge
         if not self.__schedulable(edge):
-            return False
+            return True
 
         if not self.__exec(entry):
             entry.fail()  # reschedule with lower priority
@@ -199,6 +205,7 @@ class Scheduler:
         return True
 
     def schedule(self, edge: Routine.Edge, deadline: int, update=True):
+        self.interface.on_scheduled(edge)
         e = self.edges[edge.id]
         if update:
             e.pending += 1
