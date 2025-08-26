@@ -22,6 +22,7 @@ budget issue tracker
   - [x] display runtime state (needed for debugging runtime)
   - [x] goto from frontend
   - [x] queue_edge from frontend
+  - [ ] handle goto timeout (possible failure)
 - v0.1.3 Automation Features (dynamic)
   - [x] implement template match
   - [ ] interrupt during postcondition (or action)
@@ -35,13 +36,16 @@ budget issue tracker
   - [ ] routine launch sequence
   - [ ] attach width/height to positional data (handle rotation and scaling)
 - v0.3.0 Scheduler (with parallelism)
-  - [ ] implement dependency (implicit)
-  - [ ] implement scheduling groups
+  - [x] implement dependency (implicit)
+  - [x] implement scheduling groups
   - [ ] implement scheduler (multicore EDF, Postorder DFS)
   - [ ] implement action duration logging
   - [ ] implement scheduled action
   - [ ] implement dependency (implicit) with navigation listen
-- v0.4.0 Optimization
+- v0.4.0 Background Runtime
+  - [x] single routine background task
+  - [ ] multi routine background task
+- v0.5.0 Optimization
   - [ ] implement variables (explicit dependency)
   - linear programming
 - Power Saving
@@ -59,6 +63,9 @@ budget issue tracker
 - [ ] move (py, proto) comments to after
 - [ ] proto map<> instead of repeated
 - [ ] ts alias, import sorting
+- [ ] gpu related capture
+- [ ] time travel capture (pick frame from a recording)
+- [ ] uvloop
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.

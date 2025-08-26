@@ -52,6 +52,7 @@ ahk = AHK(version="v2")
 
 class InputHandler:
     def __init__(self, title: str, cmd: str):
+        self.can_close = False
         if title:
             if cmd and not ahk.list_windows(title=title):
                 system(cmd)
@@ -59,6 +60,7 @@ class InputHandler:
             self.win = ahk.win_wait(title, timeout=600, detect_hidden_windows=True)
             print(self.win.title, self.win)
             print(self.win.get_position())
+            self.can_close = True
         else:
             # target desktop
             self.title = None
@@ -92,6 +94,10 @@ class InputHandler:
         flags = "D NA" if self.is_mouse_down else "U NA"
         self.win.click(x=self.x, y=self.y, button="L", options=flags)
         # print(self.x, self.y, flags)
+
+    def close(self):
+        if self.can_close:
+            self.win.close()
 
 
 if __name__ == "__main__":

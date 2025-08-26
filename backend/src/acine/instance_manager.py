@@ -35,7 +35,7 @@ def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
     return r
 
 
-def get_routines() -> list[Routine]:
+def get_routines(full=False) -> list[Routine]:
     """lists all routines available with minimal metadata (name,id,description)"""
 
     out = []
@@ -45,15 +45,15 @@ def get_routines() -> list[Routine]:
         if os.path.isfile(resolve(f)):
             continue
         r = Routine.FromString(fs_read_sync([f, "rt.pb"]))
-        out.append(
-            Routine(
+        if not full:
+            r = Routine(
                 id=r.id,
                 name=r.name,
                 description=r.description,
                 start_command=r.start_command,
                 window_name=r.window_name,
             )
-        )
+        out.append(r)
     return sorted(out, key=lambda x: x.name)
 
 
