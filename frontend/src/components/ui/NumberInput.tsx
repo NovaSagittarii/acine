@@ -32,7 +32,7 @@ export default function NumberInput<T, K extends keyof T>({
   }
   return (
     object &&
-    property &&
+    property !== '' &&
     (label ? (
       <div className='flex flex-row'>
         <EditableText

@@ -13,6 +13,7 @@ import Select from './ui/Select';
 import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
 import DependencyList from './DependencyList';
+import { ScheduleList } from './Schedule';
 
 const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
@@ -83,6 +84,10 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
       <Collapse label={`dependency (${edge.dependencies.length})`}>
         dependency
         <DependencyList dependencies={edge.dependencies} />
+      </Collapse>
+      <Collapse label={`schedules (${edge.schedules.length})`}>
+        schedules
+        <ScheduleList schedules={edge.schedules} />
       </Collapse>
     </div>
   );

@@ -1,18 +1,11 @@
-import { Routine_Dependency, Routine_RequirementType } from 'acine-proto-dist';
+import { Routine_Dependency } from 'acine-proto-dist';
 import useForceUpdate from './useForceUpdate';
 import NumberInput from './ui/NumberInput';
 import { LabeledSelect } from './ui/Select';
 import { $routine } from '@/state';
 import { useStore } from '@nanostores/react';
 import { getEdgeDisplay } from './Edge.util';
-
-const REQUIREMENT_TYPE_DISPLAY = [
-  ['unset', Routine_RequirementType.REQUIREMENT_TYPE_UNSPECIFIED],
-  ['check', Routine_RequirementType.REQUIREMENT_TYPE_CHECK],
-  ['check pass', Routine_RequirementType.REQUIREMENT_TYPE_CHECK_PASS],
-  ['execute', Routine_RequirementType.REQUIREMENT_TYPE_EXECUTE],
-  ['completion', Routine_RequirementType.REQUIREMENT_TYPE_COMPLETION],
-] as [string, Routine_RequirementType][];
+import { REQUIREMENT_TYPE_DISPLAY } from './display';
 
 interface DependencyProps {
   dependency: Routine_Dependency;
