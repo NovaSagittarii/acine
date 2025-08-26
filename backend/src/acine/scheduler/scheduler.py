@@ -125,7 +125,7 @@ class ISchedulerRoutineInterface:
     def __init__(self, routine: Routine):
         self.routine = routine
 
-    def goto(self, e: Routine.Edge) -> ExecResult:
+    async def goto(self, e: Routine.Edge) -> ExecResult:
         """
         Attempts to route towards e, then execute it. Returns the result of it
         in order to determine whether a retry
@@ -165,7 +165,7 @@ class Scheduler:
     def __schedulable(self, edge: Routine.Edge) -> bool:
         return self.edges[edge.id].pending >= 1
 
-    def __exec(self, entry: SchedulerEntry) -> bool:
+    async def __exec(self, entry: SchedulerEntry) -> bool:
         """
         Handle route to edge and execute, returns True if there is progress.
         Updates failcount/okcount.
@@ -194,7 +194,7 @@ class Scheduler:
         e.pending -= 1
 
         print("RUN ", edge.id)
-        result = self.interface.goto(edge)
+        result = await self.interface.goto(edge)
 
         candidates = e.broadcast(result)
         for entry in candidates:
@@ -207,7 +207,7 @@ class Scheduler:
 
         return progressing
 
-    def next(self) -> bool:
+    async def next(self) -> bool:
         """
         attempts to run the next scheduled item,
         returns False when nothing to run (empty pq)
@@ -220,7 +220,7 @@ class Scheduler:
         if not self.__schedulable(edge):
             return True
 
-        if not self.__exec(entry):
+        if not await self.__exec(entry):
             entry.fail()  # reschedule with lower priority
             heapq.heappush(self.ready_queue, entry)
 

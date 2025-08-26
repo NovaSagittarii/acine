@@ -1,6 +1,6 @@
 from random import randint, seed, shuffle
 from typing import Any
-from unittest.mock import Mock, call
+from unittest.mock import AsyncMock, Mock, call
 
 import pytest
 from acine.scheduler import ExecResult, ISchedulerRoutineInterface, Scheduler
@@ -11,7 +11,7 @@ class AlwaysOk(ISchedulerRoutineInterface):
     def __init__(self, r: Routine, on_scheduled=lambda *x: None):
         super().__init__(r)
 
-        self.goto = Mock(return_value=ExecResult.REQUIREMENT_TYPE_COMPLETION)
+        self.goto = AsyncMock(return_value=ExecResult.REQUIREMENT_TYPE_COMPLETION)
 
         self.on_scheduled = on_scheduled
 
@@ -52,44 +52,49 @@ class TestBasic:
         ri = AlwaysOk(r)
         return (edges, ri.goto, Scheduler(ri))
 
-    def test_init(self):
+    @pytest.mark.asyncio
+    async def test_init(self):
         edges, goto, _ = self.__basic([(0, 1)])
         assert len(edges[0].dependencies) == 0, "0 is independent"
         assert len(edges[1].dependencies) == 1, "1 dependent on 0"
         assert edges[1].dependencies[0].requires == "0", "1 dependent on 0"
-        goto(5)
-        goto(6)
+        await goto(5)
+        await goto(6)
         goto.assert_has_calls([call(5), call(6)])
 
-    def test_nodep(self):
+    @pytest.mark.asyncio
+    async def test_nodep(self):
         edges, goto, s = self.__basic([(0, 1)])
         s.schedule(edges[0], 0)
-        assert s.next(), "working on 0"
+        assert await s.next(), "working on 0"
         goto.assert_has_calls([call(edges[0])])
-        assert not s.next(), "no more"
+        assert not await s.next(), "no more"
 
-    def test_dep2(self):
+    @pytest.mark.asyncio
+    async def test_dep2(self):
         edges, goto, s = self.__basic([(0, 1)])
         s.schedule(edges[1], 0)
         for _ in range(5):
-            s.next()
+            await s.next()
         goto.assert_has_calls([call(edges[0]), call(edges[1])])
 
+    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (3, 5, 10, 100))
-    def test_dep_n(self, n: int):
+    async def test_dep_n(self, n: int):
         edges, goto, s = self.__basic([(i, n) for i in range(n)])
         s.schedule(edges[n], 0)
         for _ in range(n + 5):  # shouldn't require excessive extra calls
-            if not s.next():
+            if not await s.next():
                 break
         goto.assert_called_with(edges[n])
         goto.assert_has_calls([call(edges[i]) for i in range(n + 1)], any_order=True)
 
-    def test_tree(self):
+    @pytest.mark.asyncio
+    async def test_tree(self):
         edges, goto, s = self.__basic([(0, 1), (1, 3), (2, 3)])
         s.schedule(edges[3], 0)
         for _ in range(20):
-            s.next()
+            await s.next()
         goto.assert_called_with(edges[3])
         assert goto.call_count == 4
 
@@ -155,7 +160,7 @@ class MockRuntime:
         self.ready = {u: 0 for u in adj.keys()}
         """counts how many of an edge has satisfied its requirements"""
         self.blocked_tasks: list[MockRuntime.BlockedTask] = []
-        self.__goto: Mock = self.routine_interface.goto
+        self.__goto: AsyncMock = self.routine_interface.goto
         self.goto: Mock = Mock()
 
     def __on_scheduled(self, edge: Routine.Edge) -> None:
@@ -187,14 +192,14 @@ class MockRuntime:
     def schedule(self, id: int) -> None:
         self.scheduler.schedule(self.edges[id], 10000)
 
-    def step(self, iterations: int) -> None:
+    async def step(self, iterations: int) -> None:
         for _ in range(iterations):
-            if not self.next():
+            if not await self.next():
                 break
 
-    def next(self) -> bool:
+    async def next(self) -> bool:
         self.__goto.reset_mock()
-        ret = self.scheduler.next()
+        ret = await self.scheduler.next()
 
         # validate call
         prev_call = self.__goto.call_args
@@ -226,38 +231,42 @@ class TestMockRuntime:
 
 
 class TestOrdering:
+    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (2, 4, 7, 15, 16, 99))
     @pytest.mark.parametrize("b", (2, 5))
-    def test_tree(self, n: int, b: int):
+    async def test_tree(self, n: int, b: int):
         a = MockRuntime([(i, i // b) for i in range(1, n)])
         a.schedule(0)
-        a.step(2 * n + 5)
-        assert not a.next(), "Should finish within `2n + 5` iterations."
+        await a.step(2 * n + 5)
+        assert not await a.next(), "Should finish within `2n + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
+    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (99,))
     @pytest.mark.parametrize("b", (2, 10))
     @pytest.mark.parametrize("k", (3, 10))
-    def test_tree_k_times(self, n: int, b: int, k: int):
+    async def test_tree_k_times(self, n: int, b: int, k: int):
         a = MockRuntime([(i, i // b) for i in range(1, n)])
         for _ in range(k):
             a.schedule(0)
-        a.step(5 * k * n + 5)
-        assert not a.next(), "Should finish within `5kn + 5` iterations."
+        await a.step(5 * k * n + 5)
+        assert not await a.next(), "Should finish within `5kn + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
+    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (99,))
     @pytest.mark.parametrize("b", (2, 10))
     @pytest.mark.parametrize("k", (10,))
-    def test_tree_k_times_todo(self, n: int, b: int, k: int):
+    async def test_tree_k_times_todo(self, n: int, b: int, k: int):
         a = MockRuntime([(i, i // b) for i in range(1, n)])
         for _ in range(k):
             a.schedule(0)
-        a.step(2 * k * n + 5)
-        assert not a.next(), "Should finish within `2kn + 5` iterations."
+        await a.step(2 * k * n + 5)
+        assert not await a.next(), "Should finish within `2kn + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
-    def test_tree_random(self):
+    @pytest.mark.asyncio
+    async def test_tree_random(self):
         seed(0)
         k = 10
         for id in range(1, 101):
@@ -271,23 +280,27 @@ class TestOrdering:
                 expected = [randint(0, n - 1) for _ in range(k)]
                 for eid in expected:
                     a.schedule(eid)
-                    a.step(3)  # a bit of offset between scheduling
-                a.step(2 * k * n)
-                assert not a.next(), "Should finish within 2n avg steps per scheduled."
+                    await a.step(3)  # a bit of offset between scheduling
+                await a.step(2 * k * n)
+                assert (
+                    not await a.next()
+                ), "Should finish within 2n avg steps per scheduled."
                 for eid in expected:
                     a.goto.assert_any_call(a.edges[eid])
             except AssertionError as e:
                 extra = [f"Failed on test {id} -- {e.args[0]}", f"edges={edges}"]
                 raise AssertionError("\n".join((*extra, *e.args)))
 
-    def test_transitive(self):
+    @pytest.mark.asyncio
+    async def test_transitive(self):
         a = MockRuntime([(0, 4), (0, 2), (2, 4)])
         a.schedule(0)
-        a.step(4)
-        assert not a.next(), "Should finish"
+        await a.step(4)
+        assert not await a.next(), "Should finish"
         a.goto.assert_any_call(a.edges[0])
 
-    def test_overlap(self):
+    @pytest.mark.asyncio
+    async def test_overlap(self):
         edges = []
         for k in range(5):
             for i in range(10):
@@ -295,6 +308,6 @@ class TestOrdering:
                     edges.append((i + 10 * k + 10, j + 10 * k))
         a = MockRuntime(edges)
         a.schedule(0)
-        a.step(100)
-        assert not a.next(), "Should finish within 100 steps. (50 exec, 50 run)"
+        await a.step(100)
+        assert not await a.next(), "Should finish within 100 steps. (50 exec, 50 run)"
         a.goto.assert_any_call(a.edges[0])
