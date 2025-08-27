@@ -13,40 +13,28 @@ Have an installation of Python and NodeJS.
 1. Precommit setup
 
    ```sh
-   pip install uv                          # install uv (for venv)
-   python -m uv venv --seed --python 3.12  # init venv
-   # then activate venv
-   pip install -r requirements.txt         # for pre-commit hooks
-   pre-commit
-   pre-commit install
+   pip install uv
+   python -m uv sync
+   python -m uv tool run pre-commit
+   python -m uv tool run pre-commit install
    ```
 
-2. Build protobufs
+2. Install dependencies
 
    ```sh
-   cd proto       # go to /proto
-   npm i          # setup envs (does a prepare cascade)
+   npm i  # does a prepare cascade
+   ```
+
+3. Build protobufs (if changed)
+
+   ```sh
    npm run build  # run protoc
    npm test       # run basic tests
    ```
 
-3. Setup backend
+4. Run
 
    ```sh
-   cd backend  # go to /backend
-   python -m uv venv --seed
-   .venv/Scripts/activate  # activate venv
-   pip install uv
-   uv pip install -r requirements.txt
-   uv pip install -e . ../proto/dist/py
-   python main.py  # start server
-   ```
-
-4. Setup frontend
-
-   ```sh
-   cd frontend  # go to /frontend
-   npm i
-   npm i ../proto/dist/ts
-   npm run dev  # start frontend
+   npm run dev          # starts backend/frontend/test watchers
+   npm run dev:testenv  # starts testenv (tkinter app)
    ```

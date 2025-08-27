@@ -2,7 +2,10 @@
   "name": "acine-helper-scripts",
   "version": "1.0.0",
   "scripts": {
-    "prepare": "cd ./proto && pnpm i",
+    "prepare": "concurrently --kill-others-on-fail -n \"ts,py,pr\" -c \"bgBlue.bold,bgMagenta.bold,bgYellow.bold\" \"npm run prepare:frontend\" \"npm run prepare:backend\" \"npm run prepare:proto\"",
+    "prepare:frontend": "cd ./frontend && npm i",
+    "prepare:backend": "cd ./backend && python -m uv sync",
+    "prepare:proto": "cd ./proto && pnpm i",
     "build": "cd ./proto && npm run build",
     "dev": "concurrently --kill-others -n \"FE,BE,+F,+B\" -c \"bgBlue.bold,bgMagenta.bold,bgBlue,bgMagenta\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:frontend:test\" \"npm run dev:backend:pytest\"",
     "dev:backend": "cd backend && call .\\.venv\\Scripts\\activate.bat && python -u main.py",
