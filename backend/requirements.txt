@@ -7,6 +7,7 @@ aiofiles==24.1.0
 # auto inputs
 ahk[binary]==1.8.3
 windows-capture==1.4.2
+pywin32>=311
 
 # classification
 ydf==0.8.0  # 0.10.0 exists now, but 0.8.0 is highest with windows wheel

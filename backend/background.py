@@ -3,6 +3,7 @@ import datetime
 import time
 
 from acine.instance_manager import get_routines
+from acine.power.win32 import sleep
 from acine.scheduler.managed_runtime import ManagedRuntime
 
 
@@ -20,6 +21,8 @@ async def main():
         try:
             idle_time = mrt.next_time() - time.time()
             print(f"\33[F\33[2K[{datetime.datetime.now()}] idle {idle_time:.2f}s")
+            if idle_time > 60:
+                await sleep(idle_time - 10)
             await asyncio.sleep(min(idle_time, 0.02))
             await mrt.run()
         except BaseException as e:
