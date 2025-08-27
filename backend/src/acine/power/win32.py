@@ -6,6 +6,11 @@ In Windows, you can achieve S3 standby in Control Panel "Power Options" and set
 
 Doesn't seem to work if both are 1 min. During testing on local desktop,
 the lowest that works is display=1min, sleep=2min.
+
+If sleep doesn't seem to occur, you can check what might be preventing it with
+```
+powercfg /requests
+```
 """
 
 import asyncio
