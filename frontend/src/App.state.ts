@@ -18,7 +18,10 @@ import { frameToObjectURL } from './client/encoder';
 /** callbacks for specific id's */
 const wsListeners: Record<number, (arg0: pb.Packet) => void> = {};
 
-export const ws = new WebSocket('ws://localhost:9000');
+const wsUrl = document.location.origin
+  .replace('http', 'ws')
+  .replace(/(:\d+)?$/, ':9000');
+export const ws = new WebSocket(wsUrl);
 ws.onopen = () => {
   console.log('ws open');
   const req = pb.Packet.create({
