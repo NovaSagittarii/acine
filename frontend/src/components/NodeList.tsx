@@ -20,7 +20,7 @@ export default function NodeList() {
     if (selectedNode) {
       document
         .getElementById(selectedNode.id)
-        ?.scrollIntoView({ behavior: 'smooth' });
+        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [selectedNode]);
 
