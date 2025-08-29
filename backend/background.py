@@ -14,13 +14,17 @@ async def main():
     i = int(input("which index? "))
     assert routines[i]
     routine = routines[i]
+    print(f"using [{routine.name}]\n")
 
     mrt = ManagedRuntime(routine)
 
     while True:
         try:
-            idle_time = mrt.next_time() - time.time()
-            print(f"\33[F\33[2K[{datetime.datetime.now()}] idle {idle_time:.2f}s")
+            next_unix = mrt.next_time()
+            idle_time = next_unix - time.time()
+            now = datetime.datetime.now()
+            next = datetime.datetime.fromtimestamp(next_unix)
+            print(f"\33[F\33[2K[{now} => {next}] idle {idle_time:.2f}s")
             if idle_time > 60:
                 await sleep(idle_time - 10)
             await asyncio.sleep(min(idle_time, 0.02))
