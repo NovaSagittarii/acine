@@ -7,8 +7,21 @@ When run as main, creates `test-routine` and prints ids of stored routines.
 import os
 from uuid import uuid4
 
-from acine.persist import fs_read_sync, fs_write_sync, mkdir, resolve
 from acine_proto_dist.routine_pb2 import Routine
+
+from acine.persist import fs_read_sync, fs_write_sync, mkdir, resolve
+
+testenv_file = os.path.realpath(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),  # /backend/src/acine
+        "..",  # /backend/src/
+        "..",  # /backend
+        "..",  # /
+        "testenv",  # /testenv
+        "main.py",  # /testenv/main.py
+    )
+)
+testenv_cmd = f"start pythonw {testenv_file}"
 
 
 def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
@@ -23,8 +36,8 @@ def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
         id=id,
         name=routine.name,
         description=routine.description,
-        start_command=routine.start_command,
-        window_name=routine.window_name,
+        start_command=testenv_cmd,
+        window_name="TestEnv",
         nodes=[
             Routine.Node(id="init", name="start", type=Routine.Node.NODE_TYPE_STANDARD)
         ],
