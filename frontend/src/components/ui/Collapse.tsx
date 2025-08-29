@@ -22,9 +22,11 @@ export default function Collapse({
   return (
     <div
       className={
-        'relative overflow-hidden transition-all select-none ' +
+        'relative overflow-hidden transition-all duration-100 select-none ' +
         // `${isOpen ? 'max-h-[1000px]' : 'max-h-10'} ` +
-        `${!isOpen && 'group hover:bg-black/5'} ` +
+        `${!isOpen && 'group bg-amber-900/5 hover:bg-amber-500/5'} ` +
+        `${!isOpen && 'text-black/50 hover:text-black'} ` +
+        `border border-transparent ${!isOpen && 'hover:border-amber-500'} ` +
         className
       }
       onClick={() => !isOpen && setOpen(true)}
