@@ -7,14 +7,13 @@ import {
   Routine_Edge_EdgeTriggerType,
 } from 'acine-proto-dist';
 import { exportGenerator, uuidv4 } from './util';
-import { X } from 'vitest/dist/chunks/reporters.6vxQttCV.js';
 
 function displayCase(s: string | undefined): string {
   if (!s) return '';
   return s[0];
 }
 
-export function getEdgeDisplay(edge: Routine_Edge): string {
+export function getEdgePrefix(edge: Routine_Edge): string {
   let prefix = '';
   // p for "pass", don't use t for "true" cuz "target"
   // don't use uppercase so it is phoentically distinct
@@ -22,6 +21,11 @@ export function getEdgeDisplay(edge: Routine_Edge): string {
   prefix += displayCase(edge.precondition?.condition?.$case) || 'p';
   prefix += displayCase(edge.action?.$case) || 'ε';
   prefix += displayCase(edge.postcondition?.condition?.$case) || 'p';
+  return prefix;
+}
+
+export function getEdgeDisplay(edge: Routine_Edge): string {
+  const prefix = getEdgePrefix(edge);
   const destination = $routine.get().nodes.find((n) => n.id === edge.to)?.name;
   const desc = edge.description || destination || edge.to || '<no destination>';
   return prefix + ' ' + desc;

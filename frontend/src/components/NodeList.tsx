@@ -1,10 +1,4 @@
 import { useStore } from '@nanostores/react';
-import {
-  Routine_Condition,
-  Routine_Node,
-  Routine_Node_NodeType,
-} from 'acine-proto-dist';
-import { v4 as uuidv4 } from 'uuid';
 
 import { $routine, $selectedNode } from '@/state';
 import Button, { CloseButton } from '@/ui/Button';

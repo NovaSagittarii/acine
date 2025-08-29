@@ -6,7 +6,7 @@ import Edge from '@/components/Edge';
 import { $routine, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
-import { choices, EdgePreset, getEdgeDisplay } from './Edge.util';
+import { choices, getEdgeDisplay } from './Edge.util';
 
 interface EdgeListProps {
   node: Routine_Node;

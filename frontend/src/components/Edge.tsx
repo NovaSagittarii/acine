@@ -16,6 +16,7 @@ import DependencyList from './DependencyList';
 import { ScheduleList } from './Schedule';
 import Node from './Node';
 import { choices } from './Node.util';
+import { getEdgePrefix } from './Edge.util';
 
 const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
@@ -36,25 +37,33 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
     <div
       className={`pl-1 border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
     >
-      <EditableRoutineProperty
-        object={edge}
-        property={'description'}
-        callback={forceUpdate}
-      />
-      <div>
-        to →
-        <Select
-          value={edge.to}
-          values={routine.nodes.map((n) => [
-            `${n.name} - ${n.description.substring(0, 24)}`,
-            n.id,
-          ])}
-          onChange={(v) => {
-            edge.to = v;
-          }}
+      <div className='flex gap-4 w-full'>
+        <div>
+          to →
+          <Select
+            value={edge.to}
+            values={routine.nodes.map((n) => [n.name, n.id])}
+            onChange={(v) => {
+              edge.to = v;
+            }}
+          />
+        </div>
+        <div className='opacity-50'>{getEdgePrefix(edge)}</div>
+        <EditableRoutineProperty
+          object={edge}
+          property={'description'}
+          callback={forceUpdate}
+          // className='w-full'
         />
       </div>
-      <Collapse label={'destination node'}>
+      <Collapse
+        label={
+          'destination node ' +
+          (edge.to
+            ? routine.nodes.filter((x) => x.id === edge.to)[0].description
+            : 'create options')
+        }
+      >
         {edge.to ? (
           <Node node={routine.nodes.filter((x) => x.id === edge.to)[0]}></Node>
         ) : (
