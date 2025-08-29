@@ -24,7 +24,9 @@ export default function NodeList() {
   useEffect(() => {
     // a way to persist scroll location
     if (selectedNode) {
-      document.getElementById(selectedNode.id)?.scrollIntoView();
+      document
+        .getElementById(selectedNode.id)
+        ?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [selectedNode]);
 
