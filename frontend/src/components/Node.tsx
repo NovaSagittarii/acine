@@ -12,6 +12,7 @@ import useForceUpdate from './useForceUpdate';
 import { useEffect } from 'react';
 import Condition from './Condition';
 import Collapse from './ui/Collapse';
+import { runtimeSetCurr } from '../App.state';
 
 interface NodeProps extends Selectable {
   node: Routine_Node;
@@ -45,6 +46,12 @@ function Node({ node, selected = false }: NodeProps) {
           className='font-semibold grow'
         />
         <div className='flex flex-row text-xs'>
+          <div
+            className='hover:bg-red-100'
+            onClick={async () => void (await runtimeSetCurr(node.id))}
+          >
+            goto
+          </div>
           id={node.id} (outdegree={node.edges.length})
         </div>
       </div>

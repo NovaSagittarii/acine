@@ -4,8 +4,6 @@ import asyncio
 import uuid
 from copy import deepcopy
 
-from acine.runtime.util import get_frame
-
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
 from acine_proto_dist.input_event_pb2 import InputEvent
@@ -19,6 +17,8 @@ from acine_proto_dist.position_pb2 import Point
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import RuntimeState
 from autobahn.asyncio.websocket import WebSocketServerProtocol
+
+from acine.runtime.util import get_frame
 
 from . import instance_manager
 from .capture import GameCapture
@@ -134,6 +134,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     self.load_routine(packet.routine)
                 case "get_routine":
                     await self.on_get_routine(packet)
+                case "set_curr":
+                    await self.on_set_curr(packet)
                 case "goto":
                     await self.on_goto(packet)
                 case "queue_edge":
@@ -264,8 +266,9 @@ class AcineServerProtocol(WebSocketServerProtocol):
         response = Packet(set_curr=RuntimeState(current_edge=edge))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
-    async def on_goto(self, packet: Packet):
-        target_node = packet.goto.current_node
+    async def on_set_curr(self, packet: Packet):
+        """(from client) request to set curr"""
+        target_node = packet.set_curr.current_node
         if self.rt and target_node.id in self.rt.nodes:
             if self.current_task:
                 # abort previous goto (if still running)
@@ -275,14 +278,22 @@ class AcineServerProtocol(WebSocketServerProtocol):
             # on_queue_edge (click edge) can be used to test navigation
             self.rt.set_curr(target_node)
 
-            # async def run_goto():
-            #     try:
-            #         await self.rt.goto(target_node.id)
-            #     except asyncio.CancelledError:
-            #         pass
+    async def on_goto(self, packet: Packet):
+        """(from client) request to navigate goto a node"""
+        target_node = packet.goto.current_node
+        if self.rt and target_node.id in self.rt.nodes:
+            if self.current_task:
+                # abort previous goto (if still running)
+                self.current_task.cancel()
 
-            # self.current_task = asyncio.create_task(run_goto())
-            # await self.current_task
+            async def run_goto():
+                try:
+                    await self.rt.goto(target_node.id)
+                except asyncio.CancelledError:
+                    pass
+
+            self.current_task = asyncio.create_task(run_goto())
+            await self.current_task
 
     async def on_queue_edge(self, packet: Packet):
         target_edge = packet.queue_edge.current_edge

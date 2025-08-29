@@ -161,6 +161,24 @@ export function persistFrame(frame: pb.Frame) {
 }
 
 /**
+ * Set the runtime's position to this node. Typically for debugging.
+ * @param id target node id
+ */
+export function runtimeSetCurr(id: string) {
+  const packet = pb.Packet.create({
+    type: {
+      $case: 'setCurr',
+      setCurr: {
+        currentNode: {
+          id,
+        },
+      },
+    },
+  });
+  ws.send(pb.Packet.encode(packet).finish());
+}
+
+/**
  * Route the runtime to goto this particular node. If doesn't exist,
  * nothing happens. (no feedback)
  * @param id target node id
