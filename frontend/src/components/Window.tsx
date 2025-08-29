@@ -157,9 +157,9 @@ export default function Window({
         outerDown='border-blue-300/40'
         innerDown='border-blue-400/80'
       />
-      <div className='absolute font-mono'>
+      <div className='absolute bottom-0 right-0 font-mono pointer-events-none bg-white/50 opacity-50'>
         {mouseX.toString().padStart(4, '0')},
-        {mouseY.toString().padStart(4, '0')} {isMouseDown ? 'down' : 'up'}
+        {mouseY.toString().padStart(4, '0')} {isMouseDown ? 'down' : 'up  '}
       </div>
     </div>
   );
