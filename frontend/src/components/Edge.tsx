@@ -17,6 +17,7 @@ import { ScheduleList } from './Schedule';
 import Node from './Node';
 import { choices } from './Node.util';
 import { getEdgePrefix } from './Edge.util';
+import { runtimeQueueEdge } from '../App.state';
 
 const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
@@ -37,7 +38,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
     <div
       className={`pl-1 border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
     >
-      <div className='flex gap-4 w-full'>
+      <div className='flex gap-4 w-full items-center'>
         <div>
           to →
           <Select
@@ -55,6 +56,12 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
           callback={forceUpdate}
           // className='w-full'
         />
+        <div
+          className='text-xs hover:bg-red-100'
+          onClick={() => void runtimeQueueEdge(edge.id)}
+        >
+          exec
+        </div>
       </div>
       <Collapse
         label={
