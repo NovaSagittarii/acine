@@ -10,6 +10,7 @@ import { $routine, $selectedNode } from '@/state';
 import Button, { CloseButton } from '@/ui/Button';
 import Node from '@/components/Node';
 import useForceUpdate from './useForceUpdate';
+import { useEffect } from 'react';
 
 /**
  * Editor for nodes & transitions of the DFA.
@@ -19,12 +20,20 @@ export default function NodeList() {
   const selectedNode = useStore($selectedNode);
   const forceUpdate = useForceUpdate();
 
+  useEffect(() => {
+    // a way to persist scroll location
+    if (selectedNode) {
+      document.getElementById(selectedNode.id)?.scrollIntoView();
+    }
+  }, [selectedNode]);
+
   return (
     <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
       <div className='h-full overflow-y-scroll'>
         {routine.nodes.length === 0 && 'No nodes yet.'}
         {routine.nodes.map((node, index) => (
           <div
+            id={node.id}
             key={node.id}
             className='relative'
             onClick={() => $selectedNode.set(node)}
