@@ -13,7 +13,8 @@ export default function Button({
     <div
       onClick={() => void onClick()}
       className={
-        'p-4 rounded-lg text-center hover:scale-105 active:scale-95 transition-transform select-none ' +
+        'p-3 rounded-lg text-center transition-colors select-none ' +
+        'border-4 border-transparent hover:border-blue-500 ' +
         className
       }
     >
