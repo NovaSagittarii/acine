@@ -14,6 +14,7 @@ import {
   $replayInputSource,
   $loadedRoutine,
   $backendConfiguration,
+  $runtimeContext,
 } from './state';
 import Button from './components/ui/Button';
 import StateList from './components/StateList';
@@ -22,6 +23,7 @@ import ConditionImageEditor from './components/ConditionImageEditor';
 import Window from './components/Window';
 import RoutineViewer from './components/RoutineViewer';
 import RoutineConfiguration from './components/RoutineConfiguration';
+import { getEdgeDisplay } from './components/Edge.util';
 
 enum ActiveTab {
   CONFIG,
@@ -45,6 +47,7 @@ function RoutineEditor() {
   const [dState, setDState] = useState(''); // debug state
   const [dSend, setDSend] = useState(0);
   const [dRecv, setDRecv] = useState(0);
+  const runtimeContext = useStore($runtimeContext);
 
   const listen = useCallback(
     async (ev: MessageEvent<Blob>) => {
@@ -134,9 +137,20 @@ function RoutineEditor() {
               dimensions={dimensions}
               imageUrl={imageUrl}
             />
-            {dState}
-            {`; latency=${(dRecv / 1e3).toFixed(3)}s`}
-            {`; ${(1e3 / dRecv).toFixed(1)}fps`}
+            <div className='font-mono flex-col'>
+              <div>
+                {dState}
+                {` latency=${(dRecv / 1e3).toFixed(3)}s`}
+                {` ${(1e3 / dRecv).toFixed(1).padStart(5, '0')}fps`}
+              </div>
+              <div>
+                {runtimeContext?.currentNode?.name}
+                {runtimeContext.targetNode &&
+                  ' => ' + runtimeContext.targetNode.name}
+                {runtimeContext.currentEdge &&
+                  ' via ' + getEdgeDisplay(runtimeContext.currentEdge)}
+              </div>
+            </div>
           </div>
         </div>
         <div className='w-2/3 h-full flex flex-col'>
