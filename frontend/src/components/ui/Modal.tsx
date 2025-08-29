@@ -12,7 +12,7 @@ interface ModalProps {
 export default function Modal({ isOpen, onClose, children }: ModalProps) {
   return (
     isOpen && (
-      <div className='absolute left-0 top-0 w-screen h-screen'>
+      <div className='absolute left-0 top-0 w-screen h-screen z-20'>
         <div
           className='absolute w-full h-full bg-black/10'
           onClick={() => onClose()}
