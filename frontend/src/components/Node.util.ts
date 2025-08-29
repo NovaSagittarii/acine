@@ -5,6 +5,7 @@ import {
   Routine_Node_NodeType,
 } from 'acine-proto-dist';
 import { v4 as uuidv4 } from 'uuid';
+import { exportGenerator } from './util';
 
 export class NodePreset {
   static base() {
@@ -28,11 +29,7 @@ export class NodePreset {
   }
 }
 
-interface NodePresetDescription {
-  name: string;
-  method: () => Routine_Node;
-}
-
-export const choices = (['base', 'image'] as (keyof NodePreset)[]).map(
-  (x) => ({ name: x, method: NodePreset[x] }) as NodePresetDescription,
+export const choices = exportGenerator<Routine_Node, typeof NodePreset>(
+  NodePreset,
+  ['base', 'image'],
 );
