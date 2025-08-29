@@ -27,7 +27,7 @@ export default function EdgeList({ node }: EdgeListProps) {
           <Collapse
             className='relative'
             key={index}
-            label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} -- ${getEdgeDisplay(edge).substring(0, 50)} (id=${edge.id})`}
+            label={`* ${routine.nodes.find((n) => n.id === edge.to)?.name} ${getEdgeDisplay(edge).substring(0, 50)}`}
           >
             <Edge edge={edge} />
             <CloseButton

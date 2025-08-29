@@ -7,9 +7,22 @@ import {
 } from 'acine-proto-dist';
 import { exportGenerator, uuidv4 } from './util';
 
+function displayCase(s: string | undefined): string {
+  if (!s) return '';
+  return s[0];
+}
+
 export function getEdgeDisplay(edge: Routine_Edge): string {
+  let prefix = '';
+  // p for "pass", don't use t for "true" cuz "target"
+  // don't use uppercase so it is phoentically distinct
+  // don't use 1 for "true" because it looks like i for "image"
+  prefix += displayCase(edge.precondition?.condition?.$case) || 'p';
+  prefix += displayCase(edge.action?.$case) || 'ε';
+  prefix += displayCase(edge.postcondition?.condition?.$case) || 'p';
   const destination = $routine.get().nodes.find((n) => n.id === edge.to)?.name;
-  return edge.description || destination || edge.to || '<no destination>';
+  const desc = edge.description || destination || edge.to || '<no destination>';
+  return prefix + ' ' + desc;
 }
 
 export class EdgePreset {
