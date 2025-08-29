@@ -14,6 +14,8 @@ import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
 import DependencyList from './DependencyList';
 import { ScheduleList } from './Schedule';
+import Node from './Node';
+import { choices } from './Node.util';
 
 const TRIGGER_TYPES_DISPLAY = [
   ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
@@ -52,6 +54,29 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
           }}
         />
       </div>
+      <Collapse label={'destination node'}>
+        {edge.to ? (
+          <Node node={routine.nodes.filter((x) => x.id === edge.to)[0]}></Node>
+        ) : (
+          <div className='flex flex-col border rounded-sm p-1'>
+            <div className='font-semibold text-lg'>Node Presets</div>
+            {choices.map(({ name, method }, index) => (
+              <div
+                key={index}
+                className='hover:bg-red-100'
+                onClick={() => {
+                  const newNode = method();
+                  routine.nodes.push(newNode);
+                  edge.to = newNode.id;
+                  forceUpdate();
+                }}
+              >
+                {name}
+              </div>
+            ))}
+          </div>
+        )}
+      </Collapse>
       <div className='flex flex-row'>
         <Select
           value={edge.trigger}

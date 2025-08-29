@@ -11,6 +11,7 @@ import Button, { CloseButton } from '@/ui/Button';
 import Node from '@/components/Node';
 import useForceUpdate from './useForceUpdate';
 import { useEffect } from 'react';
+import { NodePreset } from './Node.util';
 
 /**
  * Editor for nodes & transitions of the DFA.
@@ -51,16 +52,7 @@ export default function NodeList() {
       <Button
         className='bg-black text-white'
         onClick={() => {
-          const newNode = Routine_Node.create({
-            id: uuidv4(),
-            name: 'unnamed node',
-            description: 'desc',
-            type: Routine_Node_NodeType.NODE_TYPE_STANDARD,
-            defaultCondition: Routine_Condition.create({
-              delay: 50,
-              interval: 100,
-            }),
-          });
+          const newNode = NodePreset.base();
           routine.nodes.push(newNode);
           forceUpdate();
           $selectedNode.set(newNode);
