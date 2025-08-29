@@ -59,7 +59,7 @@ export default function SchedulingGroup({
           createElement={() => 0}
           onUpdate={forceUpdate}
           render={(x, i) => (
-            <div key={i} className='flex items-center gap-4'>
+            <div key={i} className='flex flex-wrap items-center gap-4'>
               {x}
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <TimePicker

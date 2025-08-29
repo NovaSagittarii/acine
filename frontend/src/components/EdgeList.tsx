@@ -40,9 +40,9 @@ export default function EdgeList({ node }: EdgeListProps) {
         ))}
       </div>
       {selectedNode === node && (
-        <div className='flex flex-col'>
+        <div className='w-full flex flex-col'>
           <div className='text-lg font-semibold'>Edge Presets</div>
-          <div className='flex gap-2'>
+          <div className='w-full flex flex-wrap gap-2'>
             {choices.map(({ name, method }, index) => (
               <div
                 key={index}
