@@ -30,6 +30,12 @@ export default function Collapse({
         className
       }
       onClick={() => !isOpen && setOpen(true)}
+      ref={(ref) => {
+        // called once when isOpen changes
+        isOpen &&
+          ref &&
+          ref.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }}
     >
       <div
         className={
