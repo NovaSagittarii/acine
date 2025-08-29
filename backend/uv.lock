@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.12"
 resolution-markers = [
     "sys_platform == 'darwin'",
@@ -48,7 +49,7 @@ requires-dist = [
     { name = "pywin32", specifier = ">=311" },
     { name = "scikit-image", specifier = "==0.25.2" },
     { name = "types-pywin32", specifier = ">=311.0.0.20250822" },
-    { name = "windows-capture", specifier = "==1.4.2" },
+    { name = "windows-capture", specifier = "~=1.5.0" },
 ]
 
 [[package]]
@@ -862,13 +863,13 @@ wheels = [
 
 [[package]]
 name = "windows-capture"
-version = "1.4.2"
+version = "1.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "opencv-python" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/68/065edbee59fdcbf324a36c2d61919ca302b2a9674285c73eb3855752f3f0/windows_capture-1.4.2.tar.gz", hash = "sha256:d7a6840ad5e515c02ab657544e06ce5aeb8fe5598917e049ffeca1fe21140352", size = 41027 }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/78/bf3363d6f0890171efba9bbd4e1f36b47afa1e643a7bc7c9059176c8fb33/windows_capture-1.5.0.tar.gz", hash = "sha256:9931224dac5db4d6e35b7c3b2d02f6df8ff04caa5c95eac2401a7dd2db95b5ce", size = 48182 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/0c/2626a31baf675d1659f473bf39775a26c1bd159379512623d9e81d09fecf/windows_capture-1.4.2-cp39-abi3-win_amd64.whl", hash = "sha256:5d89fff1f75c3345599893a2108972ea93a2721c48e70d76c0cf591825be8bf0", size = 207230 },
+    { url = "https://files.pythonhosted.org/packages/a5/46/c43c7881bfa3f29f7b87ab0385654d08f808722bd09aebc52ce9ba4eace5/windows_capture-1.5.0-cp39-abi3-win_amd64.whl", hash = "sha256:262819089fbe142cf298b6bfde0eb93c27b6db09ac9828b9ed6653714041654f", size = 220395 },
 ]
