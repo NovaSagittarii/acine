@@ -361,6 +361,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
     async def on_create_routine(self, packet: Packet):
         routine = instance_manager.create_routine(packet.create_routine)
+        self.load_routine(routine)
+
         packet = Packet(get_routine=routine)
         self.sendMessage(packet.SerializeToString(), isBinary=True)
 
