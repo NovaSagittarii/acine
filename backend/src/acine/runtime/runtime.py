@@ -81,6 +81,7 @@ class Runtime:
         self.G = nx.DiGraph()
         self.context.curr = routine.nodes[0] if routine.nodes else None
         self.context.return_stack = [None]
+        self.target_node: Routine.Node | None = None
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
         self.on_change_edge = on_change_edge
@@ -135,6 +136,7 @@ class Runtime:
     async def goto(self, id: str):
         if id not in self.nodes:
             raise ValueError(id, "target does not exist in loaded routine")
+        self.target_node = self.nodes[id]
         while self.context.curr.id != id:
             print(f"{self.context.curr.name} => {self.nodes[id].name}")
 
@@ -232,6 +234,7 @@ class Runtime:
                 f" => {self.nodes[take_edge.to].name}",
             )
             await self.__run_action(take_edge)
+        self.target_node = None
 
     async def queue_edge(self, id: str):
         """

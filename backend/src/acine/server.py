@@ -254,7 +254,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def on_change_curr(self, node: Routine.Node):
-        response = Packet(set_curr=RuntimeState(current_node=node))
+        response = Packet(
+            set_curr=RuntimeState(
+                current_node=node, target_node=self.rt.target_node if self.rt else None
+            )
+        )
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def on_change_return(self, return_stack: list[Routine.Node]):

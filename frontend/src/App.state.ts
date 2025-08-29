@@ -104,7 +104,13 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
     case 'setCurr': {
       const { setCurr: context } = packet.type;
       const c = $runtimeContext.get();
-      if (context.currentNode) c.currentNode = context.currentNode;
+      if (context.currentNode) {
+        c.currentNode = context.currentNode;
+        c.targetNode = context.targetNode; // if null, no target
+        if (context.targetNode?.id === context.currentNode.id) {
+          c.targetNode = undefined; // patch result (clientside). TODO: cleanup this spaghetti
+        }
+      }
       c.currentEdge = context.currentEdge; // if null, no longer processing edge
       $runtimeContext.set(c);
       break;
