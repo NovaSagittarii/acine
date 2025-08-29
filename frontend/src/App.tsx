@@ -145,10 +145,17 @@ function RoutineEditor() {
               </div>
               <div>
                 {runtimeContext?.currentNode?.name}
-                {runtimeContext.targetNode &&
-                  ' => ' + runtimeContext.targetNode.name}
+                {runtimeContext.currentEdge &&
+                  ' => ' +
+                    $routine
+                      .get()
+                      .nodes.filter(
+                        (x) => x.id === runtimeContext.currentEdge?.to,
+                      )[0].name}
                 {runtimeContext.currentEdge &&
                   ' via ' + getEdgeDisplay(runtimeContext.currentEdge)}
+                {runtimeContext.targetNode &&
+                  ' ==> ' + runtimeContext.targetNode.name}
               </div>
             </div>
           </div>
