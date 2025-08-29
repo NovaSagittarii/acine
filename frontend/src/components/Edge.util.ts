@@ -2,10 +2,12 @@ import { $routine } from '@/state';
 import {
   InputReplay,
   Routine_Condition,
+  Routine_Condition_Image,
   Routine_Edge,
   Routine_Edge_EdgeTriggerType,
 } from 'acine-proto-dist';
 import { exportGenerator, uuidv4 } from './util';
+import { X } from 'vitest/dist/chunks/reporters.6vxQttCV.js';
 
 function displayCase(s: string | undefined): string {
   if (!s) return '';
@@ -70,9 +72,41 @@ export class EdgePreset {
     };
     return x;
   }
+
+  static imageEpsilon() {
+    const x = EdgePreset.epsilon();
+    x.precondition!.condition = {
+      $case: 'image',
+      image: Routine_Condition_Image.create(),
+    };
+    return x;
+  }
+
+  static replayRelative() {
+    const x = EdgePreset.replay();
+    x.precondition!.condition = {
+      $case: 'image',
+      image: Routine_Condition_Image.create(),
+    };
+    x.action = {
+      $case: 'replay',
+      replay: InputReplay.create({ relative: true }),
+    };
+    return x;
+  }
+
+  static subroutine() {
+    const x = EdgePreset.base();
+    x.action = {
+      $case: 'subroutine',
+      subroutine: '',
+    };
+    x.postcondition = undefined; // currently subroutine postcondition isn't implemnted
+    return x;
+  }
 }
 
 export const choices = exportGenerator<Routine_Edge, typeof EdgePreset>(
   EdgePreset,
-  ['base', 'replay', 'epsilon'],
+  ['base', 'replay', 'epsilon', 'imageEpsilon', 'replayRelative', 'subroutine'],
 );
