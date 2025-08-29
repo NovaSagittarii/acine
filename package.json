@@ -17,7 +17,9 @@
     "test": "concurrently --kill-others-on-fail -m 1 -n \"ts,py,pr\" -c \"bgBlue.bold,bgMagenta.bold,bgYellow.bold\" \"npm run test:frontend\" \"npm run test:backend\" \"npm run test:proto\"",
     "test:frontend": "cd frontend && npm test",
     "test:backend": "cd backend && call .\\.venv\\Scripts\\activate.bat && pytest",
-    "test:proto": "cd proto && npm test"
+    "test:proto": "cd proto && npm test",
+    "background": "cd backend && python -m uv run background.py",
+    "": ""
   },
   "author": "NovaSagittarii",
   "devDependencies": {
