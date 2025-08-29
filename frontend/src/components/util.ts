@@ -1,3 +1,5 @@
+export { v4 as uuidv4 } from 'uuid';
+
 type Generates<T> = () => T;
 
 interface GeneratorDescription<T, C> {

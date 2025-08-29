@@ -1,18 +1,12 @@
 import { useStore } from '@nanostores/react';
-import {
-  Routine_Condition,
-  Routine_Edge,
-  Routine_Edge_EdgeTriggerType,
-  Routine_Node,
-} from 'acine-proto-dist';
-import { v4 as uuidv4 } from 'uuid';
+import { Routine_Node } from 'acine-proto-dist';
 
-import Button, { CloseButton } from '@/ui/Button';
+import { CloseButton } from '@/ui/Button';
 import Edge from '@/components/Edge';
 import { $routine, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
-import { getEdgeDisplay } from './Edge.util';
+import { choices, EdgePreset, getEdgeDisplay } from './Edge.util';
 
 interface EdgeListProps {
   node: Routine_Node;
@@ -46,38 +40,24 @@ export default function EdgeList({ node }: EdgeListProps) {
         ))}
       </div>
       {selectedNode === node && (
-        <Button
-          className='bg-black text-white text-sm p-2!'
-          onClick={() => {
-            const newEdge = Routine_Edge.create({
-              id: uuidv4(),
-              trigger: Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_STANDARD,
-              precondition: Routine_Condition.create({
-                // precondition timeout sort of doesn't make sense
-                // since it needed to pass before it is taken...
-                delay: 0,
-                interval: 0,
-                timeout: 50,
-              }),
-              postcondition: Routine_Condition.create({
-                delay: 0,
-                interval: 10,
-                // unset timeout (defaults to 30 seconds)
-
-                // you probably want to use the destination node
-                // default_condition since most transitions are
-                // state transitions
-                condition: { $case: 'auto', auto: true },
-              }),
-              limit: -1,
-              // empty description defaults to destination node name
-            });
-            node.edges.push(newEdge);
-            forceUpdate();
-          }}
-        >
-          Add Transition
-        </Button>
+        <div className='flex flex-col'>
+          <div className='text-lg font-semibold'>Edge Presets</div>
+          <div className='flex gap-2'>
+            {choices.map(({ name, method }, index) => (
+              <div
+                key={index}
+                className='hover:bg-red-100'
+                onClick={() => {
+                  const newEdge = method();
+                  node.edges.push(newEdge);
+                  forceUpdate();
+                }}
+              >
+                {name}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

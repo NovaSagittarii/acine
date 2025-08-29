@@ -60,20 +60,22 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         ) : (
           <div className='flex flex-col border rounded-sm p-1'>
             <div className='font-semibold text-lg'>Node Presets</div>
-            {choices.map(({ name, method }, index) => (
-              <div
-                key={index}
-                className='hover:bg-red-100'
-                onClick={() => {
-                  const newNode = method();
-                  routine.nodes.push(newNode);
-                  edge.to = newNode.id;
-                  forceUpdate();
-                }}
-              >
-                {name}
-              </div>
-            ))}
+            <div className='flex gap-4'>
+              {choices.map(({ name, method }, index) => (
+                <div
+                  key={index}
+                  className='hover:bg-red-100'
+                  onClick={() => {
+                    const newNode = method();
+                    routine.nodes.push(newNode);
+                    edge.to = newNode.id;
+                    forceUpdate();
+                  }}
+                >
+                  {name}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </Collapse>
