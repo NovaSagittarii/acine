@@ -19,6 +19,7 @@ export default function Collapse({
   open = false,
 }: CollapseProps) {
   const [isOpen, setOpen] = useState(open);
+  const [ref, setRef] = useState<HTMLElement | null>(null);
   return (
     <div
       className={
@@ -29,13 +30,13 @@ export default function Collapse({
         `border border-transparent ${!isOpen && 'hover:border-amber-500'} ` +
         className
       }
-      onClick={() => !isOpen && setOpen(true)}
-      ref={(ref) => {
-        // called once when isOpen changes
-        isOpen &&
-          ref &&
-          ref.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      onClick={() => {
+        if (!isOpen) {
+          setOpen(true);
+          ref?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }}
+      ref={setRef}
     >
       <div
         className={
