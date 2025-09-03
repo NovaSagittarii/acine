@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import multiprocessing.pool
+import time
 import uuid
 from copy import deepcopy
 
@@ -344,14 +346,22 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 c = condition.image
                 c.threshold = 0.4  # clientside can filter
                 ref = get_frame(self.rt.routine.id, c.frame_id)
-                for f, img in imgs:
-                    results = check_similarity(
-                        c,
-                        img,
-                        ref,
-                        return_one=len(imgs) > 1,  # speedup large queries
-                        argpartition=len(imgs) > 1,
-                    )
+                iresults = [None for _ in imgs]
+                if len(imgs) == 1:
+                    iresults[0] = check_similarity(c, imgs[0][1], ref)
+                else:
+
+                    def exec(fimg: tuple[Frame, cv2.typing.MatLike]):
+                        return check_similarity(c, fimg[1], ref, return_one=True)
+
+                    t0 = time.time()
+                    print(f"[ ] Start processing {len(imgs)} frames")
+                    with multiprocessing.pool.ThreadPool() as p:
+                        iresults = p.map(exec, imgs, chunksize=3)
+                    print(f"[+] Completed {time.time() - t0:.2f}s")
+                for i, fimg in enumerate(imgs):
+                    f, _ = fimg
+                    results = iresults[i]
                     if not results:
                         continue
 

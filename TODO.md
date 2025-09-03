@@ -19,7 +19,7 @@ budget issue tracker
   - [ ] implement frame grouping (states!!)
   - [x] implement threshold matching
   - [x] query backend for which frames match a condition
-  - [ ] multithread frame query
+  - [x] multiprocessing frame query
 - v0.1.2 Runtime Frontend
   - [x] display runtime state (needed for debugging runtime)
   - [x] goto from frontend
@@ -73,6 +73,7 @@ budget issue tracker
 - [ ] gpu related capture
 - [ ] time travel capture (pick frame from a recording)
 - [ ] uvloop
+- [ ] server methods tests
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.
