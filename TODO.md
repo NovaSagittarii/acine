@@ -13,11 +13,13 @@ budget issue tracker
   - [x] improve frame select (v2: autoselect)
   - [x] implement node default precondition; action default
   - [x] implement interrupt handler (send to state)
+  - [ ] subroutine postcondition
 - Verification Features (design not ready)
   - [ ] improve frame select (v3: visual selector)
   - [ ] implement frame grouping (states!!)
   - [x] implement threshold matching
   - [x] query backend for which frames match a condition
+  - [ ] multithread frame query
 - v0.1.2 Runtime Frontend
   - [x] display runtime state (needed for debugging runtime)
   - [x] goto from frontend
@@ -28,6 +30,7 @@ budget issue tracker
   - [ ] interrupt during postcondition (or action)
   - [x] implement replay offset (on dynamic check)
   - [ ] implement text match
+  - [ ] repeat action N times (specifically replay but generalizable?)
 - v0.1.4 Automation Features (generalized)
   - [ ] implement multi-node interrupt (event listener)
 - v0.2.0 Routine Manager
@@ -48,20 +51,24 @@ budget issue tracker
 - v0.5.0 Optimization
   - [ ] implement variables (explicit dependency)
   - linear programming
-- Power Saving
-  - sleep and wake from sleep
-    https://learn.microsoft.com/en-us/windows/win32/api/powrprof/nf-powrprof-setsuspendstate
-    https://learn.microsoft.com/en-us/windows/win32/power/system-wake-up-events
+- v0.6.0 Power Saving
+  - [x] sleep and wake from sleep
+    - https://learn.microsoft.com/en-us/windows/win32/api/powrprof/nf-powrprof-setsuspendstate
+    - https://learn.microsoft.com/en-us/windows/win32/power/system-wake-up-events
+    - Use sleep after X minute Power Plan setting, SetWaitableTimer for wake up.
+- v1.0.0 Quality of Life
+  - [x] node/edge preset
+  - [ ] hotkeys on buttons
 
 ### Lower Priority
 
 - [ ] implement search by node name (frontend editor)
 - [ ] implement graph based editor
 - [ ] route display
-- [ ] migrate venv to uv
+- [x] migrate venv to uv
 - [ ] self loop with "sample"/"data source" action (text match parse)
 - [ ] move (py, proto) comments to after
-- [ ] proto map<> instead of repeated
+- [x] proto map<> instead of repeated
 - [ ] ts alias, import sorting
 - [ ] gpu related capture
 - [ ] time travel capture (pick frame from a recording)
