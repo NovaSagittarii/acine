@@ -68,7 +68,7 @@ function RoutineEditor() {
           const imageUrl = URL.createObjectURL(blob);
           saveCurrentFrame = () => {
             const routine = $routine.get();
-            if (!routine) throw new Error('invalid routine ' + routine);
+            if (!routine) throw new Error('invalid routine ' + routine); // eslint-disable-line @typescript-eslint/restrict-plus-operands
             const persistentURL = URL.createObjectURL(blob);
             const newId = $frames.get().length;
             $frames.set([...$frames.get(), persistentURL]);
@@ -187,7 +187,7 @@ function RoutineEditor() {
               className='hover:bg-amber-100'
               onClick={() => {
                 const routine = $routine.get();
-                if (!routine) throw new Error('invalid routine ' + routine);
+                if (!routine) throw new Error('invalid routine ' + routine); // eslint-disable-line @typescript-eslint/restrict-plus-operands
                 const pkt = pb.Packet.create({
                   type: {
                     $case: 'routine',

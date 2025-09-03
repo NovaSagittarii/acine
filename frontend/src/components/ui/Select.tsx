@@ -34,7 +34,7 @@ export default function Select<T>({
     else if (!values[selectedIndex] || values[selectedIndex][1] !== value) {
       setSelectedIndex(values.findIndex(([_, x]) => x === value));
     }
-  }, [value, selectedIndex]);
+  }, [value, values, selectedIndex, setSelectedIndex]);
 
   const ref = useRef<HTMLSelectElement>(null);
   useEffect(() => {

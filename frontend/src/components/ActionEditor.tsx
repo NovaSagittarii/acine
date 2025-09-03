@@ -1,7 +1,6 @@
 import { InputReplay, Point, Routine_Edge } from 'acine-proto-dist';
 import useForceUpdate from './useForceUpdate';
 import Select from './ui/Select';
-import NumberInput from './ui/NumberInput';
 import ReplayEditor from './ReplayEditor';
 import SubroutineEditor from './SubroutineEditor';
 

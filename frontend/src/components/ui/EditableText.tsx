@@ -16,7 +16,7 @@ function EditableText({
       }
       onClick={() => {
         const newText = prompt(
-          `replace ${children} with? (leave empty to cancel)`,
+          `replace ${children} with? (leave empty to cancel)`, // eslint-disable-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
         );
         if (newText) {
           onChange(newText);

@@ -19,7 +19,7 @@ export default function RoutineViewer() {
   const frames = useStore($frames);
   const nodes = useCallback(() => {
     return routine.nodes.map((n) => {
-      let extra = {} as GraphNode;
+      const extra = {} as GraphNode;
       if (n.defaultCondition?.condition?.$case === 'image') {
         const { frameId } = n.defaultCondition.condition.image;
         const url = frames[routine.frames.map((f) => f.id).indexOf(frameId)];
@@ -32,7 +32,7 @@ export default function RoutineViewer() {
         subLabel: n.description,
       } as GraphNode;
     });
-  }, [routine]);
+  }, [frames, routine]);
   const edges = useCallback(() => {
     return routine.nodes.flatMap((n) =>
       n.edges
