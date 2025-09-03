@@ -5,12 +5,14 @@ Test image recognition
 import os
 
 import cv2
+import numpy as np
 import pytest
-from acine.runtime.check_image import SimilarityResult, check_similarity
 from acine_proto_dist.position_pb2 import Rect
 from acine_proto_dist.routine_pb2 import Routine
 from pytest import approx
 from pytest_mock import MockerFixture
+
+from acine.runtime.check_image import SimilarityResult, check_similarity
 
 dirname = os.path.dirname(__file__)
 triangle_img = cv2.imread(os.path.join(dirname, "triangle.png"))
@@ -112,3 +114,31 @@ class TestCheckSimilarity:
         del condition1.allow_regions[:]
         condition1.allow_regions.append(Rect(left=-1, right=5, top=0, bottom=5))
         check_similarity(condition1, triangle_img, triangle_img)
+
+    @pytest.mark.skip(reason="slow benchmark")
+    @pytest.mark.parametrize("return_one", (False, True), ids=("", "Ret1"))
+    @pytest.mark.parametrize("argpartition", (False, True), ids=("", "AP"))
+    @pytest.mark.parametrize("has_match", (False, True), ids=("X", "O"))
+    @pytest.mark.benchmark(group="check_similarity", warmup=True, max_time=1)
+    def test_performance(self, benchmark, return_one, argpartition, has_match):
+        N = 1000
+        condition = Routine.Condition.Image(
+            threshold=0.999,
+            regions=[Rect(left=10, right=39, top=10, bottom=39)],
+            allow_regions=[Rect(left=0, right=N - 1, top=0, bottom=N - 1)],
+            match_limit=16,
+        )
+
+        ref = np.random.randint(0, 255, size=(N, N, 3), dtype=np.uint8)
+
+        @benchmark
+        def run():
+            if has_match:
+                a = np.copy(ref)
+            else:
+                a = np.random.randint(0, 25, size=(N, N, 3), dtype=np.uint8)
+            check_similarity(
+                condition, a, ref, return_one=return_one, argpartition=argpartition
+            )
+            # jans = check_similarity(condition, a, ref)
+            # assert ans == jans

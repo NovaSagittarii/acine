@@ -31,6 +31,9 @@ def check_similarity(
     condition: Routine.Condition.Image,
     img: cv2.typing.MatLike,
     ref_img: cv2.typing.MatLike,
+    *,
+    return_one: bool = False,
+    argpartition: bool = False,
 ) -> list[SimilarityResult]:
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
@@ -85,9 +88,24 @@ def check_similarity(
     # nan/inf bugged for matchTemplate + mask
     # see https://github.com/opencv/opencv/issues/23257
 
+    # early abort
+    i, j = np.unravel_index(np.argmax(res.ravel()), res.shape)
+    if res[i][j] < condition.threshold:
+        return []
+    elif return_one:
+        return [SimilarityResult(res[i][j], (i + rylo, j + rxlo))]
+
     result = []
 
-    pts = sorted(np.ndenumerate(res), key=lambda x: x[1], reverse=True)
+    if argpartition:  # untested, doesn't seem to be consistent with normal though
+        k = condition.match_limit * 10
+        rr = res.ravel()
+        z = np.unravel_index(np.argpartition(rr, -k)[-k:], res.shape)
+        enum = list(((i, j), res[i][j]) for i, j in zip(*z))
+        pts = sorted(enum, key=lambda x: x[1], reverse=True)
+    else:
+        pts = sorted(np.ndenumerate(res), key=lambda x: x[1], reverse=True)
+
     vis = np.zeros(img.shape[:-1])
     n, m = res.shape
     tn, tm = yhi - ylo, xhi - xlo
