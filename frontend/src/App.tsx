@@ -40,7 +40,7 @@ enum ActiveTab {
  *
  * this is a callback overridden each time client receives new frame through ws
  */
-let saveCurrentFrame = () => -1;
+let saveCurrentFrame = () => '';
 
 function RoutineEditor() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -70,11 +70,10 @@ function RoutineEditor() {
             const routine = $routine.get();
             if (!routine) throw new Error('invalid routine ' + routine); // eslint-disable-line @typescript-eslint/restrict-plus-operands
             const persistentURL = URL.createObjectURL(blob);
-            const newId = $frames.get().length;
-            $frames.set([...$frames.get(), persistentURL]);
-            routine.frames.push(pb.Frame.create({ id: frame.id }));
+            $frames.set({ ...$frames.get(), [frame.id]: persistentURL });
+            routine.frames[frame.id] = pb.Frame.create({ id: frame.id });
             persistFrame(frame);
-            return newId;
+            return frame.id;
           };
           setImageUrl((prev) => {
             // revoke old url if it exists
@@ -116,7 +115,7 @@ function RoutineEditor() {
               className='bg-red-400'
               onClick={() => {
                 const frameId = saveCurrentFrame();
-                if (frameId < 0) {
+                if (!frameId) {
                   console.warn('tried to capture nonexistant frame');
                   return;
                 }
@@ -147,11 +146,7 @@ function RoutineEditor() {
                 {runtimeContext?.currentNode?.name}
                 {runtimeContext.currentEdge &&
                   ' => ' +
-                    $routine
-                      .get()
-                      .nodes.filter(
-                        (x) => x.id === runtimeContext.currentEdge?.to,
-                      )[0].name}
+                    $routine.get().nodes[runtimeContext.currentEdge?.to]?.name}
                 {runtimeContext.currentEdge &&
                   ' via ' + getEdgeDisplay(runtimeContext.currentEdge)}
                 {runtimeContext.targetNode &&

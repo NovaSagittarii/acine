@@ -1,5 +1,4 @@
 version = 1
-revision = 1
 requires-python = ">=3.12"
 resolution-markers = [
     "sys_platform == 'darwin'",
@@ -33,7 +32,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "acine-proto-dist", directory = "../proto/dist/py" },
+    { name = "acine-proto-dist", editable = "../proto/dist/py" },
     { name = "ahk", extras = ["binary"], specifier = "==1.8.3" },
     { name = "aiofiles", specifier = "==24.1.0" },
     { name = "autobahn", extras = ["asyncio"], specifier = "==24.4.2" },
@@ -55,7 +54,7 @@ requires-dist = [
 [[package]]
 name = "acine-proto-dist"
 version = "0.0.1"
-source = { directory = "../proto/dist/py" }
+source = { editable = "../proto/dist/py" }
 dependencies = [
     { name = "grpcio" },
     { name = "protobuf" },

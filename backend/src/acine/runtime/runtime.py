@@ -73,13 +73,16 @@ class Runtime:
         on_change_return=None,
         on_change_edge=None,
     ):
+        if routine.nodes:
+            assert "start" in routine.nodes, "Node with id=start should exist."
+
         self.routine = routine
         self.controller = controller
 
-        self.nodes = {}
+        self.nodes = {}  # === routine.nodes
         self.edges = {}
         self.G = nx.DiGraph()
-        self.context.curr = routine.nodes[0] if routine.nodes else None
+        self.context.curr = routine.nodes["start"] if routine.nodes else None
         self.context.return_stack = [None]
         self.target_node: Routine.Node | None = None
         self.on_change_curr = on_change_curr
@@ -87,7 +90,7 @@ class Runtime:
         self.on_change_edge = on_change_edge
         """ the call stack but only the return nodes "addresses" """
 
-        for n in self.routine.nodes:
+        for n in self.routine.nodes.values():
             self.G.add_node(n.id)
             self.nodes[n.id] = n
             for e in n.edges:
@@ -164,7 +167,7 @@ class Runtime:
             otherwise you are forced to take the subroutine so you can leave
             the subroutine edge in there.
             """
-            for u in self.routine.nodes:
+            for u in self.routine.nodes.values():
                 for e in u.edges:
                     if e.WhichOneof("action") == "subroutine":
                         H.add_edge(u.id, e.subroutine, data=e)

@@ -67,7 +67,11 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
       switch (frameOperation.type) {
         case pb.FrameOperation_Operation.OPERATION_BATCH_GET: {
           // an HTTP server would not have been a bad idea...
-          $frames.set(frameOperation.frames.map(frameToObjectURL));
+          $frames.set(
+            Object.fromEntries(
+              frameOperation.frames.map((f) => [f.id, frameToObjectURL(f)]),
+            ),
+          );
           break;
         }
       }

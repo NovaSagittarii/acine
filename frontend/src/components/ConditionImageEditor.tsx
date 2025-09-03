@@ -8,7 +8,7 @@ import ConditionOverlay from './ConditionOverlay';
 import Modal from './ui/Modal';
 import NumberInput from './ui/NumberInput';
 import RegionEditor from './ui/RegionEditor';
-import Select from './ui/Select';
+import Select, { SelectAuto } from './ui/Select';
 
 import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
@@ -39,13 +39,15 @@ export default function ConditionImageEditor() {
   };
 
   const [src, setSrc] = useState<string>('');
+  const [currFrameId, setCurrFrameId] = useState(Object.values(frames)[0]);
   useEffect(() => {
     if (condition !== null) {
       setOpen(true);
       const { frameId } = condition;
       if (frameId) {
-        setSrc(frames[routine.frames.map((f) => f.id).indexOf(frameId)]);
-        // console.log("with condition, call set src", condition);
+        setCurrFrameId(frameId);
+        setSrc(frames[frameId]);
+        console.log('with condition, call set src', condition);
       }
 
       // initialize to reasonable defaults
@@ -60,22 +62,15 @@ export default function ConditionImageEditor() {
       }
       if (!frameId) {
         // use previous one
-        const i = frames.indexOf(src);
-        if (i >= 0 && condition) {
-          condition.frameId = routine.frames[i].id;
+        if (condition) {
+          condition.frameId = currFrameId;
+          setSrc(frames[currFrameId]);
           changed = true;
         }
       }
       if (changed) forceUpdate();
     }
-  }, [condition, forceUpdate, frames, routine.frames, src]);
-
-  const [imageChoices, setImageChoices] = useState<[string, number][]>([]);
-  useEffect(() => {
-    const images = frames.map((_, i) => [frames[i], i] as [string, number]);
-    setImageChoices(images);
-    if (images.length) setSrc((s) => (s ? s : images[0][0]));
-  }, [frames]);
+  }, [condition, frames, currFrameId]);
 
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
@@ -106,12 +101,15 @@ export default function ConditionImageEditor() {
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
         <div className='flex flex-col m-12 grow bg-white pointer-events-auto'>
-          <Select
-            value={frames.indexOf(src)}
-            values={imageChoices}
-            onChange={(s) => {
-              condition.frameId = routine.frames[s].id;
-              refreshPreview();
+          <SelectAuto
+            value={condition.frameId || undefined}
+            values={Object.keys(frames)}
+            onChange={(frameId) => {
+              if (frameId) {
+                condition.frameId = frameId;
+                setCurrFrameId(frameId);
+                refreshPreview();
+              }
             }}
             autofocus
           />
@@ -185,12 +183,7 @@ export default function ConditionImageEditor() {
                     key={index}
                     className='select-none absolute left-0 top-0'
                     style={{ opacity: 1 / (index + 1) }}
-                    src={
-                      p.frame?.id &&
-                      frames[
-                        routine.frames.map((f) => f.id).indexOf(p.frame?.id)
-                      ]
-                    }
+                    src={p.frame?.id && frames[p.frame.id]}
                     draggable={false}
                   />
                 ))}
@@ -210,10 +203,7 @@ export default function ConditionImageEditor() {
               <div key={index} className='h-fit w-fit relative'>
                 <img
                   className='select-none w-full'
-                  src={
-                    x.frame?.id &&
-                    frames[routine.frames.map((f) => f.id).indexOf(x.frame?.id)]
-                  }
+                  src={x.frame?.id && frames[x.frame.id]}
                   draggable={false}
                 />
                 <ConditionOverlay

@@ -3,8 +3,9 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, call
 
 import pytest
-from acine.scheduler import ExecResult, ISchedulerRoutineInterface, Scheduler
 from acine_proto_dist.routine_pb2 import Routine
+
+from acine.scheduler import ExecResult, ISchedulerRoutineInterface, Scheduler
 
 
 class AlwaysOk(ISchedulerRoutineInterface):
@@ -48,7 +49,7 @@ class TestBasic:
             n.edges.append(e)
             edges[int(u)] = e
 
-        r = Routine(nodes=[n])
+        r = Routine(nodes={n.id: n})
         ri = AlwaysOk(r)
         return (edges, ri.goto, Scheduler(ri))
 
@@ -154,7 +155,7 @@ class MockRuntime:
             n.edges.append(edge)
             self.edges[int(u)] = edge
 
-        self.routine = Routine(nodes=[n])
+        self.routine = Routine(nodes={n.id: n})
         self.routine_interface = AlwaysOk(self.routine, self.__on_scheduled)
         self.scheduler = Scheduler(self.routine_interface)
         self.ready = {u: 0 for u in adj.keys()}

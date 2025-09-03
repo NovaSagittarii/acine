@@ -31,7 +31,7 @@ export default function Dependency({ dependency }: DependencyProps) {
       <LabeledSelect
         label='requires'
         value={dependency.requires}
-        values={routine.nodes.flatMap((n) =>
+        values={Object.values(routine.nodes).flatMap((n) =>
           n.edges.map(
             (e) =>
               [`${n.name} - ${getEdgeDisplay(e)}`, e.id] as [string, string],

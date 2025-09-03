@@ -38,9 +38,11 @@ def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
         description=routine.description,
         start_command=testenv_cmd,
         window_name="TestEnv",
-        nodes=[
-            Routine.Node(id="init", name="start", type=Routine.Node.NODE_TYPE_STANDARD)
-        ],
+        nodes={
+            "start": Routine.Node(
+                id="start", name="start", type=Routine.Node.NODE_TYPE_STANDARD
+            )
+        },
     )
     mkdir([id])
     fs_write_sync([id, "rt.pb"], r.SerializeToString())

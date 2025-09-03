@@ -1,12 +1,15 @@
 from random import randint
 
 import pytest
-from acine.runtime.runtime import CheckResult, IController, Routine, Runtime
 from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture, MockType
 
-r1 = Routine(id="1", name="Test Routine", frames=[], nodes=[Routine.Node()])
+from acine.runtime.runtime import CheckResult, IController, Routine, Runtime
+
+r1 = Routine(
+    id="1", name="Test Routine", frames=[], nodes={"start": Routine.Node(id="start")}
+)
 
 
 @pytest.fixture
@@ -141,8 +144,8 @@ class TestRuntimeIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.dependency(name="goto")
-    @pytest.mark.parametrize("s", ("n1", "n2", "n3", "n4"))
-    @pytest.mark.parametrize("t", ("n1", "n2", "n3", "n4"))
+    @pytest.mark.parametrize("s", ("start", "n2", "n3", "n4"))
+    @pytest.mark.parametrize("t", ("start", "n2", "n3", "n4"))
     async def test_goto(self, mocker: MockerFixture, mocked_controller, s, t):
         """
               +-----------+
@@ -151,7 +154,7 @@ class TestRuntimeIntegration:
          ^          |
          +----------+
         """
-        n1 = self.node("n1")
+        n1 = self.node("start")
         n2 = self.node("n2")
         n3 = self.node("n3")
         n4 = self.node("n4")
@@ -161,7 +164,7 @@ class TestRuntimeIntegration:
         self.add_edge(n3, n4)
         self.add_edge(n4, n2)
 
-        r = Routine(nodes=[n1, n2, n3, n4])
+        r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
         rt.context.curr = [x for x in [n1, n2, n3, n4] if x.id == s][0]
@@ -170,7 +173,7 @@ class TestRuntimeIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.dependency(name="subroutine", depends=["goto"])
-    @pytest.mark.parametrize("to", ("n1", "n2", "n3", "n4", "n5", "n6"))
+    @pytest.mark.parametrize("to", ("start", "n2", "n3", "n4", "n5", "n6"))
     async def test_subroutine(self, mocker: MockerFixture, mocked_controller, to: str):
         """
         Starting from n1; every node is reachable.
@@ -180,7 +183,7 @@ class TestRuntimeIntegration:
         ```
         """
 
-        n1 = self.node("n1")
+        n1 = self.node("start")
         n2 = self.node("n2")
         n3 = self.node_init("n3")
         n4 = self.node("n4")
@@ -191,7 +194,7 @@ class TestRuntimeIntegration:
         e34 = self.add_edge(n3, n4)
         e45 = self.add_edge(n4, n5)
 
-        r = Routine(nodes=[n1, n2, n3, n4, n5, n6])
+        r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4, n5, n6)})
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
         rt.context.curr = n1
@@ -213,7 +216,7 @@ class TestRuntimeIntegration:
         n1 ==(n2 ==(n3 -> n4)==> n5)==> n6
         ```
         """
-        n1 = self.node("n1")
+        n1 = self.node("start")
         n2 = self.node_init("n2")
         n3 = self.node_init("n3")
         n4 = self.node_ret("n4")
@@ -223,7 +226,7 @@ class TestRuntimeIntegration:
         self.add_edge(n2, n5, subroutine="n3")
         e34 = self.add_edge(n3, n4)
 
-        r = Routine(nodes=[n1, n2, n3, n4, n5, n6])
+        r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4, n5, n6)})
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
         rt.context.curr = n1
@@ -248,7 +251,7 @@ class TestRuntimeIntegration:
         edge n1->n2 has auto precondition
         edge n2->n3 has auto postcondition
         """
-        n1 = self.node("n1")
+        n1 = self.node("start")
         n2 = self.node("n2")
         n3 = self.node("n3")
         e12 = self.add_edge(n1, n2, precondition=Routine.Condition(auto=True))
@@ -257,7 +260,7 @@ class TestRuntimeIntegration:
         # should be using check when you queue_edge
         mocked_check.return_value = CheckResult.PASS
         mocked_check_once.return_value = CheckResult.ERROR
-        r = Routine(nodes=[n1, n2, n3])
+        r = Routine(nodes={u.id: u for u in (n1, n2, n3)})
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
 
@@ -297,7 +300,7 @@ class TestRuntimeIntegration:
         edge n1->n4 is an interrupt
         edge n1->n2 shouldn't be taken (should get interrupted)
         """
-        n1 = self.node("n1")
+        n1 = self.node("start")
         n2 = self.node("n2")
         n3 = self.node("n3")
         n4 = self.node("n4")
@@ -306,7 +309,7 @@ class TestRuntimeIntegration:
         e14 = self.add_edge(n1, n4, trigger=Routine.Edge.EDGE_TRIGGER_TYPE_INTERRUPT)
         e43 = self.add_edge(n4, n3)
 
-        r = Routine(nodes=[n1, n2, n3, n4])
+        r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
         rt = Runtime(r, mocked_controller)
         rt.run_replay = mocker.AsyncMock()
 

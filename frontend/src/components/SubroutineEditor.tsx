@@ -23,7 +23,7 @@ export default function SubroutineEditor({ action }: SubroutineEditorProps) {
   const [options, setOptions] = useState<Routine_Node[]>([]);
   useEffect(() => {
     setOptions(
-      routine.nodes.filter(
+      Object.values(routine.nodes).filter(
         (n) => n.type & Routine_Node_NodeType.NODE_TYPE_INIT,
       ),
     );

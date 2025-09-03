@@ -324,7 +324,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
             case "sample_condition":
                 imgs = [
                     (f, get_frame(self.rt.routine.id, f.id))
-                    for f in self.rt.routine.frames
+                    for f in self.rt.routine.frames.values()
                 ]
                 output = packet.sample_condition.frames
                 condition = packet.sample_condition.condition

@@ -27,8 +27,8 @@ export default function NodeList() {
   return (
     <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
       <div className='h-full overflow-y-scroll'>
-        {routine.nodes.length === 0 && 'No nodes yet.'}
-        {routine.nodes.map((node, index) => (
+        {Object.values(routine.nodes).length === 0 && 'No nodes yet.'}
+        {Object.values(routine.nodes).map((node) => (
           <div
             id={node.id}
             key={node.id}
@@ -38,7 +38,7 @@ export default function NodeList() {
             <Node node={node} selected={node == selectedNode} />
             <CloseButton
               onClick={() => {
-                routine.nodes.splice(index, 1);
+                delete routine.nodes[node.id];
                 forceUpdate();
               }}
             />
@@ -49,7 +49,7 @@ export default function NodeList() {
         className='bg-black text-white'
         onClick={() => {
           const newNode = NodePreset.base();
-          routine.nodes.push(newNode);
+          routine.nodes[newNode.id] = newNode;
           forceUpdate();
           $selectedNode.set(newNode);
         }}

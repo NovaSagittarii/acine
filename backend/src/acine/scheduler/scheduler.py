@@ -148,11 +148,11 @@ class Scheduler:
 
         self.interface = interface
         self.routine = interface.routine
-        for u in self.routine.nodes:
+        for u in self.routine.nodes.values():
             for edge in u.edges:
                 self.edges[edge.id] = EdgeInfo(edge)
 
-        for u in self.routine.nodes:
+        for u in self.routine.nodes.values():
             for edge in u.edges:
                 e = self.edges[edge.id]
                 for dep in edge.dependencies:

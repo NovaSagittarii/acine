@@ -49,7 +49,7 @@ export function saveRoutine() {
   const o = Routine.fromJSON(Routine.toJSON(r));
 
   // scrub frame.data (its too big)
-  o.frames.map((f) => (f.data = new Uint8Array(0)));
+  Object.values(o.frames).map((f) => (f.data = new Uint8Array(0)));
 
   $routineBase64.set(JSON.stringify(Routine.toJSON(o)));
   console.log(`write ${getRb64MiB()} MiB (in base64) to storage`);
@@ -81,7 +81,7 @@ export function prepareRoutineFrames(ws: WebSocket, routine: Routine) {
   // TODO: a part of the stuff that should be moved
   // into the client connection class
   const f = FrameOperation.create();
-  f.frames = routine.frames;
+  f.frames = Object.values(routine.frames);
   f.type = FrameOperation_Operation.OPERATION_BATCH_GET;
   const pkt = Packet.create({
     type: {
@@ -94,8 +94,10 @@ export function prepareRoutineFrames(ws: WebSocket, routine: Routine) {
 
 /**
  * frame objectURLs
+ *
+ * map frame.id => loaded objectURL
  */
-export const $frames = atom<string[]>([]);
+export const $frames = atom<Record<string, string>>({});
 
 /**
  * reference to currently selected state

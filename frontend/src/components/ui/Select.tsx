@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 interface SelectProps<T> {
   className?: string;
-  /** current displayed index (this is a controlled element) */
+  /** current displayed value (this is a controlled element) */
   value: T | undefined;
 
   /** list of options; an option consists of [display, value] */

@@ -43,7 +43,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
           to →
           <Select
             value={edge.to}
-            values={routine.nodes.map((n) => [n.name, n.id])}
+            values={Object.values(routine.nodes).map((n) => [n.name, n.id])}
             onChange={(v) => {
               edge.to = v;
             }}
@@ -66,13 +66,15 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
       <Collapse
         label={
           'destination node ' +
-          (edge.to
-            ? routine.nodes.filter((x) => x.id === edge.to)[0].description
-            : 'create options')
+          (edge.to ? routine.nodes[edge.to]?.description : 'create options')
         }
       >
         {edge.to ? (
-          <Node node={routine.nodes.filter((x) => x.id === edge.to)[0]}></Node>
+          routine.nodes[edge.to] ? (
+            <Node node={routine.nodes[edge.to]}></Node>
+          ) : (
+            '<dest not exist>'
+          )
         ) : (
           <div className='flex flex-col border rounded-sm p-1'>
             <div className='font-semibold text-lg'>Node Presets</div>
@@ -83,7 +85,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
                   className='hover:bg-red-100'
                   onClick={() => {
                     const newNode = method();
-                    routine.nodes.push(newNode);
+                    routine.nodes[newNode.id] = newNode;
                     edge.to = newNode.id;
                     forceUpdate();
                   }}

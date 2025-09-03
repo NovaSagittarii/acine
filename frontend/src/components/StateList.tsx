@@ -22,8 +22,8 @@ function StateList() {
     // cause overflow/overflow as much when hovered
     <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
       <div className='h-full overflow-y-scroll'>
-        {routine.states.length === 0 && 'No states yet.'}
-        {routine.states.map((state) => (
+        {Object.values(routine.states).length === 0 && 'No states yet.'}
+        {Object.values(routine.states).map((state) => (
           <div key={state.id} onClick={() => $selectedState.set(state)}>
             <State state={state} selected={state == selectedState} />
           </div>
@@ -37,7 +37,7 @@ function StateList() {
             name: 'new state',
             description: 'desc',
           });
-          routine.states.push(newState);
+          routine.states[newState.id] = newState;
           $routine.set(routine);
           $selectedState.set(newState);
         }}

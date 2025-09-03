@@ -26,7 +26,7 @@ export function getEdgePrefix(edge: Routine_Edge): string {
 
 export function getEdgeDisplay(edge: Routine_Edge): string {
   const prefix = getEdgePrefix(edge);
-  const destination = $routine.get().nodes.find((n) => n.id === edge.to)?.name;
+  const destination = $routine.get().nodes[edge.to]?.name ?? '<dest not exist>';
   const desc = edge.description || destination || edge.to || '<no destination>';
   return prefix + ' ' + desc;
 }
