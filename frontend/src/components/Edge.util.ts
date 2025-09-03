@@ -8,8 +8,12 @@ import {
 } from 'acine-proto-dist';
 import { exportGenerator, uuidv4 } from './util';
 
-function displayCase(s: string | undefined): string {
+function displayCase(s: string | undefined, postcondition = 0): string {
   if (!s) return '';
+  // since "auto" resolves to another value, no need to display it
+  // uv based on "u -> v" edge syntax
+  if (s === 'target') return 'v';
+  if (s === 'auto') return 'uv'[postcondition];
   return s[0];
 }
 
@@ -19,8 +23,8 @@ export function getEdgePrefix(edge: Routine_Edge): string {
   // don't use uppercase so it is phoentically distinct
   // don't use 1 for "true" because it looks like i for "image"
   prefix += displayCase(edge.precondition?.condition?.$case) || 'p';
-  prefix += displayCase(edge.action?.$case) || 'ε';
-  prefix += displayCase(edge.postcondition?.condition?.$case) || 'p';
+  prefix += displayCase(edge.action?.$case) || 'e';
+  prefix += displayCase(edge.postcondition?.condition?.$case, 1) || 'p';
   return prefix;
 }
 
