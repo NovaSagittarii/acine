@@ -85,15 +85,18 @@ export default function ConditionImageEditor() {
   const [preview, setPreview] = useState<
     Awaited<ReturnType<typeof runtimeConditionQuery>>
   >([]);
+  const [isBusy, setBusy] = useState(false);
 
   const refreshPreview = () => {
     if (condition) {
       const c = pb.Routine_Condition.create({
         condition: { $case: 'image', image: condition },
       });
+      setBusy(true);
       runtimeConditionQuery(c)
         .then((w) => setPreview(w))
-        .catch((e) => console.error('Failed condition query.', e));
+        .catch((e) => console.error('Failed condition query.', e))
+        .finally(() => setBusy(false));
     }
   };
 
@@ -140,6 +143,7 @@ export default function ConditionImageEditor() {
               property='padding'
               callback={refreshPreview}
             />
+            {isBusy && 'Running...'}
           </div>
           <div className='flex'>
             <div className='flex justify-center w-full'>
