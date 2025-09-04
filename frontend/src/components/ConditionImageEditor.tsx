@@ -88,6 +88,7 @@ export default function ConditionImageEditor() {
   const [isBusy, setBusy] = useState(false);
 
   const refreshPreview = (manual: boolean = false) => {
+    forceUpdate();
     if (condition) {
       if (!manual && condition.regions && condition.allowRegions.length) {
         // suppress auto refresh when there are allow regions being used
@@ -151,10 +152,12 @@ export default function ConditionImageEditor() {
               property='padding'
               callback={refreshPreview}
             />
-            {condition.regions && condition.allowRegions.length && (
+            {condition.regions && condition.allowRegions.length ? (
               <div className='text-red-800'>
                 Auto-query is being suppressed.
               </div>
+            ) : (
+              <div className='text-green-800'>Auto-query active.</div>
             )}
             {isBusy && (
               <div className='flex gap-2 text-blue-500'>

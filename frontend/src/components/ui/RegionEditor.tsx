@@ -122,6 +122,7 @@ export default function RegionEditor({
                   onClick={(ev) => {
                     regions.splice(index, 1);
                     forceUpdate(); // setRegions(regions);
+                    onChange(regions); // propagate delete event
                     if (selectedRegion === region) setHoveredRegion(null);
                     if (hoveredRegion === region) setSelectedRegion(null);
                     ev.preventDefault();
