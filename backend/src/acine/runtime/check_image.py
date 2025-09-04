@@ -49,6 +49,21 @@ def check_similarity(
     if not condition.method:
         condition.method = Routine.Condition.Image.Method.METHOD_TM_CCORR_NORMED
 
+    # optimize for single small region but many spread out small allow_regions
+    if len(condition.regions) == 1 and len(condition.allow_regions) > 1:
+        result = []
+        for R in condition.allow_regions:  # run individually
+            c = Routine.Condition.Image()
+            c.CopyFrom(condition)
+            del c.allow_regions[:]
+            c.allow_regions.append(R)
+            result.extend(
+                check_similarity(
+                    c, img, ref_img, return_one=return_one, argpartition=argpartition
+                )
+            )
+        return result
+
     rxlo, rxhi, rylo, ryhi = img.shape[1], 0, img.shape[0], 0
     allowed = np.random.randint(0, 255, size=img.shape, dtype=img.dtype)
     for region in condition.allow_regions:
