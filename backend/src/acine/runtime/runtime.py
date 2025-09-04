@@ -329,6 +329,34 @@ class Runtime:
                 self.on_change_edge(None)
             return
 
+        if action.WhichOneof("action") == "subroutine":
+            print("EXEC SUBROUTINE", action.description)
+            self.push(action)
+            self.set_curr(self.nodes[action.subroutine])
+            return True  # Need to abort early when subroutine runs.
+            # The next shouldn't get set immediately, but stored on stack
+            # until after the subroutine completes.
+            # Post condition doesn't happen until the subroutine returns.
+        else:
+            await self.__exec_action(action)
+
+        res = await self.__check(action, action.postcondition, use_dest=True)
+        if res != CheckResult.PASS:
+            print("! ! X postcheck fail")
+            if self.on_change_edge:
+                self.on_change_edge(None)
+            return
+
+        # update state after postcondition check passes
+        self.set_curr(self.nodes[action.to])
+
+    async def __exec_action(self, action: Routine.Edge) -> bool:
+        """
+        Executes the action, utility function useful for handling repeats.
+
+        Note: subroutine handled separately.
+        """
+
         match action.WhichOneof("action"):
             case None:
                 pass
@@ -344,26 +372,8 @@ class Runtime:
                         print(f"o({x},{y}) po({px},{py}) d({dx},{dy})")
                 await self.run_replay(replay, dx, dy)
                 print("REPLAY DONE")
-            case "subroutine":
-                print("EXEC SUBROUTINE", action.description)
-                self.push(action)
-                self.set_curr(self.nodes[action.subroutine])
-                return  # Need to abort early when subroutine runs.
-                # The next shouldn't get set immediately, but stored on stack
-                # until after the subroutine completes.
-                # Post condition doesn't happen until the subroutine returns.
             case _:
                 raise NotImplementedError()
-
-        res = await self.__check(action, action.postcondition, use_dest=True)
-        if res != CheckResult.PASS:
-            print("! ! X postcheck fail")
-            if self.on_change_edge:
-                self.on_change_edge(None)
-            return
-
-        # update state after postcondition check passes
-        self.set_curr(self.nodes[action.to])
 
     async def acquire_offset(self, condition: Routine.Condition):
         if condition.WhichOneof("condition") == "image":
