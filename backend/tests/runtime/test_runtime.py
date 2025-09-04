@@ -140,7 +140,9 @@ class TestRuntimeIntegration:
         type=Routine.Edge.EDGE_TRIGGER_TYPE_STANDARD,
         **kwargs,
     ) -> Routine.Edge:
-        e = Routine.Edge(id=f"{u.id}->{v.id}", to=v.id, trigger=type, **kwargs)
+        e = Routine.Edge(
+            id=f"{u.id}->{v.id}", to=v.id, repeat_lower=1, trigger=type, **kwargs
+        )
         if e.WhichOneof("action") in ("replay", None):
             # if it is unset, assume it's a replay action (trackable)
             e.replay.duration = randint(0, 10**9)  # use as an id

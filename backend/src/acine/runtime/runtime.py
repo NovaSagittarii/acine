@@ -2,6 +2,8 @@
 Top level module that implements the acine routine runtime.
 """
 
+from __future__ import annotations
+
 import cv2
 import networkx as nx
 from acine_proto_dist.input_event_pb2 import InputReplay
@@ -54,13 +56,28 @@ class Runtime:
     G: nx.DiGraph
     controller: IController
 
+    class Call:
+        """
+        Routine subroutine call (goes on call_stack)
+
+        It's a bit strange to reimplement the call stack though. I think it
+        is reasonable to use Python's recursion, but I feel that debugging
+        the stack trace (when it fails) is going to be worse (?).
+        """
+
+        def __init__(self, edge: Routine.Edge):
+            self.id = edge.id
+            self.to = edge.to
+            self.edge = edge
+            self.finish_count = 0
+
     class Context:
         """
         Routine runtime state
         """
 
         curr: Routine.Node = None
-        return_stack: list[Routine.Edge] = [None]
+        call_stack: list[Runtime.Call] = [None]
 
     context: Context = Context()
 
@@ -83,7 +100,7 @@ class Runtime:
         self.edges = {}
         self.G = nx.DiGraph()
         self.context.curr = routine.nodes["start"] if routine.nodes else None
-        self.context.return_stack = [None]
+        self.context.call_stack = [None]
         self.target_node: Routine.Node | None = None
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
@@ -110,15 +127,18 @@ class Runtime:
 
     def push(self, edge: Routine.Edge):
         assert isinstance(edge, Routine.Edge), "ACCEPT EDGE ONLY"
-        self.context.return_stack.append(edge)
+        self.context.call_stack.append(Runtime.Call(edge))
         if self.on_change_return:
-            self.on_change_return(self.context.return_stack)
+            self.on_change_return(self.context.call_stack)
 
-    def pop(self):
-        u = self.context.return_stack.pop()
+    def pop(self) -> Runtime.Call:
+        u = self.context.call_stack.pop()
         if self.on_change_return:
-            self.on_change_return(self.context.return_stack)
+            self.on_change_return(self.context.call_stack)
         return u
+
+    def peek(self) -> Runtime.Call:
+        return self.context.call_stack[-1]
 
     def get_context(self) -> Context:
         return self.context
@@ -131,14 +151,14 @@ class Runtime:
         valid = True
         if context.curr.id not in self.nodes:
             valid = False
-        for e in context.return_stack:
+        for e in context.call_stack:
             if e and e.id not in self.edges:
                 valid = False
         if valid:
             self.set_curr(context.curr)
-            self.context.return_stack = context.return_stack
+            self.context.call_stack = context.call_stack
             if self.on_change_return:
-                self.on_change_return(self.context.return_stack)
+                self.on_change_return(self.context.call_stack)
 
     async def goto(self, id: str):
         if id not in self.nodes:
@@ -151,12 +171,26 @@ class Runtime:
             # note: type=RETURN nodes have no fixed edges!
             if self.context.curr.type & Routine.Node.NODE_TYPE_RETURN:
                 # run subroutine edge postcheck to decide where to go
-                e = self.pop()
-                res = await self.__check(e, e.postcondition, use_dest=True)
-                if res == CheckResult.PASS:
-                    self.set_curr(self.nodes[e.to])
-                else:
-                    self.set_curr(self.nodes[e.u])
+                call = self.peek()
+                call.finish_count += 1
+                e = call.edge
+
+                next_id = None
+                if call.finish_count < e.repeat_lower:
+                    # force repeat
+                    next_id = e.subroutine  # retry
+                else:  # try checking for action completion
+                    res = await self.__check(e, e.postcondition, use_dest=True)
+                    if res == CheckResult.PASS:
+                        self.pop()
+                        next_id = e.to  # complete
+                    else:  # didn't pass
+                        if call.finish_count < e.repeat_upper:  # retry
+                            next_id = e.subroutine
+                        else:
+                            next_id = e.u  # failed
+                assert next_id, "Next node should be set after subroutine return"
+                self.set_curr(self.nodes[next_id])
                 continue
 
             # is deepcopy needed?
@@ -183,7 +217,7 @@ class Runtime:
                         H.add_edge(u.id, e.subroutine, data=e)
                         # print("ADD FUNC EDGE", u.id, e.subroutine)
                 # this method only works for subroutine depth 1
-                # ret = self.nodes[self.context.return_stack[-1].to]
+                # ret = self.nodes[self.context.call_stack[-1].to]
                 # if ret and (u.type & Routine.Node.NODE_TYPE_RETURN):
                 #     H.add_edge(u.id, ret.id, data=None)
                 #     # print("ADD RET EDGE", u.id, ret.id)
@@ -193,10 +227,10 @@ class Runtime:
             curr = self.context.curr
             # print(
             #     "CURR", curr.id,
-            #     "STACK", [x.id for x in self.context.return_stack if x]
+            #     "STACK", [x.id for x in self.context.call_stack if x]
             # )
-            for i in range(1, len(self.context.return_stack)):
-                ret = self.nodes[self.context.return_stack[-i].to]
+            for i in range(1, len(self.context.call_stack)):
+                ret = self.nodes[self.context.call_stack[-i].to]
                 # print(f"RET={ret.id} CURR={curr.id}")
                 # print(self.G.edges)
                 reachable = list(nx.descendants(self.G, curr.id))
@@ -329,23 +363,33 @@ class Runtime:
                 self.on_change_edge(None)
             return
 
-        if action.WhichOneof("action") == "subroutine":
-            print("EXEC SUBROUTINE", action.description)
-            self.push(action)
-            self.set_curr(self.nodes[action.subroutine])
-            return True  # Need to abort early when subroutine runs.
-            # The next shouldn't get set immediately, but stored on stack
-            # until after the subroutine completes.
-            # Post condition doesn't happen until the subroutine returns.
-        else:
-            await self.__exec_action(action)
-
-        res = await self.__check(action, action.postcondition, use_dest=True)
-        if res != CheckResult.PASS:
-            print("! ! X postcheck fail")
-            if self.on_change_edge:
-                self.on_change_edge(None)
-            return
+        if action.repeat_lower >= 1:
+            if action.WhichOneof("action") == "subroutine":
+                print("EXEC SUBROUTINE", action.description)
+                self.push(action)
+                self.set_curr(self.nodes[action.subroutine])
+                return True  # Need to abort early when subroutine runs.
+                # The next shouldn't get set immediately, but stored on stack
+                # until after the subroutine completes.
+                # Post condition doesn't happen until the subroutine returns.
+            else:
+                for i in range(max(action.repeat_lower, action.repeat_upper)):
+                    if i >= action.repeat_lower:
+                        res = await self.__check(
+                            action, action.postcondition, use_dest=True
+                        )
+                        if res == CheckResult.PASS:
+                            break  # can exit repeating early
+                    await self.__exec_action(action)
+                else:  # final postcondition check
+                    res = await self.__check(
+                        action, action.postcondition, use_dest=True
+                    )
+                    if res != CheckResult.PASS:
+                        print("! ! X postcheck fail")
+                        if self.on_change_edge:
+                            self.on_change_edge(None)
+                        return
 
         # update state after postcondition check passes
         self.set_curr(self.nodes[action.to])

@@ -263,9 +263,12 @@ class AcineServerProtocol(WebSocketServerProtocol):
         )
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
-    def on_change_return(self, return_stack: list[Routine.Edge]):
+    def on_change_return(self, call_stack: list[Runtime.Call]):
         # prune dummy node before sending
-        response = Packet(set_stack=RuntimeState(stack_edges=return_stack[1:]))
+        st = [x.edge for x in call_stack[1:]]  # TODO: maybe modify RuntimeState?
+        # seems like SubroutineCall **can** be a proto
+
+        response = Packet(set_stack=RuntimeState(stack_edges=st))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def on_change_edge(self, edge: Routine.Edge):

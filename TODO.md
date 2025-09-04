@@ -13,7 +13,7 @@ budget issue tracker
   - [x] improve frame select (v2: autoselect)
   - [x] implement node default precondition; action default
   - [x] implement interrupt handler (send to state)
-  - [ ] subroutine postcondition
+  - [x] subroutine postcondition
 - Verification Features (design not ready)
   - [ ] improve frame select (v3: visual selector)
   - [ ] implement frame grouping (states!!)
@@ -30,7 +30,7 @@ budget issue tracker
   - [ ] interrupt during postcondition (or action)
   - [x] implement replay offset (on dynamic check)
   - [ ] implement text match
-  - [ ] repeat action N times (specifically replay but generalizable?)
+  - [x] repeat action N times (replay + subroutine)
 - v0.1.4 Automation Features (generalized)
   - [ ] implement multi-node interrupt (event listener)
 - v0.2.0 Routine Manager
