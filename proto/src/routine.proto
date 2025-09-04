@@ -70,27 +70,46 @@ message Routine {
     string id = 1;  // uuid
     string name = 2;
     string description = 3;
+
+    string u = 4;
     /* uuid of (from) curr node; only used by runtime
      * from is a reserved keyword in python
      */
-    string u = 8;
-    string to = 4;  // uuid of next node; from node is edge's parent
-    Condition precondition = 5;   // required before you can take it
-    Condition postcondition = 6;  // used to validate success
-    int32 limit = 7;  // how many times this can be taken, negative is unlimited
-    repeated ScheduleInstance schedules = 9;  // if none, does not auto schedule
+
+    string to = 5;  // uuid of next node; from node is edge's parent
+    Condition precondition = 6;   // required before you can take it
+    Condition postcondition = 7;  // used to validate success
+
+    int32 repeat_lower = 8;
+    // required to run this many times. should be >= 1; <= 0 will disable action
+    //
+    // ```
+    // REPEAT repeat_upper times:
+    //   run_action()
+    //   IF run_action has happened at least repeat_lower times:
+    //     IF postcondition_passes():
+    //       BREAK
+    // ```
+
+    int32 repeat_upper = 9;
+    // assuming repeat_lower >= 1;
+    // this is how many times this can be taken, <= 0 is unlimited.
+    // if repeat_lower <= 0; this does nothing.
+
+    repeated ScheduleInstance schedules = 10;
+    // if none, does not auto schedule
 
     oneof action {              // can be an action, or null action;
-      Point click = 11;         // [replay impl's] click here
-      Rect click_region = 12;   // [unused] click anywhere here
-      PointSequence drag = 13;  // [replay impl's] drag through these points
-      string subroutine = 14;   // execute subroutine (node_id)
-      InputReplay replay = 15;  // recording playback
+      Point click = 21;         // [replay impl's] click here
+      Rect click_region = 22;   // [unused] click anywhere here
+      PointSequence drag = 23;  // [replay impl's] drag through these points
+      string subroutine = 24;   // execute subroutine (node_id)
+      InputReplay replay = 25;  // recording playback
     };
 
-    EdgeTriggerType trigger = 10;  // restriction on when it can be taken
+    EdgeTriggerType trigger = 11;  // restriction on when it can be taken
 
-    repeated Dependency dependencies = 16;
+    repeated Dependency dependencies = 12;
     // Need to satisfy these before scheduling.
     // Interrupt with dependency does not make sense because interrupt is a
     // navigation related reaction and cannot be scheduled.

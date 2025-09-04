@@ -57,7 +57,8 @@ export class EdgePreset {
         // state transitions
         condition: { $case: 'auto', auto: true },
       }),
-      limit: -1,
+      repeatLower: 1,
+      repeatUpper: 1,
       // empty description defaults to destination node name
     });
   }

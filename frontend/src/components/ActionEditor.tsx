@@ -3,6 +3,8 @@ import useForceUpdate from './useForceUpdate';
 import Select from './ui/Select';
 import ReplayEditor from './ReplayEditor';
 import SubroutineEditor from './SubroutineEditor';
+import NumberInput from './ui/NumberInput';
+import { displayRepeatRange } from './ActionEditor.util';
 
 const ACTION_TYPES_DISPLAY = [
   ['𝜀', null],
@@ -20,14 +22,25 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
 
   return (
     <div className=''>
-      {/* <NumberInput
-        className='min-w-8 w-fit'
-        object={edge}
-        property={'limit'}
-        label={'limit'}
-        callback={forceUpdate}
-        format={(x) => (x > 0 ? x.toString() : x < 0 ? 'INF' : 'disabled')}
-      /> */}
+      <div className='flex gap-4'>
+        <NumberInput
+          className='min-w-8 w-fit'
+          object={edge}
+          property={'repeatLower'}
+          label={'repeat'}
+          callback={forceUpdate}
+        />
+        <NumberInput
+          className='min-w-8 w-fit'
+          object={edge}
+          property={'repeatUpper'}
+          label={'limit'}
+          callback={forceUpdate}
+        />
+        <div className='px-2 flex items-center gap-2 bg-green-100'>
+          {'runs ' + displayRepeatRange(edge.repeatLower, edge.repeatUpper)}
+        </div>
+      </div>
       <div>
         <Select
           value={edge.action?.$case || null}
