@@ -58,6 +58,7 @@ budget issue tracker
     - Use sleep after X minute Power Plan setting, SetWaitableTimer for wake up.
 - v1.0.0 Quality of Life
   - [x] node/edge preset
+  - [x] variable display scaling support
   - [ ] hotkeys on buttons
 
 ### Lower Priority

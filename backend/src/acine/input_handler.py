@@ -44,12 +44,32 @@ With further testing, turns out this is a result of changing to v2.
 > offset by exactly 36 pixels (the height of the window title bar)
 """
 
+import ctypes
 from os import system
 
+import win32gui
 from ahk import AHK
 
 AHK(version="v1")
 ahk = AHK(version="v2")
+
+win32user = ctypes.windll.user32
+win32user.SetProcessDPIAware()
+# GetClientRect will give values with Scaling applied (can be used to do offset)
+
+
+def get_title_bar_height(win_title):
+    """
+    Source:
+    https://github.com/Dragonlinae/Autacha/blob/b63978e4e7744c35f07959a98affc79a7a5cfbae/helpers/game_capture.py#L40-L50
+    """
+    hwnd = win32gui.FindWindow(None, win_title)
+    _, _, cx2, cy2 = win32gui.GetClientRect(hwnd)
+    wx1, wy1, wx2, wy2 = win32gui.GetWindowRect(hwnd)
+    wx1, wx2 = wx1 - wx1, wx2 - wx1
+    wy1, wy2 = wy1 - wy1, wy2 - wy1
+    bw = (wx2 - cx2) // 2  # shadow (one sided)
+    return wy2 - cy2 - bw
 
 
 class InputHandler:
@@ -75,6 +95,8 @@ class InputHandler:
         self.is_mouse_down = False
         self.x = 0
         self.y = 0
+        self.y_offset = get_title_bar_height(title)
+        print(f"y-offset(titlebar)={self.y_offset}")
 
     def mouse_move(self, x: int, y: int):
         self.x = x
@@ -84,7 +106,7 @@ class InputHandler:
         # self.y += 8
 
         # window title bar (required in AHK v2)
-        self.y -= 36
+        self.y -= self.y_offset
 
         self.update_mouse()
 
