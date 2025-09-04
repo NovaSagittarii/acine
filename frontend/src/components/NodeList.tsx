@@ -1,3 +1,4 @@
+import { atom } from 'nanostores';
 import { useStore } from '@nanostores/react';
 
 import { $routine, $selectedNode } from '@/state';
@@ -7,6 +8,10 @@ import useForceUpdate from './useForceUpdate';
 import { useEffect } from 'react';
 import { NodePreset } from './Node.util';
 import { compare } from '../client/util';
+import Checkbox from './ui/Checkbox';
+
+/* whether to override sort by id */
+const $sortByName = atom(false);
 
 /**
  * Editor for nodes & transitions of the DFA.
@@ -15,6 +20,7 @@ export default function NodeList() {
   const routine = useStore($routine);
   const selectedNode = useStore($selectedNode);
   const forceUpdate = useForceUpdate();
+  const sortByName = useStore($sortByName);
 
   useEffect(() => {
     // a way to persist scroll location
@@ -28,9 +34,16 @@ export default function NodeList() {
   return (
     <div className='w-full h-full pb-4 overflow-hidden flex flex-col gap-4'>
       <div className='h-full overflow-y-scroll'>
+        <Checkbox
+          value={sortByName}
+          onChange={(x) => $sortByName.set(x)}
+          label='Sort by name'
+        />
         {Object.values(routine.nodes).length === 0 && 'No nodes yet.'}
         {Object.values(routine.nodes)
-          .sort((a, b) => compare(a.id, b.id))
+          .sort((a, b) =>
+            sortByName ? compare(a.name, b.name) : compare(a.id, b.id),
+          )
           .map((node) => (
             <div
               id={node.id}
