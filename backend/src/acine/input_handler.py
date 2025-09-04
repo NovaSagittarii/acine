@@ -4,6 +4,8 @@ Implements interface for OS-level input events for specific windows.
 This implementation is based on AHK (AutoHotKey) and
 https://github.com/Dragonlinae/Autacha.
 
+https://github.com/Dragonlinae/Autacha/blob/main/helpers/game_capture.py
+
 ## Note about why AHK __init__ gets called twice... (yeah it's weird)
 
 So, calling AHK with a *different* version results in good side effects??
@@ -51,13 +53,17 @@ ahk = AHK(version="v2")
 
 
 class InputHandler:
-    def __init__(self, title: str, cmd: str):
+    def __init__(self, title: str, cmd: str = None):
         self.can_close = False
         if title:
             if cmd and not ahk.list_windows(title=title):
                 system(cmd)
             self.title = title
             self.win = ahk.win_wait(title, timeout=600, detect_hidden_windows=True)
+            self.win.minimize()
+            self.win.restore()
+            self.win.activate()  # min/res/act used to ensure mouse works
+            self.win.to_bottom()  # not necessary
             print(self.win.title, self.win)
             print(self.win.get_position())
             self.can_close = True
@@ -101,7 +107,7 @@ class InputHandler:
 
 
 if __name__ == "__main__":
-    s = "Arknights"
+    s = "TestEnv"
     print(f"looking for {s}")
     ih = InputHandler(s)
     print("found")
