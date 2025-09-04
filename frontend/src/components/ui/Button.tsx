@@ -32,6 +32,7 @@ export function CloseButton({
       className={
         'm-4 w-8 h-8 flex items-center justify-center absolute top-0 right-0 ' +
         'font-mono text-red-500 border border-red-500 rounded-sm ' +
+        'hover:border-2 ' +
         'opacity-50 hover:opacity-100 transition-opacity'
       }
     >
