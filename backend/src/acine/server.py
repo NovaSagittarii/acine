@@ -263,13 +263,17 @@ class AcineServerProtocol(WebSocketServerProtocol):
         )
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
-    def on_change_return(self, return_stack: list[Routine.Node]):
+    def on_change_return(self, return_stack: list[Routine.Edge]):
         # prune dummy node before sending
-        response = Packet(set_stack=RuntimeState(stack_nodes=return_stack[1:]))
+        response = Packet(set_stack=RuntimeState(stack_edges=return_stack[1:]))
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def on_change_edge(self, edge: Routine.Edge):
-        response = Packet(set_curr=RuntimeState(current_edge=edge))
+        response = Packet(
+            set_curr=RuntimeState(
+                current_edge=edge, target_node=self.rt.target_node if self.rt else None
+            )
+        )
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     async def on_set_curr(self, packet: Packet):

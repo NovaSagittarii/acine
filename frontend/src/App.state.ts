@@ -122,7 +122,7 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
     case 'setStack': {
       const { setStack: context } = packet.type;
       const c = $runtimeContext.get();
-      if (context.stackNodes) c.stackNodes = context.stackNodes;
+      if (context.stackEdges) c.stackEdges = context.stackEdges;
       $runtimeContext.set(c);
       break;
     }

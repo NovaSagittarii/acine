@@ -82,7 +82,8 @@ export default function RoutineViewer() {
         />
       </div>
       <div className='absolute bottom-0 left-0'>
-        {context?.stackNodes.map((r) => r.name).join(', ') || 'Empty stack'}
+        {context?.stackEdges.map((e) => routine.nodes[e.to].name).join(', ') ||
+          'Empty stack'}
       </div>
     </div>
   );

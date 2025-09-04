@@ -134,8 +134,13 @@ class TestRuntimeIntegration:
         return cls.node(id=id, type=Routine.Node.NodeType.NODE_TYPE_RETURN)
 
     @staticmethod
-    def add_edge(u: Routine.Node, v: Routine.Node, **kwargs) -> Routine.Edge:
-        e = Routine.Edge(id=f"{u.id}->{v.id}", to=v.id, **kwargs)
+    def add_edge(
+        u: Routine.Node,
+        v: Routine.Node,
+        type=Routine.Edge.EDGE_TRIGGER_TYPE_STANDARD,
+        **kwargs,
+    ) -> Routine.Edge:
+        e = Routine.Edge(id=f"{u.id}->{v.id}", to=v.id, trigger=type, **kwargs)
         if e.WhichOneof("action") in ("replay", None):
             # if it is unset, assume it's a replay action (trackable)
             e.replay.duration = randint(0, 10**9)  # use as an id
@@ -306,7 +311,7 @@ class TestRuntimeIntegration:
         n4 = self.node("n4")
         e12 = self.add_edge(n1, n2)
         e32 = self.add_edge(n3, n2)
-        e14 = self.add_edge(n1, n4, trigger=Routine.Edge.EDGE_TRIGGER_TYPE_INTERRUPT)
+        e14 = self.add_edge(n1, n4, Routine.Edge.EDGE_TRIGGER_TYPE_INTERRUPT)
         e43 = self.add_edge(n4, n3)
 
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})

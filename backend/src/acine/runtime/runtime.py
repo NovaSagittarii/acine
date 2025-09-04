@@ -60,7 +60,7 @@ class Runtime:
         """
 
         curr: Routine.Node = None
-        return_stack: list[Routine.Node] = [None]
+        return_stack: list[Routine.Edge] = [None]
 
     context: Context = Context()
 
@@ -94,19 +94,23 @@ class Runtime:
             self.G.add_node(n.id)
             self.nodes[n.id] = n
             for e in n.edges:
-                self.G.add_edge(n.id, e.to, data=e)
+                if e.trigger & Routine.Edge.EDGE_TRIGGER_TYPE_STANDARD:
+                    # scheduled don't exist, interrupts don't happen
+                    self.G.add_edge(n.id, e.to, data=e)
                 e.u = n.id
                 self.edges[e.id] = e
 
         self.set_curr(self.context.curr)  # pushes update on init
 
     def set_curr(self, node: Routine.Node):
+        assert isinstance(node, Routine.Node), "ACCEPT NODE ONLY"
         self.context.curr = self.nodes[node.id]
         if self.on_change_curr:
             self.on_change_curr(self.context.curr)
 
-    def push(self, node: Routine.Node):
-        self.context.return_stack.append(node)
+    def push(self, edge: Routine.Edge):
+        assert isinstance(edge, Routine.Edge), "ACCEPT EDGE ONLY"
+        self.context.return_stack.append(edge)
         if self.on_change_return:
             self.on_change_return(self.context.return_stack)
 
@@ -127,8 +131,8 @@ class Runtime:
         valid = True
         if context.curr.id not in self.nodes:
             valid = False
-        for u in context.return_stack:
-            if u and u.id not in self.nodes:
+        for e in context.return_stack:
+            if e and e.id not in self.edges:
                 valid = False
         if valid:
             self.set_curr(context.curr)
@@ -146,7 +150,13 @@ class Runtime:
             # handle pop stack (return nodes)
             # note: type=RETURN nodes have no fixed edges!
             if self.context.curr.type & Routine.Node.NODE_TYPE_RETURN:
-                self.set_curr(self.pop())
+                # run subroutine edge postcheck to decide where to go
+                e = self.pop()
+                res = await self.__check(e, e.postcondition, use_dest=True)
+                if res == CheckResult.PASS:
+                    self.set_curr(self.nodes[e.to])
+                else:
+                    self.set_curr(self.nodes[e.u])
                 continue
 
             # is deepcopy needed?
@@ -173,7 +183,7 @@ class Runtime:
                         H.add_edge(u.id, e.subroutine, data=e)
                         # print("ADD FUNC EDGE", u.id, e.subroutine)
                 # this method only works for subroutine depth 1
-                # ret = self.context.return_stack[-1]
+                # ret = self.nodes[self.context.return_stack[-1].to]
                 # if ret and (u.type & Routine.Node.NODE_TYPE_RETURN):
                 #     H.add_edge(u.id, ret.id, data=None)
                 #     # print("ADD RET EDGE", u.id, ret.id)
@@ -186,7 +196,7 @@ class Runtime:
             #     "STACK", [x.id for x in self.context.return_stack if x]
             # )
             for i in range(1, len(self.context.return_stack)):
-                ret = self.context.return_stack[-i]
+                ret = self.nodes[self.context.return_stack[-i].to]
                 # print(f"RET={ret.id} CURR={curr.id}")
                 # print(self.G.edges)
                 reachable = list(nx.descendants(self.G, curr.id))
@@ -331,7 +341,13 @@ class Runtime:
                 await self.run_replay(replay, dx, dy)
                 print("REPLAY DONE")
             case "subroutine":
-                pass
+                print("EXEC SUBROUTINE", action.description)
+                self.push(action)
+                self.set_curr(self.nodes[action.subroutine])
+                return  # Need to abort early when subroutine runs.
+                # The next shouldn't get set immediately, but stored on stack
+                # until after the subroutine completes.
+                # Post condition doesn't happen until the subroutine returns.
             case _:
                 raise NotImplementedError()
 
@@ -342,17 +358,8 @@ class Runtime:
                 self.on_change_edge(None)
             return
 
-        if action.WhichOneof("action") == "subroutine":
-            # update state after postcondition check,
-            # in case it failed for whatever reason
-            print("EXEC SUBROUTINE", action.description)
-            self.push(self.nodes[action.to])
-            self.set_curr(self.nodes[action.subroutine])
-        else:
-            # need to skip when subroutine runs
-            # the next shouldn't get set immediately, but stored on stack
-            # until after the subroutine completes
-            self.set_curr(self.nodes[action.to])
+        # update state after postcondition check passes
+        self.set_curr(self.nodes[action.to])
 
     async def acquire_offset(self, condition: Routine.Condition):
         if condition.WhichOneof("condition") == "image":
