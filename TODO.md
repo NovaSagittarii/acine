@@ -36,7 +36,7 @@ budget issue tracker
 - v0.2.0 Routine Manager
   - [x] routine new/open/save (multi-instance)
   - [ ] routine export (tar.bz2), include frames
-  - [ ] routine launch sequence
+  - [x] routine launch sequence
   - [ ] attach width/height to positional data (handle rotation and scaling)
 - v0.3.0 Scheduler (with parallelism)
   - [x] implement dependency (implicit)
@@ -48,7 +48,7 @@ budget issue tracker
 - v0.4.0 Background Runtime
   - [x] single routine background task
   - [ ] multi routine background task
-- v0.5.0 Optimization
+- v0.5.0 Scheduler Optimization
   - [ ] implement variables (explicit dependency)
   - linear programming
 - v0.6.0 Power Saving
@@ -56,10 +56,18 @@ budget issue tracker
     - https://learn.microsoft.com/en-us/windows/win32/api/powrprof/nf-powrprof-setsuspendstate
     - https://learn.microsoft.com/en-us/windows/win32/power/system-wake-up-events
     - Use sleep after X minute Power Plan setting, SetWaitableTimer for wake up.
+- v0.7.0 Scheduler Error Handling (Faults)
+  - [ ] failure modes: "cannot reach", "reach but timeout"
+  - [ ] scheduled retry/backoff
+  - [ ] temporary deletion of failed edge
 - v1.0.0 Quality of Life
   - [x] node/edge preset
   - [x] variable display scaling support
   - [ ] hotkeys on buttons
+  - [ ] metrics (high-level version of duration logging)
+- v1.1.0 Runtime Optimization
+  - some sort of template match cache to speed up future queries
+  - find the magic pixel(s)
 
 ### Lower Priority
 
@@ -75,6 +83,7 @@ budget issue tracker
 - [ ] time travel capture (pick frame from a recording)
 - [ ] uvloop
 - [ ] server methods tests
+- [ ] mypy type checks
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.
