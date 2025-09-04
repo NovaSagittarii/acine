@@ -257,6 +257,10 @@ class Runtime:
         await self.goto(e.u)
         await self.__run_action(e)
 
+        if e.WhichOneof("action") == "subroutine":
+            await self.goto(e.to)
+            # subroutine doesn't complete until it resolves
+
     def __process_condition(
         self, edge: Routine.Edge, condition: Routine.Condition, use_dest=True
     ):

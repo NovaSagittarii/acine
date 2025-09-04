@@ -328,3 +328,26 @@ class TestRuntimeIntegration:
         assert e14.replay in replays, "take edge n1->n4 (interrupt)"
         assert e43.replay in replays, "take edge n4->n3 (after n1->n4 interrupt)"
         assert e32.replay in replays, "take edge n3->n2 (after n4->n3)"
+
+    @pytest.mark.asyncio
+    @pytest.mark.dependency(depends=["goto"])
+    async def test_queue_edge_subroutine(
+        self, mocker: MockerFixture, checks_always_pass, mocked_controller
+    ):
+        n1 = self.node("start")
+        n2 = self.node("n2")
+        n3 = self.node("n3", Routine.Node.NODE_TYPE_INIT)
+        n4 = self.node("n4", Routine.Node.NODE_TYPE_RETURN)
+        e12 = self.add_edge(n1, n2, subroutine="n3")
+        e34 = self.add_edge(n3, n4)
+
+        r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
+        rt = Runtime(r, mocked_controller)
+        rt.run_replay = mocker.AsyncMock()
+
+        rt.context.curr = n1
+        await rt.queue_edge(e12.id)
+        assert rt.context.curr == n2, "should be at n2 after exec subroutine `n1->n2`"
+        rt.run_replay.assert_called_once_with(
+            e34.replay, mocker.ANY, mocker.ANY
+        ), "take edge n3->n4"
