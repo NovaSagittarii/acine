@@ -87,8 +87,13 @@ export default function ConditionImageEditor() {
   >([]);
   const [isBusy, setBusy] = useState(false);
 
-  const refreshPreview = () => {
+  const refreshPreview = (manual: boolean = false) => {
     if (condition) {
+      if (!manual && condition.regions && condition.allowRegions.length) {
+        // suppress auto refresh when there are allow regions being used
+        // those are heavy queries.
+        return;
+      }
       const c = pb.Routine_Condition.create({
         condition: { $case: 'image', image: condition },
       });
@@ -117,7 +122,10 @@ export default function ConditionImageEditor() {
             autofocus
           />
           <div className='flex items-center gap-6'>
-            <Button className='hover:bg-amber-100' onClick={refreshPreview}>
+            <Button
+              className='hover:bg-amber-100'
+              onClick={() => refreshPreview(true)}
+            >
               Query
             </Button>
             <Select
@@ -143,7 +151,17 @@ export default function ConditionImageEditor() {
               property='padding'
               callback={refreshPreview}
             />
-            {isBusy && 'Running...'}
+            {condition.regions && condition.allowRegions.length && (
+              <div className='text-red-800'>
+                Auto-query is being suppressed.
+              </div>
+            )}
+            {isBusy && (
+              <div className='flex gap-2 text-blue-500'>
+                <div className='animate-spin font-mono font-bold'>+</div>
+                <div>Running</div>
+              </div>
+            )}
           </div>
           <div className='flex'>
             <div className='flex justify-center w-full'>
