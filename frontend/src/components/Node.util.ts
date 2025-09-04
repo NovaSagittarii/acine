@@ -4,13 +4,13 @@ import {
   Routine_Node,
   Routine_Node_NodeType,
 } from 'acine-proto-dist';
-import { v4 as uuidv4 } from 'uuid';
+import { v7 as uuidv7 } from 'uuid';
 import { exportGenerator } from './util';
 
 export class NodePreset {
   static base() {
     return Routine_Node.create({
-      id: uuidv4(),
+      id: uuidv7(),
       name: 'unnamed node',
       type: Routine_Node_NodeType.NODE_TYPE_STANDARD,
       defaultCondition: Routine_Condition.create({
