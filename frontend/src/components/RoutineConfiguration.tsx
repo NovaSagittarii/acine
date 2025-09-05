@@ -2,10 +2,13 @@ import { useStore } from '@nanostores/react';
 import { $routine } from '@/state';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import useForceUpdate from './useForceUpdate';
+import { $timeSpent } from '../activity';
+import { formatDuration } from '../client/util';
 
 export default function RoutineConfiguration() {
   const forceUpdate = useForceUpdate();
   const routine = useStore($routine);
+  const timeSpent = useStore($timeSpent);
 
   return (
     <div className='flex flex-col gap-4 p-4'>
@@ -33,6 +36,7 @@ export default function RoutineConfiguration() {
         callback={forceUpdate}
         className='font-mono'
       />
+      Time Spent: {formatDuration(timeSpent)}
     </div>
   );
 }

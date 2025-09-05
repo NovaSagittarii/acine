@@ -24,6 +24,7 @@ import Window from './components/Window';
 import RoutineViewer from './components/RoutineViewer';
 import RoutineConfiguration from './components/RoutineConfiguration';
 import { getEdgeDisplay } from './components/Edge.util';
+import { increment } from './activity';
 
 enum ActiveTab {
   CONFIG,
@@ -100,6 +101,21 @@ function RoutineEditor() {
     getFrame();
     setDSend(Date.now());
   }, [imageUrl]);
+
+  useEffect(() => {
+    // a simple way to handle activity tracking
+    let routineId: string | undefined = undefined;
+    const unsubscribe = $routine.subscribe((v) => {
+      if (v.id) routineId = v.id;
+      setTimeout(() => unsubscribe(), 1000);
+    });
+    const int = setInterval(() => {
+      if (routineId && !document.hidden && document.hasFocus()) {
+        increment(routineId);
+      }
+    }, 1000);
+    return () => clearInterval(int);
+  }, []);
 
   const replayInputSource = useStore($replayInputSource);
   const selectedState = useStore($selectedState);

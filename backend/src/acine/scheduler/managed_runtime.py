@@ -2,6 +2,7 @@ import time
 
 from acine.capture import GameCapture
 from acine.input_handler import InputHandler
+from acine.persist import fs_read_sync, fs_write_sync
 from acine.preset_impl import BuiltinController, BuiltinSchedulerRoutineInterface
 from acine.runtime.runtime import Routine, Runtime
 from acine.scheduler.cron import next
@@ -14,11 +15,14 @@ class RoutineInstance:
         self.gc = GameCapture(routine.window_name)
         self.controller = BuiltinController(self.gc, self.ih)
         self.rt = Runtime(routine, self.controller)
+        self.routine = routine
 
     def __enter__(self):
+        self.time_opened = time.time()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__add_runtime(time.time() - self.time_opened)
         self.close()
         if exc_type:
             raise exc_val
@@ -29,6 +33,17 @@ class RoutineInstance:
     def close(self):
         self.gc.close()
         self.ih.close()
+
+    def __add_runtime(self, duration: float):
+        assert duration >= 0, "expect nonnegative duration"
+        path = [self.routine.id, "time"]
+        t = 0.0
+        try:
+            t = float(fs_read_sync(path).decode())
+        except OSError:
+            pass
+        t += duration
+        fs_write_sync(path, str(t).encode())
 
 
 class SchedulingGroupInfo:
@@ -51,7 +66,7 @@ class ManagedRuntime:
     def __init__(self, routine: Routine):
         self.routine = routine
         self.S = {k: SchedulingGroupInfo(v) for k, v in routine.sgroups.items()}
-        for node in routine.nodes:
+        for node in routine.nodes.values():
             for edge in node.edges:
                 for s in edge.schedules:
                     # TODO: s.count, s.requirement

@@ -2,5 +2,6 @@
 **/*.png
 **/*.pb
 **/*.zip
+**/time
 
 !.gitignore

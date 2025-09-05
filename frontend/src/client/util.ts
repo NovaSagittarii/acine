@@ -69,3 +69,25 @@ export function compare<T>(a: T, b: T): number {
   else if (a == b) return 0;
   else return 1;
 }
+
+export function formatDuration(seconds: number) {
+  seconds = Math.max(0, Math.round(seconds));
+  let s = seconds;
+  let m = Math.floor(s / 60);
+  let h = Math.floor(m / 60);
+  let d = Math.floor(h / 24);
+  h %= 24;
+  m %= 60;
+  s %= 60;
+  return (
+    [
+      [d, 'd'],
+      [h, 'h'],
+      [m, 'm'],
+      [s, 's'],
+    ] as [number, string][]
+  )
+    .filter(([x, _]) => x)
+    .map((x) => x.join(''))
+    .join(' ');
+}
