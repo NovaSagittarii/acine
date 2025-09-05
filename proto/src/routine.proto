@@ -270,9 +270,10 @@ message Routine {
      */
 
     REQUIREMENT_TYPE_UNSPECIFIED = 0;  // default: completion
-    REQUIREMENT_TYPE_CHECK = 1;        // requires precondition attempt
-    REQUIREMENT_TYPE_CHECK_PASS = 2;   // requires precondition pass
-    REQUIREMENT_TYPE_EXECUTE = 3;      // requires postcondition attempt
-    REQUIREMENT_TYPE_COMPLETION = 4;   // requires postcondition pass
+    REQUIREMENT_TYPE_ATTEMPT = 1;      // attempted (unreachable is ok)
+    REQUIREMENT_TYPE_CHECK = 2;        // requires precondition attempt
+    REQUIREMENT_TYPE_CHECK_PASS = 3;   // requires precondition pass
+    REQUIREMENT_TYPE_EXECUTE = 4;      // requires postcondition attempt
+    REQUIREMENT_TYPE_COMPLETION = 5;   // requires postcondition pass
   }
 }
