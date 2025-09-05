@@ -74,6 +74,8 @@ class ManagedRuntime:
 
     def next_time(self) -> float:
         """Returns the next time something gets scheduled."""
+        if not self.S.values():
+            return float("inf")
         return min(sg.next_time for sg in self.S.values())
 
     async def run(self, t: float = None):

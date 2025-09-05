@@ -47,7 +47,8 @@ budget issue tracker
   - [ ] implement dependency (implicit) with navigation listen
 - v0.4.0 Background Runtime
   - [x] single routine background task
-  - [ ] multi routine background task
+  - [x] multi routine background task
+  - [ ] multi routine background task + concurrency + locks
 - v0.5.0 Scheduler Optimization
   - [ ] implement variables (explicit dependency)
   - linear programming

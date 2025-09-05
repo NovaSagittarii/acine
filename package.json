@@ -19,6 +19,7 @@
     "test:backend": "cd backend && call .\\.venv\\Scripts\\activate.bat && pytest",
     "test:proto": "cd proto && npm test",
     "background": "cd backend && python -m uv run background.py",
+    "start": "cd backend && python -m uv run service.py",
     "": ""
   },
   "author": "NovaSagittarii",
