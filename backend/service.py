@@ -8,7 +8,7 @@ import time
 
 from acine.instance_manager import get_routines
 from acine.power.win32 import sleep
-from acine.scheduler import Multischeduler
+from acine.scheduler.multischeduler import Multischeduler
 
 
 async def main():
