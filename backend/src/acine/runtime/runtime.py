@@ -1,5 +1,12 @@
 """
 Top level module that implements the acine routine runtime.
+
+TODO: Possible improvements:
+- Use python recursion (see note under Routine.Call) -- simplifies logic
+- Remove the interface in favor of an interactive style class. goto becomes
+  a generator that requests what actions to happen (how to deal with subroutine?)
+  -- might simplify interface code? but this would clean up dependency issues
+  and make mocks simpler.
 """
 
 from __future__ import annotations
@@ -8,6 +15,17 @@ import cv2
 import networkx as nx
 from acine_proto_dist.input_event_pb2 import InputReplay
 from acine_proto_dist.routine_pb2 import Routine
+
+from acine.runtime.exceptions import (
+    ExecutionError,
+    NavigationError,
+    NoPathError,
+    PostconditionTimeoutError,
+    PreconditionTimeoutError,
+    SubroutineExecutionError,
+    SubroutinePostconditionTimeoutError,
+)
+from acine.scheduler.typing import ExecResult
 
 from .check import CheckResult, check, check_once
 from .check_image import check_similarity
@@ -63,6 +81,13 @@ class Runtime:
         It's a bit strange to reimplement the call stack though. I think it
         is reasonable to use Python's recursion, but I feel that debugging
         the stack trace (when it fails) is going to be worse (?).
+
+        Oh if you use recursion, it's harder to queue an edge within a subroutine.
+        It would involve stack save/restore (maybe that's fine though).
+
+        Queue within-subroutine edge rarely happens during scheduling, but this
+        is very common during editing. There's context interrupt on re-upload.
+        And just testing a subroutine (queue edges from inside the subroutine).
         """
 
         def __init__(self, edge: Routine.Edge):
@@ -189,6 +214,7 @@ class Runtime:
                             next_id = e.subroutine
                         else:
                             next_id = e.u  # failed
+                            raise SubroutinePostconditionTimeoutError(e)
                 assert next_id, "Next node should be set after subroutine return"
                 self.set_curr(self.nodes[next_id])
                 continue
@@ -244,7 +270,10 @@ class Runtime:
                         # print("ADD RET EDGE", u.id, ret.id)
                 curr = ret
 
-            path = nx.shortest_path(H, self.context.curr.id, id)
+            try:
+                path = nx.shortest_path(H, self.context.curr.id, id)
+            except nx.NetworkXNoPath:
+                raise NoPathError(self.context.curr.id, id)
             u = self.nodes[path[0]]
             v = self.nodes[path[1]]
 
@@ -283,17 +312,31 @@ class Runtime:
             await self.__run_action(take_edge)
         self.target_node = None
 
-    async def queue_edge(self, id: str):
+    async def queue_edge(self, id: str) -> ExecResult:
         """
         goes to the edge start node and then runs the action on the edge
         """
+        s = self.context.curr  # source
         e = self.edges[id]
-        await self.goto(e.u)
-        await self.__run_action(e)
+        try:
+            await self.goto(e.u)
+        except ExecutionError:
+            raise NavigationError(s.id, e.u)
+        await self.__run_action(e)  # this shouldn't raise exception
 
         if e.WhichOneof("action") == "subroutine":
-            await self.goto(e.to)
             # subroutine doesn't complete until it resolves
+            try:
+                await self.goto(e.to)
+            except SubroutinePostconditionTimeoutError:
+                if self.context.call_stack[-1].edge == e:
+                    # timeout during target subroutine postcondition
+                    raise PostconditionTimeoutError(e)
+                else:
+                    # timeout during a child subroutine postcondition
+                    raise SubroutineExecutionError(e)
+            except (ExecutionError, NavigationError):
+                raise SubroutineExecutionError(e)
 
     def __process_condition(
         self, edge: Routine.Edge, condition: Routine.Condition, use_dest=True
@@ -358,38 +401,35 @@ class Runtime:
 
         res = await self.__check(action, action.precondition, use_dest=False)
         if res != CheckResult.PASS:
-            print("X ? ? precheck fail")
+            # print("X ? ? precheck fail")
             if self.on_change_edge:
                 self.on_change_edge(None)
-            return
+            raise PreconditionTimeoutError(action)
 
-        if action.repeat_lower >= 1:
-            if action.WhichOneof("action") == "subroutine":
-                print("EXEC SUBROUTINE", action.description)
-                self.push(action)
-                self.set_curr(self.nodes[action.subroutine])
-                return True  # Need to abort early when subroutine runs.
-                # The next shouldn't get set immediately, but stored on stack
-                # until after the subroutine completes.
-                # Post condition doesn't happen until the subroutine returns.
-            else:
-                for i in range(max(action.repeat_lower, action.repeat_upper)):
-                    if i >= action.repeat_lower:
-                        res = await self.__check(
-                            action, action.postcondition, use_dest=True
-                        )
-                        if res == CheckResult.PASS:
-                            break  # can exit repeating early
-                    await self.__exec_action(action)
-                else:  # final postcondition check
+        if action.WhichOneof("action") == "subroutine" and action.repeat_lower >= 1:
+            print("EXEC SUBROUTINE", action.description)
+            self.push(action)
+            self.set_curr(self.nodes[action.subroutine])
+            return True  # Need to abort early when subroutine runs.
+            # The next shouldn't get set immediately, but stored on stack
+            # until after the subroutine completes.
+            # Post condition doesn't happen until the subroutine returns.
+        else:
+            for i in range(max(action.repeat_lower, action.repeat_upper)):
+                if i >= action.repeat_lower:
                     res = await self.__check(
                         action, action.postcondition, use_dest=True
                     )
-                    if res != CheckResult.PASS:
-                        print("! ! X postcheck fail")
-                        if self.on_change_edge:
-                            self.on_change_edge(None)
-                        return
+                    if res == CheckResult.PASS:
+                        break  # can exit repeating early
+                await self.__exec_action(action)
+            else:  # final postcondition check
+                res = await self.__check(action, action.postcondition, use_dest=True)
+                if res != CheckResult.PASS:
+                    # print("! ! X postcheck fail")
+                    if self.on_change_edge:
+                        self.on_change_edge(None)
+                    raise PostconditionTimeoutError(action)
 
         # update state after postcondition check passes
         self.set_curr(self.nodes[action.to])

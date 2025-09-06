@@ -5,7 +5,8 @@ from unittest.mock import AsyncMock, Mock, call
 import pytest
 from acine_proto_dist.routine_pb2 import Routine
 
-from acine.scheduler import ExecResult, ISchedulerRoutineInterface, Scheduler
+from acine.scheduler.scheduler import Scheduler
+from acine.scheduler.typing import ExecResult, ISchedulerRoutineInterface
 
 
 class AlwaysOk(ISchedulerRoutineInterface):

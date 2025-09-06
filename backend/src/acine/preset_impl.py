@@ -2,12 +2,13 @@
 Utility classes that are basic implementation of interfaces.
 """
 
+from acine_proto_dist.routine_pb2 import Routine
+from cv2.typing import MatLike
+
 from acine.capture import GameCapture
 from acine.input_handler import InputHandler
 from acine.runtime.runtime import IController, Runtime
-from acine.scheduler.scheduler import ExecResult, ISchedulerRoutineInterface
-from acine_proto_dist.routine_pb2 import Routine
-from cv2.typing import MatLike
+from acine.scheduler.typing import ExecResult, ISchedulerRoutineInterface
 
 
 class BuiltinController(IController):
