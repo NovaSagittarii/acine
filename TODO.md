@@ -58,6 +58,8 @@ budget issue tracker
     - https://learn.microsoft.com/en-us/windows/win32/power/system-wake-up-events
     - Use sleep after X minute Power Plan setting, SetWaitableTimer for wake up.
 - v0.7.0 Scheduler Error Handling (Faults)
+  - [x] variable success modes
+  - [ ] variable subroutine success mode (resolve/reject/recover return nodes)
   - [ ] failure modes: "cannot reach", "reach but timeout"
   - [ ] scheduled retry/backoff
   - [ ] temporary deletion of failed edge

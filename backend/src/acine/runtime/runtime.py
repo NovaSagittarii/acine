@@ -213,7 +213,7 @@ class Runtime:
                         if call.finish_count < e.repeat_upper:  # retry
                             next_id = e.subroutine
                         else:
-                            next_id = e.u  # failed
+                            next_id = e.u  # failed ... probably won't apply?
                             raise SubroutinePostconditionTimeoutError(e)
                 assert next_id, "Next node should be set after subroutine return"
                 self.set_curr(self.nodes[next_id])

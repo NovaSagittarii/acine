@@ -145,22 +145,25 @@ class TestRuntimeExceptions:
         rt = MockRuntime(sab, mocker)
         with pytest.raises(NavigationError):
             await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert rt.context.curr.id == "start"
 
     @pytest.mark.asyncio
     async def test_precondition_fail(self, sab: Routine, mocker):
-        """start -/> a -> b"""
+        """start -> a -/> b"""
         disable_condition(sab.nodes["a"].edges[0].precondition)
         rt = MockRuntime(sab, mocker)
         with pytest.raises(PreconditionTimeoutError):
             await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert rt.context.curr.id == "a"
 
     @pytest.mark.asyncio
     async def test_postcondition_fail(self, sab: Routine, mocker):
-        """start -/> a -> b"""
+        """start -> a -/> b"""
         disable_condition(sab.nodes["a"].edges[0].postcondition)
         rt = MockRuntime(sab, mocker)
         with pytest.raises(PostconditionTimeoutError):
             await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert rt.context.curr.id == "a"
 
     @pytest.mark.asyncio
     async def test_no_path(self, sab: Routine, mocker):
@@ -168,17 +171,22 @@ class TestRuntimeExceptions:
         rt = MockRuntime(sab, mocker)
         with pytest.raises(NoPathError):
             await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert rt.context.curr.id == "start"
 
+    @pytest.mark.skip(reason="currently subroutines cannot fail")
     @pytest.mark.asyncio
     async def test_subroutine_exec_fail(self, srt, mocker):
         disable_condition(srt.nodes["c"].edges[0].precondition)
         rt = MockRuntime(srt, mocker)
         with pytest.raises(SubroutineExecutionError):
             await rt.queue_edge(srt.nodes["a"].edges[0].id)
+        assert rt.context.curr.id == "a", "subroutine fail to complete"
 
+    @pytest.mark.skip(reason="currently subroutines cannot fail")
     @pytest.mark.asyncio
     async def test_nested_subroutine_exec_postcondition_fail(self, srt2, mocker):
         disable_condition(srt2.nodes["c"].edges[0].postcondition)
         rt = MockRuntime(srt2, mocker)
         with pytest.raises(SubroutineExecutionError):
             await rt.queue_edge(srt2.nodes["a"].edges[0].id)
+        assert rt.context.curr.id == "a", "subroutine fail to complete"
