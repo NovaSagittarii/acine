@@ -210,6 +210,8 @@ class Runtime:
                         self.pop()
                         next_id = e.to  # complete
                     else:  # didn't pass
+                        if e.repeat_upper < e.repeat_lower:  # overrides (see frontend)
+                            e.repeat_upper = 1000
                         if call.finish_count < e.repeat_upper:  # retry
                             next_id = e.subroutine
                         else:
@@ -426,6 +428,8 @@ class Runtime:
             # until after the subroutine completes.
             # Post condition doesn't happen until the subroutine returns.
         else:
+            if action.repeat_upper < action.repeat_lower:  # overrides (see frontend)
+                action.repeat_upper = 1000
             for i in range(max(action.repeat_lower, action.repeat_upper)):
                 if i >= action.repeat_lower:
                     res = await self.__check(
