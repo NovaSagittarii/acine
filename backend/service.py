@@ -15,14 +15,14 @@ async def main():
     routines = get_routines(full=True)
     ms = Multischeduler(routines)
 
-    k = len(str(ms).split("\n"))
+    k = len(str(ms).split("\n")) + 2
     print("\n" * k)
 
     while True:
         try:
             next_unix = ms.next_time()
             idle_time = next_unix - time.time()
-            print("\33[F" * (k + 1), "\33[2K", str(ms), flush=True)
+            print("\33[F\33[2K" * k, "\n" + str(ms), flush=True)
             print("clock", datetime.datetime.fromtimestamp(time.time()))
             if idle_time > 60:
                 await sleep(idle_time - 10)
