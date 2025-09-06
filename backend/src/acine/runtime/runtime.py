@@ -316,15 +316,24 @@ class Runtime:
         """
         goes to the edge start node and then runs the action on the edge
         """
-        s = self.context.curr  # source
+        # s = self.context.curr  # source
         e = self.edges[id]
         try:
             await self.goto(e.u)
         except ExecutionError:
-            raise NavigationError(s.id, e.u)
-        await self.__run_action(e)  # this shouldn't raise exception
+            return ExecResult.REQUIREMENT_TYPE_ATTEMPT
+            # raise NavigationError(s.id, e.u)
+
+        try:
+            await self.__run_action(e)
+        except PreconditionTimeoutError:
+            return ExecResult.REQUIREMENT_TYPE_CHECK
+        except PostconditionTimeoutError:
+            return ExecResult.REQUIREMENT_TYPE_EXECUTE
 
         if e.WhichOneof("action") == "subroutine":
+            # current impl cannot support subroutine errors
+
             # subroutine doesn't complete until it resolves
             try:
                 await self.goto(e.to)
@@ -337,6 +346,8 @@ class Runtime:
                     raise SubroutineExecutionError(e)
             except (ExecutionError, NavigationError):
                 raise SubroutineExecutionError(e)
+
+        return ExecResult.REQUIREMENT_TYPE_COMPLETION
 
     def __process_condition(
         self, edge: Routine.Edge, condition: Routine.Condition, use_dest=True

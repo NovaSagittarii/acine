@@ -2,13 +2,10 @@ import pytest
 from pytest_mock import MockerFixture
 
 from acine.runtime.exceptions import (
-    NavigationError,
     NoPathError,
-    PostconditionTimeoutError,
-    PreconditionTimeoutError,
     SubroutineExecutionError,
 )
-from acine.runtime.runtime import CheckResult, IController, Routine, Runtime
+from acine.runtime.runtime import CheckResult, ExecResult, IController, Routine, Runtime
 
 NodeType = Routine.Node.NodeType
 EdgeType = Routine.Edge.EdgeTriggerType
@@ -141,28 +138,29 @@ class TestRuntimeExceptions:
     @pytest.mark.asyncio
     async def test_nav_fail(self, sab: Routine, mocker):
         """start -/> a -> b"""
-        disable_condition(sab.nodes["start"].edges[0].precondition)
+        e = sab.nodes["start"].edges[0]
+        e2 = sab.nodes["a"].edges[0]
+        disable_condition(e.precondition)
         rt = MockRuntime(sab, mocker)
-        with pytest.raises(NavigationError):
-            await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert await rt.queue_edge(e2.id) == ExecResult.REQUIREMENT_TYPE_ATTEMPT
         assert rt.context.curr.id == "start"
 
     @pytest.mark.asyncio
     async def test_precondition_fail(self, sab: Routine, mocker):
         """start -> a -/> b"""
-        disable_condition(sab.nodes["a"].edges[0].precondition)
+        e = sab.nodes["a"].edges[0]
+        disable_condition(e.precondition)
         rt = MockRuntime(sab, mocker)
-        with pytest.raises(PreconditionTimeoutError):
-            await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert await rt.queue_edge(e.id) == ExecResult.REQUIREMENT_TYPE_CHECK
         assert rt.context.curr.id == "a"
 
     @pytest.mark.asyncio
     async def test_postcondition_fail(self, sab: Routine, mocker):
         """start -> a -/> b"""
-        disable_condition(sab.nodes["a"].edges[0].postcondition)
+        e = sab.nodes["a"].edges[0]
+        disable_condition(e.postcondition)
         rt = MockRuntime(sab, mocker)
-        with pytest.raises(PostconditionTimeoutError):
-            await rt.queue_edge(sab.nodes["a"].edges[0].id)
+        assert await rt.queue_edge(e.id) == ExecResult.REQUIREMENT_TYPE_EXECUTE
         assert rt.context.curr.id == "a"
 
     @pytest.mark.asyncio

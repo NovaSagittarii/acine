@@ -42,6 +42,4 @@ class BuiltinSchedulerRoutineInterface(ISchedulerRoutineInterface):
         self.runtime = runtime
 
     async def goto(self, e: Routine.Edge) -> ExecResult:
-        await self.runtime.queue_edge(e.id)
-        # TODO: queue_edge should return ExecResult
-        return ExecResult.REQUIREMENT_TYPE_COMPLETION
+        return await self.runtime.queue_edge(e.id)
