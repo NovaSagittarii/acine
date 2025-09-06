@@ -15,7 +15,7 @@ async def main():
     routines = get_routines(full=True)
     ms = Multischeduler(routines)
 
-    k = len(str(ms).split("\n")) + 2
+    k = len(str(ms).split("\n")) + 1
     print("\n" * k)
 
     while True:
@@ -28,7 +28,9 @@ async def main():
                 await sleep(idle_time - 10)
             else:
                 await sleep(1)
-            await ms.get_next().run()
+            if idle_time <= 0:
+                await ms.get_next().run()
+                print("\n" * k)
         except BaseException as e:
             print(e)
             return 1
