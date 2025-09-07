@@ -27,7 +27,7 @@ export default function Region({
   return (
     <div
       className={
-        'absolute outline-4 box-border overflow-x-visible whitespace-nowrap ' +
+        'absolute outline-4 box-border overflow-x-visible whitespace-nowrap select-none ' +
         color
       }
       draggable={false}

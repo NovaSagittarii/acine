@@ -100,7 +100,10 @@ export default function ConditionOverlay({
           }
         >
           <div
-            className={`${firstInGroup || 'opacity-20'} ${matchType === MatchType.PRIMARY ? 'text-black/75' : 'text-black/20'}`}
+            className={
+              'pointer-events-none ' +
+              `${firstInGroup || 'opacity-20'} ${matchType === MatchType.PRIMARY ? 'text-black/75' : 'text-black/20'}`
+            }
           >
             {score.toFixed(5)}
           </div>
