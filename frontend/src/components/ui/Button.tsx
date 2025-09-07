@@ -1,24 +1,49 @@
+import { useEffect, useState } from 'react';
+
 interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void | Promise<void>;
+  hotkey?: string;
 }
 
 export default function Button({
   children,
   className = '',
+  hotkey,
   onClick = () => {},
 }: ButtonProps) {
+  const [isDown, setDown] = useState(false);
+  useEffect(() => {
+    const onKeyDown = (ev: KeyboardEvent) => {
+      if (ev.code === hotkey && !isDown.valueOf()) {
+        setDown(true);
+        void onClick();
+      }
+    };
+    const onKeyUp = (ev: KeyboardEvent) => {
+      if (ev.code === hotkey) {
+        setDown(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
+    };
+  }, [hotkey, onClick]);
   return (
     <div
       onClick={() => void onClick()}
       className={
         'p-3 rounded-lg text-center transition-colors select-none ' +
-        'border-4 border-transparent hover:border-blue-500 ' +
+        `border-4 ${!isDown ? 'border-transparent' : 'border-sky-500'} hover:border-blue-500 ` +
         className
       }
     >
       {children}
+      {hotkey && `[${hotkey}]`}
     </div>
   );
 }

@@ -135,6 +135,7 @@ function RoutineEditor() {
           <div className='h-full p-4 flex flex-col gap-4'>
             <Button
               className='bg-red-400'
+              hotkey='Backquote'
               onClick={() => {
                 const frameId = saveCurrentFrame();
                 if (!frameId) {
