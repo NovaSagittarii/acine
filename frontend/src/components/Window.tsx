@@ -19,6 +19,8 @@ interface WindowProps {
   imageUrl?: string | null;
 }
 
+let lastTime = -10000;
+
 /**
  * Input window similar to MouseRegion (but no region),
  *
@@ -87,6 +89,12 @@ export default function Window({
     <div
       className='relative h-fit w-fit bg-black'
       onMouseMove={(ev) => {
+        // suppress too many events (ahk mousemove takes time apparently)
+        if (ev.timeStamp < lastTime + 20) {
+          return;
+        }
+        lastTime = ev.timeStamp;
+
         const { x, y } = toOutCoordinates(...dimensions, ev);
         const inputEvent = pb.InputEvent.create({
           // ev.timeStamp is ms with float values
