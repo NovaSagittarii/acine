@@ -85,7 +85,7 @@ export default function Window({
 
   return (
     <div
-      className='relative min-h-[12rem] bg-black'
+      className='relative h-fit w-fit bg-black'
       onMouseMove={(ev) => {
         const { x, y } = toOutCoordinates(...dimensions, ev);
         const inputEvent = pb.InputEvent.create({
@@ -127,7 +127,7 @@ export default function Window({
         <img
           src={imageUrl}
           draggable={false}
-          className='w-full object-cover'
+          className='w-fit h-fit object-cover'
           style={{ imageRendering: 'pixelated' }}
         />
       )}

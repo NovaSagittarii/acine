@@ -6,6 +6,7 @@ import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
 import { runtimeGoto, runtimeQueueEdge } from '../App.state';
 import Checkbox from './ui/Checkbox';
 import { getEdgeDisplay } from './Edge.util';
+import Node from './Node';
 
 const $is3d = atom(false);
 const $showSelected = atom(true);
@@ -52,38 +53,54 @@ export default function RoutineViewer() {
     );
   }, [routine]);
   return (
-    <div className='relative block w-full h-full'>
-      <GraphCanvas
-        layoutType={!is3d ? 'forceDirected2d' : 'forceDirected3d'}
-        cameraMode={!is3d ? 'pan' : 'rotate'}
-        nodes={nodes()}
-        edges={edges()}
-        edgeInterpolation='curved' // make <-> 2-cycles more visible
-        labelType='all'
-        onNodeClick={(node) => runtimeGoto(node.id)}
-        onEdgeClick={(e) => runtimeQueueEdge(e.id)} // it does work (highlight bugged)
-        selections={
-          showSelected
-            ? [
-                context?.currentNode?.id?.toString() || '',
-                context?.currentEdge?.id?.toString() || '',
-              ].filter((x) => x)
-            : []
-        }
-        edgeLabelPosition={'above'} // for label readability
-        // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
-      />
-      <div className='absolute top-0 left-0 flex flex-col'>
-        <Checkbox value={is3d} onChange={(x) => $is3d.set(x)} label='3D' />
-        <Checkbox
-          value={showSelected}
-          onChange={(x) => $showSelected.set(x)}
-          label='Show selected'
+    <div className='relative flex w-full h-full overflow-hidden'>
+      <div className='relative block w-full h-full'>
+        <GraphCanvas
+          layoutType={!is3d ? 'forceDirected2d' : 'forceDirected3d'}
+          cameraMode={!is3d ? 'pan' : 'rotate'}
+          nodes={nodes()}
+          edges={edges()}
+          edgeInterpolation='curved' // make <-> 2-cycles more visible
+          labelType='all'
+          onNodeClick={(node) => runtimeGoto(node.id)}
+          onEdgeClick={(e) => runtimeQueueEdge(e.id)} // it does work (highlight bugged)
+          selections={
+            showSelected
+              ? [
+                  context?.currentNode?.id?.toString() || '',
+                  context?.currentEdge?.id?.toString() || '',
+                ].filter((x) => x)
+              : []
+          }
+          edgeLabelPosition={'above'} // for label readability
+          // animated={false} // animated used to cause many spring errors; now just THREE.Color transparent errors
         />
+        <div className='absolute top-0 left-0 flex flex-col'>
+          <Checkbox value={is3d} onChange={(x) => $is3d.set(x)} label='3D' />
+          <Checkbox
+            value={showSelected}
+            onChange={(x) => $showSelected.set(x)}
+            label='Show selected'
+          />
+        </div>
+        <div className='absolute bottom-0 left-0'>
+          {context?.stackEdges
+            .map((e) => routine.nodes[e.to].name)
+            .join(', ') || 'Empty stack'}
+        </div>
       </div>
-      <div className='absolute bottom-0 left-0'>
-        {context?.stackEdges.map((e) => routine.nodes[e.to].name).join(', ') ||
-          'Empty stack'}
+      <div
+        className={
+          'absolute right-0 ' +
+          'flex flex-col w-1/4 hover:w-1/2 h-full overflow-y-scroll transition-all ease-in ' +
+          'bg-amber-50 hover:bg-white/50 ' +
+          'opacity-20 hover:opacity-100 ' +
+          'border-l-4 border-amber-500/10 hover:border-amber-500'
+        }
+      >
+        {context.currentNode?.id && routine.nodes[context.currentNode.id] && (
+          <Node node={routine.nodes[context.currentNode.id]} selected={true} />
+        )}
       </div>
     </div>
   );
