@@ -1,19 +1,20 @@
 import { $frames, $routine, $runtimeContext } from '@/state';
 import { atom } from 'nanostores';
 import { useStore } from '@nanostores/react';
-import { useCallback } from 'react';
-import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
+import { useCallback, useEffect, useRef } from 'react';
+import { GraphCanvas, GraphCanvasRef, GraphEdge, GraphNode } from 'reagraph';
 import { runtimeGoto, runtimeQueueEdge } from '../App.state';
 import Checkbox from './ui/Checkbox';
 import { getEdgeDisplay } from './Edge.util';
 import Node from './Node';
 
 const $is3d = atom(false);
-const $showSelected = atom(true);
+const $follow = atom(true);
 
 export default function RoutineViewer() {
   const is3d = useStore($is3d); // persist between menu change
-  const showSelected = useStore($showSelected);
+  const follow = useStore($follow); // follow runtime (highlight)
+  const graphRef = useRef<GraphCanvasRef | null>(null);
 
   const routine = useStore($routine);
   const context = useStore($runtimeContext);
@@ -52,10 +53,26 @@ export default function RoutineViewer() {
         .filter((e) => e.source != e.target),
     );
   }, [routine]);
+
+  useEffect(() => {
+    if (follow && context?.currentNode?.id) {
+      if (context?.stackEdges?.length) {
+        graphRef.current?.fitNodesInView([
+          context.currentNode.id,
+          ...context.stackEdges.map((x) => x.to),
+        ]);
+      } else {
+        graphRef.current?.centerGraph([context.currentNode.id]);
+      }
+    }
+    if (!follow) graphRef.current?.fitNodesInView();
+  }, [context?.currentNode?.id, follow]);
+
   return (
     <div className='relative flex w-full h-full overflow-hidden'>
       <div className='relative block w-full h-full'>
         <GraphCanvas
+          ref={graphRef}
           layoutType={!is3d ? 'forceDirected2d' : 'forceDirected3d'}
           cameraMode={!is3d ? 'pan' : 'rotate'}
           nodes={nodes()}
@@ -65,10 +82,11 @@ export default function RoutineViewer() {
           onNodeClick={(node) => runtimeGoto(node.id)}
           onEdgeClick={(e) => runtimeQueueEdge(e.id)} // it does work (highlight bugged)
           selections={
-            showSelected
+            follow
               ? [
                   context?.currentNode?.id?.toString() || '',
                   context?.currentEdge?.id?.toString() || '',
+                  ...(context?.stackEdges?.map((x) => x.id) || []),
                 ].filter((x) => x)
               : []
           }
@@ -78,9 +96,9 @@ export default function RoutineViewer() {
         <div className='absolute top-0 left-0 flex flex-col'>
           <Checkbox value={is3d} onChange={(x) => $is3d.set(x)} label='3D' />
           <Checkbox
-            value={showSelected}
-            onChange={(x) => $showSelected.set(x)}
-            label='Show selected'
+            value={follow}
+            onChange={(x) => $follow.set(x)}
+            label='Follow'
           />
         </div>
         <div className='absolute bottom-0 left-0'>
@@ -89,22 +107,24 @@ export default function RoutineViewer() {
             .join(', ') || 'Empty stack'}
         </div>
       </div>
-      <div
-        className={
-          'absolute right-0 ' +
-          'flex flex-col w-1/2 h-full overflow-y-auto transition-all ease-in ' +
-          'bg-amber-50 hover:bg-white/50 ' +
-          'opacity-50 hover:opacity-100 ' +
-          'border-l-4 border-amber-500/10 hover:border-amber-500'
-        }
-        style={{
-          scrollbarWidth: 'thin',
-        }}
-      >
-        {context.currentNode?.id && routine.nodes[context.currentNode.id] && (
-          <Node node={routine.nodes[context.currentNode.id]} tools expand />
-        )}
-      </div>
+      {follow && (
+        <div
+          className={
+            // 'absolute right-0 ' +
+            'flex flex-col w-full h-full overflow-y-auto transition-all ease-in ' +
+            'bg-amber-50 hover:bg-white/50 ' +
+            'opacity-40 hover:opacity-100 ' +
+            'border-l-4 border-amber-500/10 hover:border-amber-500'
+          }
+          style={{
+            scrollbarWidth: 'thin',
+          }}
+        >
+          {context.currentNode?.id && routine.nodes[context.currentNode.id] && (
+            <Node node={routine.nodes[context.currentNode.id]} tools expand />
+          )}
+        </div>
+      )}
     </div>
   );
 }
