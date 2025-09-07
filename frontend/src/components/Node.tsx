@@ -16,6 +16,12 @@ import { runtimeGoto, runtimeSetCurr } from '../App.state';
 
 interface NodeProps extends Selectable {
   node: Routine_Node;
+
+  /** extra tools? (edge create) */
+  tools?: boolean;
+
+  /** initally open? */
+  expand?: boolean;
 }
 
 const NODE_TYPES_DISPLAY = [
@@ -24,7 +30,12 @@ const NODE_TYPES_DISPLAY = [
   ['return', NodeType.NODE_TYPE_RETURN],
 ] as [string, NodeType][];
 
-function Node({ node, selected = false }: NodeProps) {
+function Node({
+  node,
+  selected = false,
+  tools = false,
+  expand = false,
+}: NodeProps) {
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
@@ -85,6 +96,7 @@ function Node({ node, selected = false }: NodeProps) {
             'defaultCondition ' +
             (node.defaultCondition.condition?.$case || 'true')
           }
+          open={expand}
         >
           defaultCondition
           <Condition condition={node.defaultCondition} />
@@ -92,7 +104,7 @@ function Node({ node, selected = false }: NodeProps) {
       )}
 
       <div>
-        <EdgeList node={node} />
+        <EdgeList node={node} tools={tools} expand={expand} />
       </div>
     </div>
   );

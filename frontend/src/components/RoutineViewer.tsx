@@ -92,14 +92,17 @@ export default function RoutineViewer() {
       <div
         className={
           'absolute right-0 ' +
-          'flex flex-col w-1/4 hover:w-1/2 h-full overflow-y-scroll transition-all ease-in ' +
+          'flex flex-col w-1/2 h-full overflow-y-auto transition-all ease-in ' +
           'bg-amber-50 hover:bg-white/50 ' +
-          'opacity-20 hover:opacity-100 ' +
+          'opacity-50 hover:opacity-100 ' +
           'border-l-4 border-amber-500/10 hover:border-amber-500'
         }
+        style={{
+          scrollbarWidth: 'thin',
+        }}
       >
         {context.currentNode?.id && routine.nodes[context.currentNode.id] && (
-          <Node node={routine.nodes[context.currentNode.id]} selected={true} />
+          <Node node={routine.nodes[context.currentNode.id]} tools expand />
         )}
       </div>
     </div>

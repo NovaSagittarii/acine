@@ -10,12 +10,20 @@ import { choices, getEdgeDisplay } from './Edge.util';
 
 interface EdgeListProps {
   node: Routine_Node;
+
+  tools?: boolean;
+
+  expand?: boolean;
 }
 
 /**
  * Editor for nodes & transitions of the DFA.
  */
-export default function EdgeList({ node }: EdgeListProps) {
+export default function EdgeList({
+  node,
+  tools = false,
+  expand = false,
+}: EdgeListProps) {
   const routine = useStore($routine);
   const selectedNode = useStore($selectedNode);
   const forceUpdate = useForceUpdate();
@@ -28,6 +36,7 @@ export default function EdgeList({ node }: EdgeListProps) {
             className='relative'
             key={index}
             label={`* ${routine.nodes[edge.to]?.name ?? '<unset>'} ${getEdgeDisplay(edge).substring(0, 50)}`}
+            open={expand}
           >
             <Edge edge={edge} />
             <CloseButton
@@ -39,7 +48,7 @@ export default function EdgeList({ node }: EdgeListProps) {
           </Collapse>
         ))}
       </div>
-      {selectedNode === node && (
+      {(tools || selectedNode === node) && (
         <div className='w-full flex flex-col'>
           <div className='text-lg font-semibold'>Edge Presets</div>
           <div className='w-full flex flex-wrap gap-2'>

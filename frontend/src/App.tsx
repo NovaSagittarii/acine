@@ -127,7 +127,7 @@ function RoutineEditor() {
       <div className='w-full h-full flex gap-0 rounded-sm'>
         <div
           className={
-            `w-1/3 ${dimensions[0] > dimensions[1] && 'hover:w-full'}  max-w-fit transition-all ` +
+            `w-1/3 ${dimensions[0] > dimensions[1] && 'hover:w-full'} max-w-fit transition-all ` +
             'border-r-4 border-blue-500/10 hover:border-blue-500 ' +
             'bg-blue-50 hover:bg-transparent'
           }
