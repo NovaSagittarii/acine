@@ -28,10 +28,12 @@ export function getEdgePrefix(edge: Routine_Edge): string {
   return prefix;
 }
 
-export function getEdgeDisplay(edge: Routine_Edge): string {
+export function getEdgeDisplay(edge: Routine_Edge, shorten = false): string {
   const prefix = getEdgePrefix(edge);
   const destination = $routine.get().nodes[edge.to]?.name ?? '<dest not exist>';
-  const desc = edge.description || destination || edge.to || '<no destination>';
+  const desc = shorten
+    ? edge.description || ''
+    : edge.description || destination || edge.to || '<no destination>';
   return prefix + ' ' + desc;
 }
 

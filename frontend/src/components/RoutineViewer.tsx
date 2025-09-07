@@ -44,7 +44,7 @@ export default function RoutineViewer() {
               source: n.id.toString(),
               target: e.to.toString(),
               id: e.id,
-              label: getEdgeDisplay(e).substring(0, 16),
+              label: getEdgeDisplay(e, true).substring(0, 16),
               size: 3,
             }) as GraphEdge,
         )
