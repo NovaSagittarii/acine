@@ -320,11 +320,16 @@ class Runtime:
         """
         # s = self.context.curr  # source
         e = self.edges[id]
-        try:
-            await self.goto(e.u)
-        except ExecutionError:
+        for _ in range(10):  # insist you can navigate there (old behavior)
+            try:
+                await self.goto(e.u)
+                break
+            except ExecutionError:
+                pass
+                # return ExecResult.REQUIREMENT_TYPE_ATTEMPT
+                # raise NavigationError(s.id, e.u)
+        else:
             return ExecResult.REQUIREMENT_TYPE_ATTEMPT
-            # raise NavigationError(s.id, e.u)
 
         try:
             await self.__run_action(e)
