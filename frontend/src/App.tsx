@@ -121,13 +121,14 @@ function RoutineEditor() {
   const selectedState = useStore($selectedState);
   const dimensions = useStore($sourceDimensions);
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.CONFIG);
+  const expanded = false;
 
   return (
     <>
       <div className='w-full h-full flex gap-0 rounded-sm'>
         <div
           className={
-            `w-1/3 ${dimensions[0] > dimensions[1] && 'hover:w-full'} max-w-fit transition-all ` +
+            `${expanded ? 'w-full' : 'w-1/3'} max-w-fit transition-all ` +
             'border-r-4 border-blue-500/10 hover:border-blue-500 ' +
             'bg-blue-50 hover:bg-transparent'
           }
