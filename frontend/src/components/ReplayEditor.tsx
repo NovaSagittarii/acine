@@ -85,14 +85,12 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
                 Playback
               </Button>
             ) : (
-              <div className='w-full'>
-                <Button
-                  className='p-1! w-full bg-red-500 text-white'
-                  onClick={() => replayInputSource.stop()}
-                >
-                  Stop
-                </Button>
-              </div>
+              <Button
+                className='p-1! w-full bg-red-500 text-white'
+                onClick={() => replayInputSource.stop()}
+              >
+                Stop
+              </Button>
             )}
             {/* <Button
               className='p-1! w-full bg-black text-white'
@@ -102,27 +100,40 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
             </Button> */}
           </>
         ) : (
-          <Button
-            className='p-1! w-full bg-red-500 text-white'
-            onClick={async () => {
-              setRecording(false);
-              if (stream) {
-                stream.close({ noHover: true });
-                await stream.writeTo(replay);
-                if (offset && offset.x && offset.y) {
-                  replay.offset = {
-                    x: offset.x,
-                    y: offset.y,
-                    width: 0, // TODO: relativepoint
-                    height: 0,
-                  };
+          <>
+            <Button
+              className='p-1! w-full bg-red-500 text-white'
+              onClick={() => {
+                setRecording(false);
+                if (stream) {
+                  stream.close();
                 }
-                console.log(replay.events);
-              } else console.error("InputStream wasn't initialized.");
-            }}
-          >
-            Stop Recording
-          </Button>
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className='p-1! w-full bg-black text-white'
+              onClick={async () => {
+                setRecording(false);
+                if (stream) {
+                  stream.close({ noHover: true });
+                  await stream.writeTo(replay);
+                  if (offset && offset.x && offset.y) {
+                    replay.offset = {
+                      x: offset.x,
+                      y: offset.y,
+                      width: 0, // TODO: relativepoint
+                      height: 0,
+                    };
+                  }
+                  console.log(replay.events);
+                } else console.error("InputStream wasn't initialized.");
+              }}
+            >
+              Save Recording
+            </Button>
+          </>
         )}
       </div>
     </div>
