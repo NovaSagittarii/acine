@@ -177,7 +177,7 @@ function RoutineEditor() {
             </div>
           </div>
         </div>
-        <div className='w-2/3 h-full flex flex-col'>
+        <div className='w-2/3 h-full flex flex-col grow'>
           <div className='w-full flex flex-row gap-2'>
             {new Array(ActiveTab.length).fill(0).map((_, index) => (
               <div
