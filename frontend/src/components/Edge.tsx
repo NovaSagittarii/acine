@@ -36,7 +36,7 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
 
   return (
     <div
-      className={`pl-1 border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
+      className={`pl-1 border-t-4 rounded-sm border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
     >
       <div className='flex gap-4 w-full items-center'>
         <div>
