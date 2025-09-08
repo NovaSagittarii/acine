@@ -75,6 +75,7 @@ def get_title_bar_height(win_title):
 class InputHandler:
     def __init__(self, title: str, cmd: str = None):
         self.can_close = False
+        self.y_offset = 0
         if title:
             if cmd and not ahk.list_windows(title=title):
                 system(cmd)
@@ -87,6 +88,7 @@ class InputHandler:
             print(self.win.title, self.win)
             print(self.win.get_position())
             self.can_close = True
+            self.y_offset = get_title_bar_height(self.win.get_title())
         else:
             # target desktop
             self.title = None
@@ -95,7 +97,6 @@ class InputHandler:
         self.is_mouse_down = False
         self.x = 0
         self.y = 0
-        self.y_offset = get_title_bar_height(title)
         print(f"y-offset(titlebar)={self.y_offset}")
 
     def mouse_move(self, x: int, y: int):
