@@ -63,6 +63,8 @@ class EdgeInfo:
         completions: list[SchedulerEntry] = []
         for v in tuple(self.__dependents.values()):
             # on_completed will call unsubscribe (modifying self.__dependents)
+            print("BROADCAST", self.edge.description, result, v.edge.description, v.requirement)
+            print("ACTUAL", v.requirement)
             if result >= v.requirement:
                 if v.on_completed(self):
                     completions.append(v)
@@ -115,6 +117,7 @@ class SchedulerEntry:
                 del self.deps[id]
         if id not in self.deps:
             e.unsubscribe(self)
+        print("RESOLVing", e.edge.name, self.deps)
         return not self.deps
 
     def fail(self):
@@ -168,9 +171,10 @@ class Scheduler:
         if entry.deps:  # has dependencies to run
             for dep in entry.deps.values():
                 e = self.edges[dep.dependency.requires]
+                print(entry.edge.description, "BLOCKED BY", e.edge.description, dep.dependency.requirement)
                 e.subscribe(entry)
                 for _ in range(max(0, dep.dependency.count - e.pending)):
-                    self.schedule(e.edge, deadline + 1)
+                    self.schedule(e.edge, deadline + 1, requirement=dep.dependency.requirement)
             return True
 
         # Able to run now.
@@ -178,10 +182,12 @@ class Scheduler:
         e.fail_count = 0
         e.pending -= 1
 
-        print("RUN ", edge.id)
+        print("RUN ", edge.id, edge.name, edge.description)
         result = await self.interface.goto(edge)
+        print("RUN RESULT", result, ">=?", entry.requirement)
 
         candidates = e.broadcast(result)
+        print("RESOLVE", [x.edge.name for x in candidates])
         for entry in candidates:
             assert not entry.deps, "Should have no unmet dependencies."
             heapq.heappush(self.ready_queue, entry)
@@ -211,10 +217,11 @@ class Scheduler:
 
         return True
 
-    def schedule(self, edge: Routine.Edge, deadline: int, update=True):
+    def schedule(self, edge: Routine.Edge, deadline: int, update=True, requirement=ExecResult.REQUIREMENT_TYPE_CHECK):
         print("SCHEDULE", edge.id, f"d={deadline}")
         self.interface.on_scheduled(edge)
         e = self.edges[edge.id]
         if update:
             e.pending += 1
-        heapq.heappush(self.ready_queue, SchedulerEntry(edge, deadline))
+        entry = SchedulerEntry(edge, deadline, requirement=requirement)
+        heapq.heappush(self.ready_queue, entry)
