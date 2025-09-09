@@ -6,6 +6,8 @@ import { $routine } from '@/state';
 import { useStore } from '@nanostores/react';
 import { getEdgeDisplay } from './Edge.util';
 import { REQUIREMENT_TYPE_DISPLAY } from './display';
+import { runtimeQueueEdge } from '../App.state';
+import { compare } from '../client/util';
 
 interface DependencyProps {
   dependency: Routine_Dependency;
@@ -16,7 +18,8 @@ export default function Dependency({ dependency }: DependencyProps) {
   const forceUpdate = useForceUpdate();
   return (
     <div className='relative flex flex-col hover:bg-amber-100 border border-black p-1 rounded-sm'>
-      <div className='absolute top-0 right-0 opacity-50 text-xs p-1'>
+      <div className='absolute flex gap-4 top-0 right-0 opacity-50 text-xs p-1'>
+        <div className='hover:bg-red-100' onClick={() => void runtimeQueueEdge(dependency.requires)}>exec</div>
         {dependency.id}
       </div>
       <LabeledSelect
@@ -31,7 +34,7 @@ export default function Dependency({ dependency }: DependencyProps) {
       <LabeledSelect
         label='requires'
         value={dependency.requires}
-        values={Object.values(routine.nodes).flatMap((n) =>
+        values={Object.values(routine.nodes).sort((a, b) => compare(a.name, b.name)).flatMap((n) =>
           n.edges.map(
             (e) =>
               [`${n.name} - ${getEdgeDisplay(e)}`, e.id] as [string, string],
