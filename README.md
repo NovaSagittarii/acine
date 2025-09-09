@@ -26,11 +26,10 @@ Have an installation of Python and NodeJS.
    npm i           # does a prepare cascade (installs all deps)
    ```
 
-2. Build protobufs (on first install or when they change)
+2. $\scriptsize\texttt{DEV}$ Build protobufs (when they change)
 
    ```sh
    npm run build  # run protoc
-   npm test       # run basic tests
    ```
 
 3. $\scriptsize\texttt{DEV}$ Precommit setup
@@ -52,6 +51,7 @@ Have an installation of Python and NodeJS.
 
    ```sh
    npm run editor       # run editor program (web on :5173, background on :9000)
+   npm run background   # run one routine
    npm start            # run multischeduler
    ```
 
