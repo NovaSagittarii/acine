@@ -21,7 +21,8 @@ class Multischeduler:
                 continue
             D = datetime.timedelta(seconds=int(dt)).__str__()
             T = datetime.datetime.fromtimestamp(t).__str__()
-            lines.append(f"{D if dt > 0 else "READY":>16} {T} {x.routine.name}")
+            Z = ", ".join(x.next_groups(t))
+            lines.append(f"{D if dt > 0 else "READY":>16} {T} {x.routine.name} {Z}")
         return "\n".join(lines)
 
     def next_time(self):

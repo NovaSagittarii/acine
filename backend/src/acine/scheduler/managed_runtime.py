@@ -35,6 +35,7 @@ class RoutineInstance:
         self.ih.close()
 
     def __add_runtime(self, duration: float):
+        print(f"exec time {duration/60:.2f}m")
         assert duration >= 0, "expect nonnegative duration"
         path = [self.routine.id, "time"]
         t = 0.0
@@ -78,6 +79,9 @@ class ManagedRuntime:
             return float("inf")
         return min(sg.next_time for sg in self.S.values())
 
+    def next_groups(self, t: float):
+        return [sg.group.name for sg in self.S.values() if sg.next_time == t]
+
     async def run(self, t: float = None):
         """
         `t` is seconds since UNIX epoch. When no `t` is provided, uses the current time.
@@ -97,5 +101,9 @@ class ManagedRuntime:
                     for edge in sg.linked:
                         scheduler.schedule(edge, t)
                     sg.on_scheduled()
-            while await scheduler.next():
-                pass
+            try: 
+                while await scheduler.next():
+                    pass
+            except BaseException as e:
+                print("FAILURE", e)
+                raise e
