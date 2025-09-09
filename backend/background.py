@@ -17,6 +17,9 @@ async def main():
     print(f"using [{routine.name}]\n")
 
     mrt = ManagedRuntime(routine)
+    if input(f"run {mrt.next_groups(mrt.next_time())} once? (Y/n) ") == "Y":
+        await mrt.run(mrt.next_time())
+        return
 
     while True:
         try:
