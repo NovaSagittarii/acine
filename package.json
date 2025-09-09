@@ -23,7 +23,7 @@
     "main:build": "npm run build:web",
     "main:web": "cd frontend && npm run preview",
     "background": "cd backend && python -m uv run background.py",
-    "editor": "npm run main:build && concurrently --kill-others-on-fail -n \"FE,BE\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run main:web\" \"npm run dev:backend\"",
+    "editor": "concurrently --kill-others-on-fail -n \"FE,BE\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run main:web\" \"npm run dev:backend\"",
     "start": "cd backend && python -m uv run service.py",
     "": ""
   },

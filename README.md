@@ -50,7 +50,8 @@ Have an installation of Python and NodeJS.
 5. Run
 
    ```sh
-   npm run editor       # run editor program (web on :5173, background on :9000)
+   npm run main:build   # run this once (build editor)
+   npm run editor       # run editor program (web on :4173, background on :9000)
    npm run background   # run one routine
    npm start            # run multischeduler
    ```
