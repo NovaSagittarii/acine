@@ -112,7 +112,7 @@ export class EdgePreset {
       $case: 'subroutine',
       subroutine: '',
     };
-    x.postcondition = undefined; // currently subroutine postcondition isn't implemnted
+    x.postcondition!.condition = undefined; // currently subroutine postcondition isn't implemnted
     return x;
   }
 }
