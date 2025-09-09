@@ -10,9 +10,12 @@ import NumberInput from './ui/NumberInput';
 import ElementList from './ElementList';
 
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+
+dayjs.extend(utc);
 
 interface SchedulingGroupProps {
   schedulingGroup: Routine_SchedulingGroup;
@@ -64,10 +67,11 @@ export default function SchedulingGroup({
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <TimePicker
                   views={['hours', 'minutes', 'seconds']}
-                  value={dayjs(x * 1000)}
+                  value={dayjs((x - new Date().getTimezoneOffset() * 60) * 1000).utc()}
+                  timezone='UTC'
                   onChange={(v) => {
                     if (v) {
-                      const t = (v.unix() + 86400) % 86400;
+                      const t = (v.unix() + 86400 + new Date().getTimezoneOffset() * 60) % 86400;
                       sgroup.dispatchTimes[i] = t;
                       forceUpdate();
                     }
