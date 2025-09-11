@@ -301,7 +301,12 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
             async def run_goto():
                 try:
-                    await self.rt.goto(target_node.id)
+                    for _ in range(10):
+                        try:
+                            await self.rt.goto(target_node.id)
+                            break
+                        except BaseException:
+                            pass
                 except asyncio.CancelledError:
                     pass
 
