@@ -15,7 +15,7 @@ async def main():
     routines = get_routines(full=True)
     ms = Multischeduler(routines)
 
-    k = len(str(ms).split("\n")) + 1
+    k = len(str(ms).split("\n")) + 2
     print("\n" * k)
 
     while True:
