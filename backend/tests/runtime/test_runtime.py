@@ -5,7 +5,7 @@ from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture, MockType
 
-from acine.runtime.runtime import CheckResult, IController, Routine, Runtime
+from acine.runtime.runtime import CheckResult, Event, IController, Routine, Runtime
 
 r1 = Routine(
     id="1", name="Test Routine", frames=[], nodes={"start": Routine.Node(id="start")}
@@ -52,7 +52,7 @@ def mocked_check_once(mocker: MockerFixture):
 
 @pytest.fixture
 def checks_always_pass(mocker: MockerFixture, mocked_check, mocked_check_once):
-    mocked_check.return_value = CheckResult.PASS
+    mocked_check.return_value = (Event.RESULT_PASS, None)
     mocked_check_once.return_value = CheckResult.PASS
 
 
@@ -265,7 +265,7 @@ class TestRuntimeIntegration:
         e23 = self.add_edge(n2, n3, postcondition=Routine.Condition(auto=True))
 
         # should be using check when you queue_edge
-        mocked_check.return_value = CheckResult.PASS
+        mocked_check.return_value = (Event.RESULT_PASS, None)
         mocked_check_once.return_value = CheckResult.ERROR
         r = Routine(nodes={u.id: u for u in (n1, n2, n3)})
         rt = Runtime(r, mocked_controller)

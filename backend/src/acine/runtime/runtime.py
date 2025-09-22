@@ -11,11 +11,16 @@ TODO: Possible improvements:
 
 from __future__ import annotations
 
+import io
+
 import cv2
 import networkx as nx
 from acine_proto_dist.input_event_pb2 import InputReplay
 from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import Event, RuntimeData
+from uuid_utils import uuid7
 
+from acine.instance_manager import get_pfs
 from acine.runtime.exceptions import (
     ExecutionError,
     NavigationError,
@@ -110,16 +115,23 @@ class Runtime:
         self,
         routine: Routine,
         controller: IController,
+        data: RuntimeData = RuntimeData(),
         *,
         on_change_curr=None,
         on_change_return=None,
         on_change_edge=None,
+        enable_logs=False,
     ):
         if routine.nodes:
             assert "start" in routine.nodes, "Node with id=start should exist."
 
         self.routine = routine
         self.controller = controller
+        self.data = data
+        self.enable_logs = enable_logs
+        self.pfs = None
+        if self.enable_logs:
+            self.pfs = get_pfs(routine)
 
         self.nodes = {}  # === routine.nodes
         self.edges = {}
@@ -205,7 +217,9 @@ class Runtime:
                     # force repeat
                     next_id = e.subroutine  # retry
                 else:  # try checking for action completion
-                    res = await self.__check(e, e.postcondition, use_dest=True)
+                    res = await self.__check(
+                        e, Event.PHASE_POSTCONDITION, use_dest=True
+                    )
                     if res == CheckResult.PASS:
                         self.pop()
                         next_id = e.to  # complete
@@ -370,10 +384,10 @@ class Runtime:
             condition = self.nodes[edge.to].default_condition
         return condition
 
-    def __check(
+    async def __check(
         self,
         edge: Routine.Edge,
-        condition: Routine.Condition,
+        phase: Event.Phase,
         *,
         no_delay: bool = False,
         use_dest: bool = True,
@@ -381,11 +395,26 @@ class Runtime:
         """
         processes condition before calling `check`
         """
+        if phase == Event.PHASE_PRECONDITION:
+            condition = edge.precondition
+        elif phase == Event.PHASE_POSTCONDITION:
+            condition = edge.postcondition
+        else:
+            assert False, "Invalid __check(phase) parameter."
         condition = self.__process_condition(edge, condition, use_dest=use_dest)
         ref_img: cv2.typing.MatLike | None = None
         if condition.WhichOneof("condition") == "image":
             ref_img = get_frame(self.routine.id, condition.image.frame_id)
-        return check(condition, self.controller.get_frame, ref_img, no_delay=no_delay)
+        res, img = await check(
+            condition, self.controller.get_frame, ref_img, no_delay=no_delay
+        )
+        await self.__log(edge, img, phase, res)
+        if res == Event.RESULT_PASS:
+            return CheckResult.PASS
+        elif res == Event.RESULT_TIMEOUT:
+            return CheckResult.TIMEOUT
+        else:
+            return CheckResult.ERROR
 
     def __check_once(
         self,
@@ -409,6 +438,27 @@ class Runtime:
         """
         return self.__check_once(action, action.precondition, img, use_dest=False)
 
+    async def __log(
+        self,
+        action: Routine.Edge,
+        img: cv2.typing.MatLike,
+        phase: Event.Phase = Event.PHASE_UNSPECIFIED,
+        result: Event.Result = Event.RESULT_UNSPECIFIED,
+        comment: str | None = None,
+    ):
+        if not self.enable_logs or not self.pfs:
+            return
+        _, data = cv2.imencode(".bmp", img)
+        buffer = io.BytesIO(data)
+        id = uuid7().hex
+        await self.pfs.write_archive([f"{id}.bmp"], buffer.getvalue())
+
+        event = Event(archive_id=id, phase=phase, result=result, comment=comment)
+        event.timestamp.GetCurrentTime()
+
+        einfo = self.data.execution_info.get_or_create(action.id)
+        einfo.events.append(event)
+
     async def __run_action(self, action: Routine.Edge):
         """
         Runs the precheck/action/postcheck of an action
@@ -417,7 +467,7 @@ class Runtime:
         if self.on_change_edge:
             self.on_change_edge(action)
 
-        res = await self.__check(action, action.precondition, use_dest=False)
+        res = await self.__check(action, Event.PHASE_PRECONDITION, use_dest=False)
         if res != CheckResult.PASS:
             # print("X ? ? precheck fail")
             if self.on_change_edge:
@@ -438,13 +488,15 @@ class Runtime:
             for i in range(max(action.repeat_lower, action.repeat_upper)):
                 if i >= action.repeat_lower:
                     res = await self.__check(
-                        action, action.postcondition, use_dest=True
+                        action, Event.PHASE_POSTCONDITION, use_dest=True
                     )
                     if res == CheckResult.PASS:
                         break  # can exit repeating early
                 await self.__exec_action(action)
             else:  # final postcondition check
-                res = await self.__check(action, action.postcondition, use_dest=True)
+                res = await self.__check(
+                    action, Event.PHASE_POSTCONDITION, use_dest=True
+                )
                 if res != CheckResult.PASS:
                     # print("! ! X postcheck fail")
                     if self.on_change_edge:

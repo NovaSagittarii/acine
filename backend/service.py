@@ -5,6 +5,7 @@ Process to schedule all active routines.
 import asyncio
 import datetime
 import time
+import traceback
 
 from acine.instance_manager import get_routines
 from acine.power.win32 import sleep
@@ -33,6 +34,7 @@ async def main():
                 print("\n" * k)
         except BaseException as e:
             print(e)
+            traceback.print_exc()
             return 1
 
 

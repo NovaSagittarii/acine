@@ -25,6 +25,7 @@ message Packet {
     ac.Routine create_routine = 13;           // menu: New
     ac.Routine load_routine = 14;             // menu: Open
     BackendConfiguration get_configuration = 15;  // menu: lists all routines
+    ac.RuntimeData runtime = 16;                  // sync runtime exec log
   }
 }
 

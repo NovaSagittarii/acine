@@ -1,7 +1,9 @@
 import time
+import traceback
 
 from acine.capture import GameCapture
 from acine.input_handler import InputHandler
+from acine.instance_manager import get_runtime_data, write_runtime_data
 from acine.persist import fs_read_sync, fs_write_sync
 from acine.preset_impl import BuiltinController, BuiltinSchedulerRoutineInterface
 from acine.runtime.runtime import Routine, Runtime
@@ -14,7 +16,9 @@ class RoutineInstance:
         self.ih = InputHandler(routine.window_name, cmd=routine.start_command)
         self.gc = GameCapture(routine.window_name)
         self.controller = BuiltinController(self.gc, self.ih)
-        self.rt = Runtime(routine, self.controller)
+        self.rt = Runtime(
+            routine, self.controller, get_runtime_data(routine), enable_logs=True
+        )
         self.routine = routine
 
     def __enter__(self):
@@ -33,6 +37,7 @@ class RoutineInstance:
     def close(self):
         self.gc.close()
         self.ih.close()
+        write_runtime_data(self.routine, self.rt.data)
 
     def __add_runtime(self, duration: float):
         print(f"exec time {duration / 60:.2f}m")
@@ -82,7 +87,7 @@ class ManagedRuntime:
     def next_groups(self, t: float):
         return [sg.group.name for sg in self.S.values() if sg.next_time == t]
 
-    async def run(self, t: float = None):
+    async def run(self, t: float | None = None):
         """
         `t` is seconds since UNIX epoch. When no `t` is provided, uses the current time.
 
@@ -106,4 +111,5 @@ class ManagedRuntime:
                     pass
             except BaseException as e:
                 print("FAILURE", e)
+                traceback.print_exc()
                 raise e

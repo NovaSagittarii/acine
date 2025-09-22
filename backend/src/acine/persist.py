@@ -16,6 +16,7 @@ def resolve(*paths: str) -> str:
     """
     Resolves file path relative to data folder
     """
+    assert not paths or isinstance(paths[0], str), "expect strings"
     return os.path.realpath(os.path.join(path, *paths))
 
 
@@ -84,8 +85,8 @@ class PrefixedFilesystem:
         mkdir([*self.prefix, "tmp"])
         os.chdir(self.resolve("tmp"))
         path = Path(*filename)
-        with open(path, "wb") as file:
-            file.write(contents)
+        async with aopen(path, "wb") as file:
+            await file.write(contents)
         with py7zr.SevenZipFile(Path(self.resolve("archive.7z")), "a") as archive:
             archive.write(path)
         os.remove(path)
@@ -100,7 +101,7 @@ class PrefixedFilesystem:
         with py7zr.SevenZipFile(Path(self.resolve("archive.7z")), "r") as archive:
             try:
                 archive.extract(path=self.resolve("tmp"), targets=filename)
-                with open(path, "rb") as file:
-                    return file.read()
+                async with aopen(path, "rb") as file:
+                    return await file.read()
             finally:
                 os.remove(path)

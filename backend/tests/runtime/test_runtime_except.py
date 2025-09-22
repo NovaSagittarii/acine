@@ -1,4 +1,5 @@
 import pytest
+from acine_proto_dist.runtime_pb2 import Event
 from pytest_mock import MockerFixture
 
 from acine.runtime.exceptions import (
@@ -61,11 +62,16 @@ class MockRuntime(Runtime):
     async def __check(
         s,
         edge: Routine.Edge,
-        condition: Routine.Condition,
+        phase: Event.Phase,
         *,
         no_delay: bool = False,
         use_dest: bool = False,
     ):
+        condition = (
+            edge.precondition
+            if phase == Event.PHASE_PRECONDITION
+            else edge.postcondition
+        )
         condition = super()._Runtime__process_condition(
             edge, condition, use_dest=use_dest
         )

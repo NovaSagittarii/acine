@@ -5,9 +5,10 @@ syntax = "proto3";
 package ac;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "routine.proto";
 
-service Runtime {
+service RuntimeService {
   // Fetches where the current node is
   rpc GetCurrentNode(google.protobuf.Empty) returns (Routine.Node) {}
 
@@ -16,9 +17,85 @@ service Runtime {
   rpc GoToNode(Routine.Node) returns (google.protobuf.Empty) {}
 }
 
+// Currently loaded initially to debug any background-runtime failures.
+//
+// Intended TODO: Runtime data is sent over to the client batched initially,
+// then single update packets.
+message RuntimeData {
+  string id = 1;  // id of routine this is linked with (validation purposes)
+  reserved 2;     // frames?
+  reserved 3;     // states?
+  reserved 4;     // nodes?
+  reserved 5;     // map<string, ExecutionInfo> edges = 5;    // edge aux data
+  reserved 6;     // map<string, ExecutionInfo> sgroups = 6;  // sgroup aux data
+  map<string, ExecutionInfo> execution_info = 7;  // all aux data
+}
+
 message RuntimeState {
   Routine.Node current_node = 1;  // current node
   Routine.Node target_node = 2;   // desired target node
   Routine.Edge current_edge = 3;  // current processed edge, null if idling
   repeated Routine.Edge stack_edges = 4;  // return stack
+}
+
+message ExecutionInfo {
+  string id = 1;
+  repeated Event events = 2;
+  Metric stats = 3;
+
+  google.protobuf.Timestamp last_run = 4;
+  // Last completed execution.
+  //
+  // In SchedulingGroup -- Used to determine whether a group needs to
+  // be scheduled as catch-up. Previously, only triggered on refresh time.
+}
+
+message Metric {
+  int32 total = 1;                          // total runs
+  int32 fails = 2;                          // how many fails
+  int32 consecutive_fails = 3;              // how many fails in a row
+  google.protobuf.Timestamp next_time = 4;  // next allow time after backoff
+}
+
+message Event {
+  google.protobuf.Timestamp timestamp = 1;  // when this happened
+  Phase phase = 2;                          // which phase
+  string archive_id = 3;                    // id of frame for this event
+  Result result = 4;                        // result of (precondition/action)
+  string comment = 5;                       // additional info
+  oneof type {
+    LogEvent log = 6;
+    ErrorEvent error = 7;
+  }
+
+  enum Phase {
+    PHASE_UNSPECIFIED = 0;
+    PHASE_PRECONDITION = 1;
+    PHASE_POSTCONDITION = 2;
+    PHASE_ACTION = 3;
+  }
+
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_PASS = 1;     // condition pass OR action completion
+    RESULT_TIMEOUT = 2;  // condition timeout
+    RESULT_FAIL = 3;     // condition fail
+    RESULT_ERROR = 4;    // something broke
+  }
+}
+
+message LogEvent {
+  google.protobuf.Timestamp start = 1;
+  double duration = 2;  // how long it took to finish
+}
+
+message ErrorEvent {
+  ErrorType type = 1;
+}
+
+enum ErrorType {
+  ERROR_TYPE_UNSPECIFIED = 0;
+  ERROR_TYPE_PRECONDITION = 1;   // rare (scheduled but then it failed)
+  ERROR_TYPE_POSTCONDITION = 2;  // postcondition never happened
+  ERROR_TYPE_NOT_ATOMIC = 3;     // error during subroutine
 }

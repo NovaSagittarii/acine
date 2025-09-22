@@ -3,5 +3,6 @@
 **/*.pb
 **/*.zip
 **/time
+**/archive.7z
 
 !.gitignore

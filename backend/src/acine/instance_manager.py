@@ -8,8 +8,15 @@ import os
 from uuid import uuid4
 
 from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import RuntimeData
 
-from acine.persist import fs_read_sync, fs_write_sync, mkdir, resolve
+from acine.persist import (
+    PrefixedFilesystem,
+    fs_read_sync,
+    fs_write_sync,
+    mkdir,
+    resolve,
+)
 
 testenv_file = os.path.realpath(
     os.path.join(
@@ -46,6 +53,8 @@ def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
     )
     mkdir([id])
     fs_write_sync([id, "rt.pb"], r.SerializeToString())
+    fs_write_sync([id, "archive.7z"], RuntimeData(id=routine.id).SerializeToString())
+    mkdir([id, "tmp"])
     mkdir([id, "img"])
     return r
 
@@ -86,6 +95,25 @@ def get_routine(routine: Routine) -> Routine:
     """gets full routine metadata from filesystem"""
     assert validate_routine(routine)
     return Routine.FromString(fs_read_sync([routine.id, "rt.pb"]))
+
+
+def get_runtime_data(routine: Routine) -> RuntimeData:
+    """gets routine runtime_data from filesystem"""
+    assert validate_routine(routine)
+    if os.path.exists(resolve(routine.id, "runtimedata.pb")):
+        return RuntimeData.FromString(fs_read_sync([routine.id, "runtimedata.pb"]))
+    else:
+        return RuntimeData(id=routine.id)
+
+
+def write_runtime_data(routine: Routine, data: RuntimeData) -> None:
+    assert validate_routine(routine)
+    fs_write_sync([routine.id, "runtimedata.pb"], data.SerializeToString())
+
+
+def get_pfs(routine: Routine) -> PrefixedFilesystem:
+    assert validate_routine(routine)
+    return PrefixedFilesystem([routine.id])
 
 
 if __name__ == "__main__":

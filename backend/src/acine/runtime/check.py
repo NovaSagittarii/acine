@@ -3,17 +3,19 @@ functions for checking conditions
 """
 
 from enum import Enum
-from typing import Any, Callable, Coroutine
+from typing import Awaitable, Callable
 
 import cv2
 from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import Event
 
 from .check_image import check_image
 from .util import now, sleep
 
-GetImageCallableType = Callable[[], Coroutine[Any, Any, cv2.typing.MatLike]]
+GetImageCallableType = Callable[[], Awaitable[cv2.typing.MatLike]]
 
 
+# TODO: replace with runtime.Event.Result
 class CheckResult(Enum):
     ERROR = 0
     PASS = 1
@@ -26,7 +28,7 @@ async def check(
     ref_img: cv2.typing.MatLike | None = None,
     *,
     no_delay: bool = False,
-) -> CheckResult:
+) -> tuple[Event.Result, cv2.typing.MatLike | None]:
     """
     Implements runtime for Routine.Condition checks
 
@@ -48,20 +50,17 @@ async def check(
         ct += 1
 
         next = now() + condition.interval
+        img = await get_img()
 
-        if check_once(condition, await get_img(), ref_img):
+        if check_once(condition, img, ref_img):
             print("[== OK ==]", ct)
-            return CheckResult.PASS
+            return (Event.RESULT_PASS, img)
 
         # allow at least one check before timeout
         if now() > timeout or next > timeout:
             print(f"[X] check timeout after {timeout_duration / 1000:.1f}s")
-            return CheckResult.TIMEOUT
+            return (Event.RESULT_TIMEOUT, img)
 
-        # schedule for next check
-        # if next > timeout:
-        #     await sleep(max(0, timeout - now())) # probably no need to wait
-        #     return CheckResult.TIMEOUT
         await sleep(next - now())
 
 
