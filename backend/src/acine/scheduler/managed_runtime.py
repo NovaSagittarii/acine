@@ -35,7 +35,7 @@ class RoutineInstance:
         self.ih.close()
 
     def __add_runtime(self, duration: float):
-        print(f"exec time {duration/60:.2f}m")
+        print(f"exec time {duration / 60:.2f}m")
         assert duration >= 0, "expect nonnegative duration"
         path = [self.routine.id, "time"]
         t = 0.0
@@ -101,7 +101,7 @@ class ManagedRuntime:
                     for edge in sg.linked:
                         scheduler.schedule(edge, t)
                     sg.on_scheduled()
-            try: 
+            try:
                 while await scheduler.next():
                     pass
             except BaseException as e:

@@ -3,7 +3,9 @@ Image persistence / save to disk.
 """
 
 import os
+from pathlib import Path
 
+import py7zr
 from aiofiles import open as aopen
 
 dirname = os.path.dirname(__file__)
@@ -14,7 +16,7 @@ def resolve(*paths: str) -> str:
     """
     Resolves file path relative to data folder
     """
-    return os.path.join(path, *paths)
+    return os.path.realpath(os.path.join(path, *paths))
 
 
 async def fs_write(filename: list[str], contents: bytes):
@@ -78,11 +80,27 @@ class PrefixedFilesystem:
     async def write(self, filename: list[str], contents: bytes):
         return await fs_write([*self.prefix, *filename], contents)
 
-    def write_sync(self, filename: list[str], contents: bytes):
-        return fs_write_sync([*self.prefix, *filename], contents)
-
-    def read_sync(self, filename: list[str]) -> bytes:
-        return fs_read_sync([*self.prefix, *filename])
+    async def write_archive(self, filename: list[str], contents: bytes):
+        mkdir([*self.prefix, "tmp"])
+        os.chdir(self.resolve("tmp"))
+        path = Path(*filename)
+        with open(path, "wb") as file:
+            file.write(contents)
+        with py7zr.SevenZipFile(Path(self.resolve("archive.7z")), "a") as archive:
+            archive.write(path)
+        os.remove(path)
 
     async def read(self, filename: list[str]) -> bytes:
         return await fs_read([*self.prefix, *filename])
+
+    async def read_archive(self, filename: list[str]) -> bytes:
+        mkdir([*self.prefix, "tmp"])
+        os.chdir(self.resolve("tmp"))
+        path = Path(*filename)
+        with py7zr.SevenZipFile(Path(self.resolve("archive.7z")), "r") as archive:
+            try:
+                archive.extract(path=self.resolve("tmp"), targets=filename)
+                with open(path, "rb") as file:
+                    return file.read()
+            finally:
+                os.remove(path)

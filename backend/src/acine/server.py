@@ -20,14 +20,13 @@ from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import RuntimeState
 from autobahn.asyncio.websocket import WebSocketServerProtocol
 
+from acine import instance_manager
+from acine.capture import GameCapture
+from acine.input_handler import InputHandler
+from acine.persist import PrefixedFilesystem
+from acine.runtime.check_image import check_similarity
+from acine.runtime.runtime import IController, Runtime, cv2
 from acine.runtime.util import get_frame
-
-from . import instance_manager
-from .capture import GameCapture
-from .input_handler import InputHandler
-from .persist import PrefixedFilesystem
-from .runtime.check_image import check_similarity
-from .runtime.runtime import IController, Runtime, cv2
 
 # from .classifier import predict
 

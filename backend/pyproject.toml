@@ -15,6 +15,7 @@ dependencies = [
     "autobahn[asyncio]==24.4.2",
     "inquirer>=3.4.1",
     "networkx==3.4.2",
+    "py7zr>=1.0.0",
     "pytest==8.3.5",
     "pytest-asyncio>=0.26.0",
     "pytest-benchmark>=5.1.0",
