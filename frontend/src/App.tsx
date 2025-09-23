@@ -25,12 +25,14 @@ import RoutineViewer from './components/RoutineViewer';
 import RoutineConfiguration from './components/RoutineConfiguration';
 import { getEdgeDisplay } from './components/Edge.util';
 import { increment } from './activity';
+import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer';
 
 enum ActiveTab {
   CONFIG,
   STATE,
   NODE,
-  GRAPH,
+  GRAPH, // runtime (navigation graph)
+  DGRAPH, // scheduler (dependency graph)
   length, // keep this at the end to know how many tabs there are
 }
 
@@ -187,7 +189,7 @@ function RoutineEditor() {
                 onClick={() => setActiveTab(index)}
                 className={`hover:bg-amber-100 ${activeTab.valueOf() === index && 'font-bold'}`}
               >
-                {['config', 'states', 'nodes', 'graph'][index]}
+                {['config', 'states', 'nodes', 'graph', 'deps'][index]}
               </div>
             ))}
             <div className='hover:bg-amber-100' onClick={saveRoutine}>
@@ -236,6 +238,7 @@ function RoutineEditor() {
           {activeTab === ActiveTab.STATE && <StateList />}
           {activeTab === ActiveTab.NODE && <NodeList />}
           {activeTab === ActiveTab.GRAPH && <RoutineViewer />}
+          {activeTab === ActiveTab.DGRAPH && <DependencyGraphViewer />}
         </div>
       </div>
       <ConditionImageEditor />
