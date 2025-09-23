@@ -237,15 +237,22 @@ export default function DependencyGraphViewer() {
   }, [frames, routine, dnodes]);
   const edges = useCallback(() => {
     return Object.values(routine.nodes).flatMap((n) =>
-      n.edges.map(
+      n.edges.flatMap(
         (e) =>
-          ({
-            source: n.id.toString(),
-            target: e.to.toString(),
-            id: e.id,
-            // label: getEdgeDisplay(e, true).substring(0, 16),
-            size: 3,
-          }) as GraphEdge,
+          [
+            {
+              source: n.id.toString(),
+              target: e.to.toString(),
+              id: e.id,
+              // label: getEdgeDisplay(e, true).substring(0, 16),
+              // size: 3,
+            },
+            ...e.dependencies.map((d) => ({
+              source: n.id,
+              target: d.requires,
+              id: d.id,
+            })),
+          ] as GraphEdge[],
       ),
     );
   }, [routine]);
