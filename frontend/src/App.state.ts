@@ -12,6 +12,7 @@ import {
   $matchOverlay,
   $backendConfiguration,
   $loadedRoutine,
+  $logs,
 } from './state';
 import { frameToObjectURL } from './client/encoder';
 
@@ -130,6 +131,11 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
     case 'sampleCurrent': {
       const cb = wsListeners[packet.id];
       if (cb) cb(packet);
+      break;
+    }
+    case 'runtime': {
+      console.log('runtime logs', packet.type.runtime);
+      $logs.set(packet.type.runtime);
       break;
     }
     default:

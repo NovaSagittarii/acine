@@ -440,7 +440,7 @@ class Runtime:
 
     async def __log(
         self,
-        action: Routine.Edge,
+        edge: Routine.Edge,
         img: cv2.typing.MatLike,
         phase: Event.Phase = Event.PHASE_UNSPECIFIED,
         result: Event.Result = Event.RESULT_UNSPECIFIED,
@@ -455,9 +455,7 @@ class Runtime:
 
         event = Event(archive_id=id, phase=phase, result=result, comment=comment)
         event.timestamp.GetCurrentTime()
-
-        einfo = self.data.execution_info.get_or_create(action.id)
-        einfo.events.append(event)
+        self.data.execution_info.get_or_create(edge.id).events.append(event)
 
     async def __run_action(self, action: Routine.Edge):
         """

@@ -8,7 +8,7 @@ import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import Condition from './Condition';
 import useForceUpdate from './useForceUpdate';
 import { useStore } from '@nanostores/react';
-import { $routine } from '@/state';
+import { $logs, $routine } from '@/state';
 import Select from './ui/Select';
 import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
@@ -33,6 +33,7 @@ interface EdgeProps extends Selectable {
 export default function Edge({ edge, selected = false }: EdgeProps) {
   const routine = useStore($routine);
   const forceUpdate = useForceUpdate();
+  const logs = useStore($logs);
 
   return (
     <div
@@ -133,6 +134,9 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
       <Collapse label={`schedules (${edge.schedules.length})`}>
         schedules
         <ScheduleList schedules={edge.schedules} />
+      </Collapse>
+      <Collapse label={`logs (${logs.executionInfo[edge.id]?.events.length})`}>
+        {JSON.stringify(logs.executionInfo[edge.id]?.events, null, 2)}
       </Collapse>
     </div>
   );

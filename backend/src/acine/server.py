@@ -250,8 +250,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     async def on_get_routine(self, packet: Packet):
-        s = await self.fs.read(["rt.pb"])
-        response = Packet(get_routine=Routine.FromString(s))
+        routine = Routine.FromString(await self.fs.read(["rt.pb"]))
+        response = Packet(get_routine=routine)
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
     def on_change_curr(self, node: Routine.Node):
@@ -403,6 +403,9 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
         packet = Packet(get_routine=routine)
         self.sendMessage(packet.SerializeToString(), isBinary=True)
+
+        data = instance_manager.get_runtime_data(routine)
+        self.sendMessage(Packet(runtime=data).SerializeToString(), isBinary=True)
 
     async def on_get_configuration(self, packet: Packet):
         packet.get_configuration.Clear()

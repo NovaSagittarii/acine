@@ -15,6 +15,7 @@ import {
   Routine_Condition_Image,
   Routine_Node,
   Routine_State,
+  RuntimeData,
   RuntimeState,
 } from 'acine-proto-dist';
 import InputSource from './client/input_source';
@@ -26,6 +27,11 @@ export const $backendConfiguration = atom(BackendConfiguration.create());
  * TODO: some day merge with $routine ? (use useContext or propagate routine dependency ?)
  */
 export const $loadedRoutine = atom<Routine | null>(null);
+
+/**
+ * runtime logs associated with the routine (used for debugging background runs)
+ */
+export const $logs = atom<RuntimeData>(RuntimeData.create());
 
 /**
  * routine being edited (most code references this and assumes it exists)
