@@ -7,6 +7,7 @@ import Edge from '../Edge';
 import { MultiDirectedGraph } from 'graphology';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 
+import { makeSet, find, union, UnionFindElement } from '@manubb/union-find';
 import {
   P5CanvasInstance,
   ReactP5Wrapper,
@@ -44,6 +45,35 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
   type NodeAttributes = GraphNode;
   type EdgeAttributes = GraphEdge;
   const graph = new MultiDirectedGraph<NodeAttributes, EdgeAttributes, {}>();
+  function updatePositions(iterations: number = 50) {
+    const positions = forceAtlas2(graph, {
+      iterations,
+      settings: { ...forceAtlas2.inferSettings(graph), adjustSizes: true },
+    });
+    Object.entries(positions).forEach(([k, { x, y }]) =>
+      graph.updateNode(
+        k,
+        (n: Partial<NodeAttributes>) =>
+          ({ ...n, x: x * 10, y: y * 10 }) as NodeAttributes,
+      ),
+    );
+    graph.mapNodes((_, { x = 0, y = 0, adj = [] }) => {
+      adj.forEach((e) => {
+        const { x: x2, y: y2 } = graph.getNodeAttributes(e.to);
+        graph.updateEdgeWithKey(
+          e.id,
+          e.u,
+          e.to,
+          (attr) =>
+            ({
+              ...attr,
+              x: (x + x2) / 2,
+              y: (y + y2) / 2,
+            }) as GraphEdge,
+        );
+      });
+    });
+  }
 
   let font: object;
   p5.preload = () => {
@@ -84,33 +114,7 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
         );
       });
     }
-    const positions = forceAtlas2(graph, {
-      iterations: 50,
-      settings: { ...forceAtlas2.inferSettings(graph), adjustSizes: true },
-    });
-    Object.entries(positions).forEach(([k, { x, y }]) =>
-      graph.updateNode(
-        k,
-        (n: Partial<NodeAttributes>) =>
-          ({ ...n, x: x * 10, y: y * 10 }) as NodeAttributes,
-      ),
-    );
-    graph.mapNodes((_, { x = 0, y = 0, adj = [] }) => {
-      adj.forEach((e) => {
-        const { x: x2, y: y2 } = graph.getNodeAttributes(e.to);
-        graph.updateEdgeWithKey(
-          e.id,
-          e.u,
-          e.to,
-          (attr) =>
-            ({
-              ...attr,
-              x: (x + x2) / 2,
-              y: (y + y2) / 2,
-            }) as GraphEdge,
-        );
-      });
-    });
+    updatePositions(50);
   };
 
   let zoom = 1;
@@ -236,25 +240,44 @@ export default function DependencyGraphViewer() {
     });
   }, [frames, routine, dnodes]);
   const edges = useCallback(() => {
-    return Object.values(routine.nodes).flatMap((n) =>
-      n.edges.flatMap(
-        (e) =>
-          [
-            {
-              source: n.id.toString(),
-              target: e.to.toString(),
-              id: e.id,
-              // label: getEdgeDisplay(e, true).substring(0, 16),
-              // size: 3,
-            },
-            ...e.dependencies.map((d) => ({
-              source: n.id,
-              target: d.requires,
-              id: d.id,
-            })),
-          ] as GraphEdge[],
-      ),
+    const a: Record<string, UnionFindElement> = Object.fromEntries(
+      Object.keys(routine.nodes).map((k) => [k, makeSet()]),
     );
+    const k0 = Object.keys(a)[0];
+    const extraEdges: GraphEdge[] = [];
+    for (const k in a) {
+      if (find(a[k]) !== find(a[k0])) {
+        union(a[k], a[k0]);
+        extraEdges.push({
+          source: k,
+          target: k0,
+          id: k + '-' + k0,
+        });
+      }
+    }
+
+    return [
+      ...extraEdges,
+      Object.values(routine.nodes).flatMap((n) =>
+        n.edges.flatMap(
+          (e) =>
+            [
+              {
+                source: n.id.toString(),
+                target: e.to.toString(),
+                id: e.id,
+                // label: getEdgeDisplay(e, true).substring(0, 16),
+                // size: 3,
+              },
+              ...e.dependencies.map((d) => ({
+                source: n.id,
+                target: d.requires,
+                id: d.id,
+              })),
+            ] as GraphEdge[],
+        ),
+      ),
+    ];
   }, [routine]);
 
   return (

@@ -15,6 +15,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@manubb/union-find": "^1.0.2",
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.10.2",
     "@nanostores/persistent": "^0.10.2",
