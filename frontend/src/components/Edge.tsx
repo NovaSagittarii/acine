@@ -18,13 +18,7 @@ import Node from './Node';
 import { choices } from './Node.util';
 import { getEdgePrefix } from './Edge.util';
 import { runtimeQueueEdge } from '../App.state';
-
-const TRIGGER_TYPES_DISPLAY = [
-  ['unset', TriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED],
-  ['standard', TriggerType.EDGE_TRIGGER_TYPE_STANDARD],
-  ['interrupt', TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT],
-  ['scheduled', TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED],
-] as [string, TriggerType][];
+import SelectTab from './ui/SelectTab';
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
@@ -98,18 +92,28 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
           </div>
         )}
       </Collapse>
-      <div className='flex flex-row'>
-        <Select
-          value={edge.trigger}
-          values={TRIGGER_TYPES_DISPLAY}
-          onChange={(t) => {
-            edge.trigger = t;
-            forceUpdate();
-          }}
-        />
-        <div className='opacity-50'> : type </div>
-      </div>
-
+      <SelectTab
+        label={<div className='opacity-50'>type</div>}
+        value={edge.trigger}
+        values={[
+          {
+            label: 'navigation',
+            value: TriggerType.EDGE_TRIGGER_TYPE_STANDARD,
+          },
+          {
+            label: 'interrupt',
+            value: TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT,
+          },
+          {
+            label: 'scheduled',
+            value: TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED,
+          },
+        ]}
+        onChange={(t) => {
+          edge.trigger = t;
+          forceUpdate();
+        }}
+      />
       <ActionEditor edge={edge} />
       <Collapse
         label={
@@ -127,14 +131,18 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
         postcondition
         <Condition condition={edge.postcondition!} allowAuto />
       </Collapse>
-      <Collapse label={`dependency (${edge.dependencies.length})`}>
-        dependency
-        <DependencyList dependencies={edge.dependencies} />
-      </Collapse>
-      <Collapse label={`schedules (${edge.schedules.length})`}>
-        schedules
-        <ScheduleList schedules={edge.schedules} />
-      </Collapse>
+      {edge.trigger === TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED && (
+        <>
+          <Collapse label={`dependency (${edge.dependencies.length})`}>
+            dependency
+            <DependencyList dependencies={edge.dependencies} />
+          </Collapse>
+          <Collapse label={`schedules (${edge.schedules.length})`}>
+            schedules
+            <ScheduleList schedules={edge.schedules} />
+          </Collapse>
+        </>
+      )}
       <Collapse label={`logs (${logs.executionInfo[edge.id]?.events.length})`}>
         {JSON.stringify(logs.executionInfo[edge.id]?.events, null, 2)}
       </Collapse>

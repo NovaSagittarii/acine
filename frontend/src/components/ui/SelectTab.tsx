@@ -1,0 +1,65 @@
+import React, { useEffect, useState } from 'react';
+
+interface SelectTabEntry<T> {
+  value: T;
+  label: string;
+  children?: React.ReactNode;
+}
+
+interface SelectTabProps<T> {
+  className?: string;
+
+  /** current displayed value (this is a controlled element) */
+  value: T;
+
+  /** list of options; an option consists of [display, value] */
+  values: SelectTabEntry<T>[];
+
+  /** calls onChange with the [value] of the selected item  */
+  onChange: (newValue: T) => void;
+
+  /** display to left of tab options */
+  label?: React.ReactNode;
+}
+
+/**
+ * Horizontal tabs select UI element.
+ */
+export default function SelectTab<T>({
+  label,
+  value,
+  values,
+  onChange,
+}: SelectTabProps<T>) {
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  useEffect(() => {
+    if (value === undefined) setSelectedIndex(-1);
+    else if (!values[selectedIndex] || values[selectedIndex].value !== value) {
+      setSelectedIndex(values.findIndex((x) => x.value === value));
+    }
+  }, [value, values, selectedIndex, setSelectedIndex]);
+
+  return (
+    <div className='flex flex-col'>
+      <div className='flex items-center gap-1'>
+        {label}
+        {values.map(({ value, label }, index) => (
+          <div
+            onClick={() => {
+              onChange(value);
+              setSelectedIndex(index);
+            }}
+            className={
+              `p-1 rounded-sm transition-colors ` +
+              `${index === selectedIndex ? 'bg-amber-100' : 'bg-slate-50'} ` +
+              `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent'}`
+            }
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+      {selectedIndex >= 0 && values[selectedIndex].children}
+    </div>
+  );
+}
