@@ -13,7 +13,6 @@ import {
   ReactP5Wrapper,
   SketchProps,
 } from '@p5-wrapper/react';
-import { getEdgeDisplay } from '../Edge.util';
 
 type MySketchProps = SketchProps & {
   nodes: Record<string, GraphNode>;
@@ -46,6 +45,14 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
   type EdgeAttributes = GraphEdge;
   const graph = new MultiDirectedGraph<NodeAttributes, EdgeAttributes, {}>();
   function updatePositions(iterations: number = 50) {
+    const K = 3;
+    graph.forEachNode((k) => {
+      graph.updateNode(
+        k,
+        ({ x = 0, y = 0, ...n }: Partial<NodeAttributes>) =>
+          ({ ...n, x: x / K, y: y / K }) as NodeAttributes,
+      );
+    });
     const positions = forceAtlas2(graph, {
       iterations,
       settings: { ...forceAtlas2.inferSettings(graph), adjustSizes: true },
@@ -54,7 +61,7 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
       graph.updateNode(
         k,
         (n: Partial<NodeAttributes>) =>
-          ({ ...n, x: x * 10, y: y * 10 }) as NodeAttributes,
+          ({ ...n, x: x * K, y: y * K }) as NodeAttributes,
       ),
     );
     graph.mapNodes((_, { x = 0, y = 0, adj = [] }) => {
@@ -82,7 +89,8 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
     );
   };
   p5.setup = () => {
-    p5.createCanvas(600, 400, p5.WEBGL);
+    p5.createCanvas(400, 400, p5.WEBGL);
+    p5.ortho();
     p5.textFont(font);
     p5.textSize(12);
     p5.textAlign(p5.CENTER, p5.CENTER);
@@ -114,7 +122,7 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
         );
       });
     }
-    updatePositions(50);
+    for (let i = 0; i < 10; ++i) updatePositions(50);
   };
 
   let zoom = 1;
@@ -138,43 +146,40 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
     x2 -= x;
     y2 -= y;
     const l = Math.hypot(x2, y2);
+    if (!l) return;
     p5.push();
     p5.rotate(Math.atan2(y2, x2));
     p5.line(r / 2, 0, l - r / 2, 0);
     const p2 = l - r / 2;
     p5.triangle(p2, 0, p2 - 5, 5, p2 - 5, -5);
-
     p5.pop();
   }
 
-  function drawNode({
-    x = 0,
-    y = 0,
-    label,
-    adj = [],
-  }: Partial<NodeAttributes>) {
+  function drawNode({ x = 0, y = 0, adj = [] }: Partial<NodeAttributes>) {
+    const D = 10;
     p5.push();
     p5.rotateX(Math.PI / 2);
     p5.fill(255);
     p5.stroke(0);
     p5.translate(x, y);
-    p5.ellipse(0, 0, 50, 50);
+    p5.ellipse(0, 0, D, D);
 
     p5.push();
     // p5.translate(0, 0, -3);
     adj.forEach((e) => {
       const { x: x2, y: y2 } = graph.getNodeAttributes(e.to);
-      drawEdge(0, 0, x2 - x, y2 - y);
+      if (!x2 || !y2) return;
+      drawEdge(0, 0, x2 - x, y2 - y, D);
 
       if (
         e.trigger !== Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_SCHEDULED
       ) {
         return;
       }
-      const dz = 50;
+      const dz = 100;
       p5.translate((x2 - x) / 2, (y2 - y) / 2, dz);
       p5.fill(255);
-      p5.ellipse(0, 0, 50, 50);
+      p5.ellipse(0, 0, D, D);
       p5.push();
       p5.rotateX(Math.PI / 2);
       for (let i = 1; i <= 10; i += 2) {
@@ -184,24 +189,25 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
       e.dependencies.forEach((d) => {
         const { x, y } = graph.getEdgeAttributes(e.id);
         const { x: x2, y: y2 } = graph.getEdgeAttributes(d.requires);
-        if (x && x2 && y && y2) drawEdge(0, 0, x2 - x, y2 - y);
+        if (x && x2 && y && y2) drawEdge(0, 0, x2 - x, y2 - y, D);
       });
 
       p5.fill(0);
       p5.rotateX(-Math.PI / 2);
       p5.rotateY(-rotationY);
-      p5.text(getEdgeDisplay(e), 0, -6);
+      // p5.text(getEdgeDisplay(e), 0, -6);
     });
     p5.pop();
 
     p5.rotateX(-Math.PI / 2);
     p5.rotateY(-rotationY);
     p5.fill(0);
-    p5.text(label, 0, -6);
+    // p5.text(label, 0, -6);
     p5.pop();
   }
 
   p5.draw = () => {
+    // updatePositions(5);
     p5.background(0, 0, 0, 0);
     p5.normalMaterial();
     p5.noStroke();
@@ -215,6 +221,9 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
   };
 }
 
+/**
+ * laggy way to render it (has broken edges bug too)
+ */
 export default function DependencyGraphViewer() {
   const routine = useStore($routine);
   const frames = useStore($frames);
@@ -245,6 +254,11 @@ export default function DependencyGraphViewer() {
     );
     const k0 = Object.keys(a)[0];
     const extraEdges: GraphEdge[] = [];
+    Object.values(routine.nodes).forEach((n) => {
+      n.edges.forEach((e) => {
+        union(a[n.id], a[e.to]);
+      });
+    });
     for (const k in a) {
       if (find(a[k]) !== find(a[k0])) {
         union(a[k], a[k0]);
