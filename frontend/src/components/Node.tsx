@@ -98,7 +98,6 @@ function Node({
           }
           open={expand}
         >
-          defaultCondition
           <Condition condition={node.defaultCondition} />
         </Collapse>
       )}

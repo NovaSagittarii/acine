@@ -138,7 +138,6 @@ export default function Edge({
           'precondition ' + (edge.precondition?.condition?.$case || 'true')
         }
       >
-        precondition
         <Condition condition={edge.precondition!} allowAuto />
       </Collapse>
       <Collapse
@@ -146,7 +145,6 @@ export default function Edge({
           'postcondition ' + (edge.postcondition?.condition?.$case || 'true')
         }
       >
-        postcondition
         <Condition condition={edge.postcondition!} allowAuto />
       </Collapse>
       {edge.trigger === TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED && (
@@ -155,11 +153,9 @@ export default function Edge({
             label={`dependency (${edge.dependencies.length})`}
             open={showDependencies}
           >
-            dependency
             <DependencyList dependencies={edge.dependencies} />
           </Collapse>
           <Collapse label={`schedules (${edge.schedules.length})`}>
-            schedules
             <ScheduleList schedules={edge.schedules} />
           </Collapse>
         </>
