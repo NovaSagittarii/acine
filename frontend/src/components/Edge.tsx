@@ -22,9 +22,25 @@ import SelectTab from './ui/SelectTab';
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
+
+  /**
+   * suppress type select from appearing. use in cases where it doesn't
+   * make sense to change the type
+   */
+  fixedType?: boolean;
+
+  /**
+   * don't collapse dependencies
+   */
+  showDependencies?: boolean;
 }
 
-export default function Edge({ edge, selected = false }: EdgeProps) {
+export default function Edge({
+  edge,
+  selected = false,
+  fixedType = false,
+  showDependencies = false,
+}: EdgeProps) {
   const routine = useStore($routine);
   const forceUpdate = useForceUpdate();
   const logs = useStore($logs);
@@ -92,28 +108,30 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
           </div>
         )}
       </Collapse>
-      <SelectTab
-        label={<div className='opacity-50'>type</div>}
-        value={edge.trigger}
-        values={[
-          {
-            label: 'navigation',
-            value: TriggerType.EDGE_TRIGGER_TYPE_STANDARD,
-          },
-          {
-            label: 'interrupt',
-            value: TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT,
-          },
-          {
-            label: 'scheduled',
-            value: TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED,
-          },
-        ]}
-        onChange={(t) => {
-          edge.trigger = t;
-          forceUpdate();
-        }}
-      />
+      {!fixedType && (
+        <SelectTab
+          label={<div className='opacity-50'>type</div>}
+          value={edge.trigger}
+          values={[
+            {
+              label: 'navigation',
+              value: TriggerType.EDGE_TRIGGER_TYPE_STANDARD,
+            },
+            {
+              label: 'interrupt',
+              value: TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT,
+            },
+            {
+              label: 'scheduled',
+              value: TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED,
+            },
+          ]}
+          onChange={(t) => {
+            edge.trigger = t;
+            forceUpdate();
+          }}
+        />
+      )}
       <ActionEditor edge={edge} />
       <Collapse
         label={
@@ -133,7 +151,10 @@ export default function Edge({ edge, selected = false }: EdgeProps) {
       </Collapse>
       {edge.trigger === TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED && (
         <>
-          <Collapse label={`dependency (${edge.dependencies.length})`}>
+          <Collapse
+            label={`dependency (${edge.dependencies.length})`}
+            open={showDependencies}
+          >
             dependency
             <DependencyList dependencies={edge.dependencies} />
           </Collapse>

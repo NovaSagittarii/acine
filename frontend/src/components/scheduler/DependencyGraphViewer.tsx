@@ -114,7 +114,7 @@ export default function RoutineViewer() {
             scrollbarWidth: 'thin',
           }}
         >
-          <Edge edge={selectedNode} />
+          <Edge edge={selectedNode} fixedType showDependencies />
         </div>
       )}
     </div>
