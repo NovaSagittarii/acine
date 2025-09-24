@@ -26,6 +26,7 @@ import RoutineConfiguration from './components/RoutineConfiguration';
 import { getEdgeDisplay } from './components/Edge.util';
 import { increment } from './activity';
 import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer';
+import ScheduleViewer from './components/scheduler/ScheduleViewer';
 
 enum ActiveTab {
   CONFIG,
@@ -33,6 +34,7 @@ enum ActiveTab {
   NODE,
   GRAPH, // runtime (navigation graph)
   DGRAPH, // scheduler (dependency graph)
+  CRON, // scheduling groups
   length, // keep this at the end to know how many tabs there are
 }
 
@@ -189,7 +191,7 @@ function RoutineEditor() {
                 onClick={() => setActiveTab(index)}
                 className={`hover:bg-amber-100 ${activeTab.valueOf() === index && 'font-bold'}`}
               >
-                {['config', 'states', 'nodes', 'graph', 'deps'][index]}
+                {['config', 'states', 'nodes', 'graph', 'deps', 'cron'][index]}
               </div>
             ))}
             <div className='hover:bg-amber-100' onClick={saveRoutine}>
@@ -239,6 +241,9 @@ function RoutineEditor() {
           {activeTab === ActiveTab.NODE && <NodeList />}
           {activeTab === ActiveTab.GRAPH && <RoutineViewer />}
           {activeTab === ActiveTab.DGRAPH && <DependencyGraphViewer />}
+          {activeTab === ActiveTab.CRON && (
+            <ScheduleViewer routine={$routine.get()} />
+          )}
         </div>
       </div>
       <ConditionImageEditor />
