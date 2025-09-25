@@ -5,7 +5,6 @@ import {
 } from 'acine-proto-dist';
 
 import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
-import Select from '@/ui/Select';
 import { Selectable } from './types';
 import EdgeList from './EdgeList';
 import useForceUpdate from './useForceUpdate';
@@ -13,6 +12,7 @@ import { useEffect } from 'react';
 import Condition from './Condition';
 import Collapse from './ui/Collapse';
 import { runtimeGoto, runtimeSetCurr } from '../App.state';
+import SelectTab from './ui/SelectTab';
 
 interface NodeProps extends Selectable {
   node: Routine_Node;
@@ -23,12 +23,6 @@ interface NodeProps extends Selectable {
   /** initally open? */
   expand?: boolean;
 }
-
-const NODE_TYPES_DISPLAY = [
-  ['standard', NodeType.NODE_TYPE_STANDARD],
-  ['init', NodeType.NODE_TYPE_INIT],
-  ['return', NodeType.NODE_TYPE_RETURN],
-] as [string, NodeType][];
 
 function Node({
   node,
@@ -78,18 +72,31 @@ function Node({
         callback={forceUpdate}
         className='text-sm'
       />
-      <div className='flex flex-row'>
-        <Select
-          className='p-0 appearance-none'
-          value={node.type}
-          values={NODE_TYPES_DISPLAY}
-          onChange={(t) => {
-            node.type = t;
-            forceUpdate();
-          }}
-        />
-        <div className='opacity-50'> : type </div>
-      </div>
+      <SelectTab
+        label={'type'}
+        value={node.type}
+        values={[
+          {
+            label: 'standard',
+            value: NodeType.NODE_TYPE_STANDARD,
+            tooltip: 'Standard node with no special properties.',
+          },
+          {
+            label: 'init',
+            value: NodeType.NODE_TYPE_INIT,
+            tooltip: 'Start of a subroutine.',
+          },
+          {
+            label: 'return',
+            value: NodeType.NODE_TYPE_RETURN,
+            tooltip: 'End of a subroutine (successful return).',
+          },
+        ]}
+        onChange={(v) => {
+          node.type = v;
+          forceUpdate();
+        }}
+      />
       {node.defaultCondition && (
         <Collapse
           label={
