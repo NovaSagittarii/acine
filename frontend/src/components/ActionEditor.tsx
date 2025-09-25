@@ -1,17 +1,10 @@
-import { InputReplay, Point, Routine_Edge } from 'acine-proto-dist';
+import { InputReplay, Routine_Edge } from 'acine-proto-dist';
 import useForceUpdate from './useForceUpdate';
-import Select from './ui/Select';
 import ReplayEditor from './ReplayEditor';
 import SubroutineEditor from './SubroutineEditor';
 import NumberInput from './ui/NumberInput';
 import { displayRepeatRange } from './ActionEditor.util';
-
-const ACTION_TYPES_DISPLAY = [
-  ['𝜀', null],
-  ['click', 'click'],
-  ['replay', 'replay'],
-  ['subroutine', 'subroutine'],
-] as [string, Exclude<Routine_Edge['action'], undefined>['$case']][];
+import SelectTab from './ui/SelectTab';
 
 interface ActionEditorProps {
   edge: Routine_Edge;
@@ -41,49 +34,53 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
           {'runs ' + displayRepeatRange(edge.repeatLower, edge.repeatUpper)}
         </div>
       </div>
-      <div>
-        <Select
-          value={edge.action?.$case || null}
-          values={ACTION_TYPES_DISPLAY}
-          onChange={(v) => {
-            if (v === null) {
+      <SelectTab
+        label={<div className='opacity-50'>action</div>}
+        value={edge.action?.$case || null}
+        values={[
+          { label: '𝜀', value: null, tooltip: 'Do nothing.' },
+          {
+            label: 'replay',
+            value: 'replay',
+            tooltip: 'Record a sequence of actions, then replay.',
+          },
+          {
+            label: 'subroutine',
+            value: 'subroutine',
+            tooltip: 'Execute subroutine.',
+          },
+        ]}
+        onChange={(v) => {
+          switch (v) {
+            case null: {
               edge.action = undefined;
-            } else {
-              switch (v) {
-                case 'click':
-                  edge.action = {
-                    $case: v,
-                    click: Point.create(),
-                  };
-                  break;
-                case 'replay':
-                  edge.action = {
-                    $case: v,
-                    replay: InputReplay.create(),
-                  };
-                  break;
-                case 'subroutine':
-                  edge.action = {
-                    $case: v,
-                    subroutine: '',
-                  };
-                  break;
-              }
+              break;
             }
-            forceUpdate();
-          }}
-        />
-        <span className='opacity-50'>: action_type</span>
-      </div>
-      {edge.action?.$case === 'subroutine' && (
-        <SubroutineEditor action={edge.action} />
-      )}
-      {edge.action?.$case === 'replay' && (
-        <ReplayEditor
-          replay={edge.action.replay}
-          condition={edge.precondition}
-        />
-      )}
+            case 'replay':
+              edge.action = {
+                $case: v,
+                replay: InputReplay.create(),
+              };
+              break;
+            case 'subroutine':
+              edge.action = {
+                $case: v,
+                subroutine: '',
+              };
+              break;
+          }
+        }}
+      >
+        {edge.action?.$case === 'subroutine' && (
+          <SubroutineEditor action={edge.action} />
+        )}
+        {edge.action?.$case === 'replay' && (
+          <ReplayEditor
+            replay={edge.action.replay}
+            condition={edge.precondition}
+          />
+        )}
+      </SelectTab>
     </div>
   );
 }
