@@ -47,7 +47,7 @@ export default function Edge({
 
   return (
     <div
-      className={`pl-1 border-t-4 rounded-sm border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
+      className={`px-1 border-t-4 rounded-sm border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
     >
       <div className='flex gap-4 w-full items-center'>
         <div>

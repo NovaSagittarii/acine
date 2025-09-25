@@ -23,6 +23,8 @@ interface SelectTabProps<T> {
 
   /** display to left of tab options */
   label?: React.ReactNode;
+
+  children?: React.ReactNode;
 }
 
 /**
@@ -32,6 +34,7 @@ export default function SelectTab<T>({
   label,
   value,
   values,
+  children,
   onChange,
 }: SelectTabProps<T>) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -43,27 +46,30 @@ export default function SelectTab<T>({
   }, [value, values, selectedIndex, setSelectedIndex]);
 
   return (
-    <div className='flex flex-col'>
-      <div className='flex items-center gap-1'>
-        {label}
-        {values.map(({ value, label, tooltip }, index) => (
-          <div
-            onClick={() => {
-              onChange(value);
-              setSelectedIndex(index);
-            }}
-            className={
-              `p-1 rounded-sm transition-colors ` +
-              `${index === selectedIndex ? 'bg-amber-100' : 'bg-slate-50'} ` +
-              `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent'}`
-            }
-            title={tooltip}
-          >
-            {label}
-          </div>
-        ))}
+    <div className='flex flex-col p-1 border border-transparent hover:border-black/50 rounded-sm'>
+      <div className='flex flex-col'>
+        <div className='flex items-center gap-1'>
+          {label}
+          {values.map(({ value, label, tooltip }, index) => (
+            <div
+              onClick={() => {
+                onChange(value);
+                setSelectedIndex(index);
+              }}
+              className={
+                `p-1 rounded-sm transition-colors ` +
+                `${index === selectedIndex ? 'bg-amber-100' : 'bg-slate-50'} ` +
+                `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent'}`
+              }
+              title={tooltip}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+        {selectedIndex >= 0 && values[selectedIndex].children}
       </div>
-      {selectedIndex >= 0 && values[selectedIndex].children}
+      {children}
     </div>
   );
 }
