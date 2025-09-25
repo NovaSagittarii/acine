@@ -4,6 +4,9 @@ interface SelectTabEntry<T> {
   value: T;
   label: string;
   children?: React.ReactNode;
+
+  /** tooltip that appears on hover. TODO: use a library. */
+  tooltip?: string;
 }
 
 interface SelectTabProps<T> {
@@ -43,7 +46,7 @@ export default function SelectTab<T>({
     <div className='flex flex-col'>
       <div className='flex items-center gap-1'>
         {label}
-        {values.map(({ value, label }, index) => (
+        {values.map(({ value, label, tooltip }, index) => (
           <div
             onClick={() => {
               onChange(value);
@@ -54,6 +57,7 @@ export default function SelectTab<T>({
               `${index === selectedIndex ? 'bg-amber-100' : 'bg-slate-50'} ` +
               `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent'}`
             }
+            title={tooltip}
           >
             {label}
           </div>

@@ -116,14 +116,20 @@ export default function Edge({
             {
               label: 'navigation',
               value: TriggerType.EDGE_TRIGGER_TYPE_STANDARD,
+              tooltip:
+                'Action for navigating UI. These should always work, ' +
+                'and should be infinitely repeatable.',
             },
             {
               label: 'interrupt',
               value: TriggerType.EDGE_TRIGGER_TYPE_INTERRUPT,
+              tooltip: 'Action to respond to expected async event.',
             },
             {
               label: 'scheduled',
               value: TriggerType.EDGE_TRIGGER_TYPE_SCHEDULED,
+              tooltip:
+                'Action must be explicitly scheduled (via cron or dependency).',
             },
           ]}
           onChange={(t) => {
