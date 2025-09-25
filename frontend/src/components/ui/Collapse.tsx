@@ -38,7 +38,10 @@ export default function Collapse({
       }}
       ref={setRef}
     >
-      <div className='group' onClick={() => setOpen((o) => !o)}>
+      <div
+        className='group flex items-center'
+        onClick={() => setOpen((o) => !o)}
+      >
         {label}
         <div
           className={

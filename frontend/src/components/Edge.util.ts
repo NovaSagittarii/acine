@@ -17,6 +17,20 @@ function displayCase(s: string | undefined, postcondition = 0): string {
   return s[0];
 }
 
+export function getEdgeIcon(edge: Routine_Edge): string {
+  switch (edge.trigger) {
+    case Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_UNSPECIFIED:
+      return '?';
+    case Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_STANDARD:
+      return 'N';
+    case Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_INTERRUPT:
+      return 'I';
+    case Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_SCHEDULED:
+      return 'S';
+  }
+  return '!';
+}
+
 export function getEdgePrefix(edge: Routine_Edge): string {
   let prefix = '';
   // p for "pass", don't use t for "true" cuz "target"

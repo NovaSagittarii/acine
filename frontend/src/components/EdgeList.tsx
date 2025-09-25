@@ -6,7 +6,7 @@ import Edge from '@/components/Edge';
 import { $routine, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
-import { choices, getEdgeDisplay } from './Edge.util';
+import { choices, getEdgeDisplay, getEdgeIcon } from './Edge.util';
 
 interface EdgeListProps {
   node: Routine_Node;
@@ -35,7 +35,14 @@ export default function EdgeList({
           <Collapse
             className='relative'
             key={index}
-            label={`* ${routine.nodes[edge.to]?.name ?? '<unset>'} ${getEdgeDisplay(edge).substring(0, 50)}`}
+            label={
+              <div className='flex items-center gap-2'>
+                <div className='font-mono text-blue-500 flex items-center justify-center text-xs w-4 h-4 border border-black/50 rounded-full'>
+                  {getEdgeIcon(edge)}
+                </div>
+                {`${routine.nodes[edge.to]?.name ?? '<unset>'} ${getEdgeDisplay(edge).substring(0, 50)}`}
+              </div>
+            }
             open={expand}
           >
             <Edge edge={edge} />
