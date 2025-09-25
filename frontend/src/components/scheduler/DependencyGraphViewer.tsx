@@ -59,6 +59,7 @@ export default function RoutineViewer() {
             target: d.requires,
             id: d.id,
             label: `x${d.count}`,
+            size: 3,
           }) as GraphEdge,
       ),
     );
