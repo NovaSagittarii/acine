@@ -40,8 +40,7 @@ export default function SelectTab<T>({
 }: SelectTabProps<T>) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   useEffect(() => {
-    if (value === undefined) setSelectedIndex(-1);
-    else if (!values[selectedIndex] || values[selectedIndex].value !== value) {
+    if (!values[selectedIndex] || values[selectedIndex].value !== value) {
       setSelectedIndex(values.findIndex((x) => x.value === value));
     }
   }, [value, values, selectedIndex, setSelectedIndex]);
