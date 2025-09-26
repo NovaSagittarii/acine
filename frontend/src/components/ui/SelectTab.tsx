@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Section from './Section';
 
 interface SelectTabEntry<T> {
   value: T;
@@ -46,7 +47,7 @@ export default function SelectTab<T>({
   }, [value, values, selectedIndex, setSelectedIndex]);
 
   return (
-    <div className='flex flex-col p-1 border border-transparent hover:border-black/50 rounded-sm'>
+    <Section.h1 className='flex-col'>
       <div className='flex flex-col'>
         <div className='flex items-center gap-1'>
           {label}
@@ -59,7 +60,7 @@ export default function SelectTab<T>({
               className={
                 `p-1 rounded-sm transition-colors ` +
                 `${index === selectedIndex ? 'bg-amber-100' : 'bg-slate-50'} ` +
-                `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent'}`
+                `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent hover:border-amber-500/50'}`
               }
               title={tooltip}
             >
@@ -70,6 +71,6 @@ export default function SelectTab<T>({
         {selectedIndex >= 0 && values[selectedIndex].children}
       </div>
       {children}
-    </div>
+    </Section.h1>
   );
 }

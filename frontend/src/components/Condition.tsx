@@ -11,6 +11,7 @@ import { SelectAuto } from './ui/Select';
 import Button from './ui/Button';
 import { $condition } from './ConditionImageEditor.state';
 import { pluralize } from '../client/util';
+import Section from './ui/Section';
 
 interface ConditionNumberInputProps<K extends keyof Routine_Condition> {
   /* property */
@@ -47,9 +48,9 @@ export default function Condition({
   const forceUpdate = useForceUpdate();
 
   return (
-    <div className='pl-1 border border-black'>
+    <Section.h1 className='flex flex-col'>
       {condition.condition?.$case === 'image' && (
-        <div className='float-right flex gap-2 items-center font-sans'>
+        <div className='absolute right-0 flex gap-2 items-center font-sans'>
           <div
             className={
               'text-sm ' +
@@ -126,6 +127,6 @@ export default function Condition({
         />
         <span className='opacity-50'>: condition</span>
       </div>
-    </div>
+    </Section.h1>
   );
 }

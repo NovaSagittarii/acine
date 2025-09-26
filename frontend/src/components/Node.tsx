@@ -41,7 +41,7 @@ function Node({
 
   return (
     <div
-      className={`pl-1 border ${selected ? 'border-amber-800 bg-amber-50' : 'border-black'}`}
+      className={`flex flex-col gap-1 px-1 border ${selected ? 'border-amber-800 bg-amber-50' : 'border-black'}`}
     >
       <div className='w-full flex flex-row justify-between items-center'>
         <EditableRoutineProperty
@@ -110,6 +110,7 @@ function Node({
       )}
 
       <div>
+        <div className='text-lg font-semibold mt-4'>Edges</div>
         <EdgeList node={node} tools={tools} expand={expand} />
       </div>
     </div>

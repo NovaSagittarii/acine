@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Section from './Section';
 
 interface CollapseProps {
   className?: string;
@@ -27,7 +28,7 @@ export default function Collapse({
         // `${isOpen ? 'max-h-[1000px]' : 'max-h-10'} ` +
         `${!isOpen && 'group bg-amber-900/5 hover:bg-amber-500/5'} ` +
         `${!isOpen && 'text-black/50 hover:text-black'} ` +
-        `border border-transparent ${!isOpen && 'hover:border-amber-500'} ` +
+        `rounded-sm border border-transparent ${!isOpen && 'hover:border-amber-500'} ` +
         className
       }
       onClick={() => {
@@ -38,24 +39,26 @@ export default function Collapse({
       }}
       ref={setRef}
     >
-      <div
-        className='group flex items-center'
-        onClick={() => setOpen((o) => !o)}
-      >
-        {label}
+      <Section.h3 className={`flex-col ${!isOpen && 'border-0'}`}>
         <div
-          className={
-            'absolute right-0 top-0 w-6 h-6 mx-4 flex justify-center items-center ' +
-            'font-mono font-bold select-none z-10 transition-all ' +
-            'group-hover:text-amber-700 hover:text-amber-700 ' +
-            'border-2 border-transparent group-hover:border-black/20 hover:border-black/20 group-hover:bg-white hover:bg-white ' +
-            `${isOpen && 'rotate-90'} `
-          }
+          className='group flex items-center'
+          onClick={() => setOpen((o) => !o)}
         >
-          {'>'}
+          {label}
+          <div
+            className={
+              'absolute right-0 top-0 w-8 h-8 mx-4 flex justify-center items-center ' +
+              'font-mono font-bold select-none z-10 transition-all ' +
+              'group-hover:text-amber-700 hover:text-amber-700 ' +
+              'border-2 border-transparent group-hover:border-black/20 hover:border-black/20 group-hover:bg-white hover:bg-white ' +
+              `${isOpen && 'rotate-90'} `
+            }
+          >
+            {'>'}
+          </div>
         </div>
-      </div>
-      {isOpen && children}
+        {isOpen && children}
+      </Section.h3>
     </div>
   );
 }

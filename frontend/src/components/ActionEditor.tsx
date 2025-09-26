@@ -5,6 +5,7 @@ import SubroutineEditor from './SubroutineEditor';
 import NumberInput from './ui/NumberInput';
 import { displayRepeatRange } from './ActionEditor.util';
 import SelectTab from './ui/SelectTab';
+import Section from './ui/Section';
 
 interface ActionEditorProps {
   edge: Routine_Edge;
@@ -14,8 +15,8 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
   const forceUpdate = useForceUpdate();
 
   return (
-    <div className=''>
-      <div className='flex gap-4'>
+    <Section.h2 className='flex flex-col gap-1'>
+      <Section.h1 className='flex-row gap-4'>
         <NumberInput
           className='min-w-8 w-fit'
           object={edge}
@@ -33,7 +34,7 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
         <div className='px-2 flex items-center gap-2 bg-green-100'>
           {'runs ' + displayRepeatRange(edge.repeatLower, edge.repeatUpper)}
         </div>
-      </div>
+      </Section.h1>
       <SelectTab
         label={<div className='opacity-50'>action</div>}
         value={edge.action?.$case || null}
@@ -81,6 +82,6 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
           />
         )}
       </SelectTab>
-    </div>
+    </Section.h2>
   );
 }
