@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import Section from './Section';
+import { Tooltip } from 'react-tooltip';
 
 interface SelectTabEntry<T> {
   value: T;
@@ -44,6 +45,7 @@ export default function SelectTab<T>({
       setSelectedIndex(values.findIndex((x) => x.value === value));
     }
   }, [value, values, selectedIndex, setSelectedIndex]);
+  const id = useId().replace(/\W+/g, '');
 
   return (
     <Section.h1 className='flex-col'>
@@ -52,6 +54,7 @@ export default function SelectTab<T>({
           {label}
           {values.map(({ value, label, tooltip }, index) => (
             <div
+              key={index}
               onClick={() => {
                 onChange(value);
                 setSelectedIndex(index);
@@ -61,9 +64,19 @@ export default function SelectTab<T>({
                 `${index === selectedIndex ? 'bg-amber-100' : 'bg-black/5'} ` +
                 `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent hover:border-amber-500/50'}`
               }
-              title={tooltip}
+              id={`${id}-${index}`}
             >
               {label}
+              {tooltip && (
+                <Tooltip
+                  key={`tooltip-${id}-${index}`}
+                  anchorSelect={`#${id}-${index}`}
+                  place='top-start'
+                  positionStrategy='fixed'
+                >
+                  {tooltip}
+                </Tooltip>
+              )}
             </div>
           ))}
         </div>
