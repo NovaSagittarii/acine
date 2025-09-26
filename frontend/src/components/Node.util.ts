@@ -16,6 +16,7 @@ export class NodePreset {
       defaultCondition: Routine_Condition.create({
         delay: 50,
         interval: 100,
+        timeout: 0,
       }),
     });
   }
