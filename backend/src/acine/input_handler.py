@@ -61,7 +61,7 @@ win32user.SetProcessDPIAware()
 def get_title_bar_height(win_title):
     """
     Source:
-    https://github.com/Dragonlinae/Autacha/blob/b63978e4e7744c35f07959a98affc79a7a5cfbae/helpers/game_capture.py#L40-L50
+    https://github.com/NiiightmareXD/windows-capture/issues/72#issuecomment-2278956444
     """
     hwnd = win32gui.FindWindow(None, win_title)
     _, _, cx2, cy2 = win32gui.GetClientRect(hwnd)
