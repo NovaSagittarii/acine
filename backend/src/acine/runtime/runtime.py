@@ -21,6 +21,8 @@ from acine_proto_dist.runtime_pb2 import Event, RuntimeData
 from uuid_utils import uuid7
 
 from acine.instance_manager import get_pfs
+from acine.runtime.check import CheckResult, check, check_once
+from acine.runtime.check_image import check_similarity
 from acine.runtime.exceptions import (
     ExecutionError,
     NavigationError,
@@ -30,11 +32,8 @@ from acine.runtime.exceptions import (
     SubroutineExecutionError,
     SubroutinePostconditionTimeoutError,
 )
+from acine.runtime.util import get_frame, now, sleep
 from acine.scheduler.typing import ExecResult
-
-from .check import CheckResult, check, check_once
-from .check_image import check_similarity
-from .util import get_frame, now, sleep
 
 
 class IController:
@@ -106,8 +105,12 @@ class Runtime:
         Routine runtime state
         """
 
-        curr: Routine.Node = None
-        call_stack: list[Runtime.Call] = [None]
+        curr: Routine.Node
+        call_stack: list[Runtime.Call]
+
+        def __init__(self):
+            self.curr = None
+            self.call_stack = [Runtime.Call()]
 
     context: Context = Context()
 
@@ -137,7 +140,7 @@ class Runtime:
         self.edges = {}
         self.G = nx.DiGraph()
         self.context.curr = routine.nodes["start"] if routine.nodes else None
-        self.context.call_stack = [None]
+        self.context.call_stack = [Runtime.Call()]
         self.target_node: Routine.Node | None = None
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
@@ -504,7 +507,7 @@ class Runtime:
         # update state after postcondition check passes
         self.set_curr(self.nodes[action.to])
 
-    async def __exec_action(self, action: Routine.Edge) -> bool:
+    async def __exec_action(self, action: Routine.Edge):
         """
         Executes the action, utility function useful for handling repeats.
 

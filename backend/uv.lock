@@ -29,6 +29,9 @@ dependencies = [
     { name = "pytest-watcher" },
     { name = "pywin32" },
     { name = "scikit-image" },
+    { name = "types-aiofiles" },
+    { name = "types-networkx" },
+    { name = "types-protobuf" },
     { name = "types-pywin32" },
     { name = "uuid-utils" },
     { name = "windows-capture" },
@@ -54,6 +57,9 @@ requires-dist = [
     { name = "pytest-watcher", specifier = ">=0.4.3" },
     { name = "pywin32", specifier = ">=311" },
     { name = "scikit-image", specifier = "==0.25.2" },
+    { name = "types-aiofiles", specifier = ">=24.1.0.20250822" },
+    { name = "types-networkx", specifier = ">=3.5.0.20250918" },
+    { name = "types-protobuf", specifier = ">=6.32.1.20250918" },
     { name = "types-pywin32", specifier = ">=311.0.0.20250822" },
     { name = "uuid-utils", specifier = ">=0.11.0" },
     { name = "windows-capture", specifier = "~=1.5.0" },
@@ -1189,6 +1195,36 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/10/21/f1d3305ae1d3ca05aa71d509f02f4db11c1357001f7e31f9713e610efc5b/txaio-25.6.1.tar.gz", hash = "sha256:d8c03dca823515c9bca920df33504923ae54f2dabf476cc5a9ed5cc1691ed687", size = 58709 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/52/56/aff5af8caa210321d0c206eb19897a4e0b29b4e24c4e24226325950efe0b/txaio-25.6.1-py2.py3-none-any.whl", hash = "sha256:f461b917a14d46077fb1668d0bea4998695d93c9c569cd05fd7f193abdd22414", size = 31250 },
+]
+
+[[package]]
+name = "types-aiofiles"
+version = "24.1.0.20250822"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/48/c64471adac9206cc844afb33ed311ac5a65d2f59df3d861e0f2d0cad7414/types_aiofiles-24.1.0.20250822.tar.gz", hash = "sha256:9ab90d8e0c307fe97a7cf09338301e3f01a163e39f3b529ace82466355c84a7b", size = 14484 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bc/8e/5e6d2215e1d8f7c2a94c6e9d0059ae8109ce0f5681956d11bb0a228cef04/types_aiofiles-24.1.0.20250822-py3-none-any.whl", hash = "sha256:0ec8f8909e1a85a5a79aed0573af7901f53120dd2a29771dd0b3ef48e12328b0", size = 14322 },
+]
+
+[[package]]
+name = "types-networkx"
+version = "3.5.0.20250918"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ce/88/f758a96247da3f2a1de3a655b725471828762ae28c9591a4b27c518c8866/types_networkx-3.5.0.20250918.tar.gz", hash = "sha256:346cc347fc7670b5db29af9d4ba5fa077507ad7100ed7a02707f74fbf317be3c", size = 71507 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0f/82/e48e099e41d8b5515dc2ee98f6336bc2c330e1d63018c3c6582271f1c3f1/types_networkx-3.5.0.20250918-py3-none-any.whl", hash = "sha256:c7d3951e747333a65c0fb3011461e2de990c7ed5b49f4292ffc0d3febc8e2536", size = 159162 },
+]
+
+[[package]]
+name = "types-protobuf"
+version = "6.32.1.20250918"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/5a/bd06c2dbb77ebd4ea764473c9c4c014c7ba94432192cb965a274f8544b9d/types_protobuf-6.32.1.20250918.tar.gz", hash = "sha256:44ce0ae98475909ca72379946ab61a4435eec2a41090821e713c17e8faf5b88f", size = 63780 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/5a/8d93d4f4af5dc3dd62aa4f020deae746b34b1d94fb5bee1f776c6b7e9d6c/types_protobuf-6.32.1.20250918-py3-none-any.whl", hash = "sha256:22ba6133d142d11cc34d3788ad6dead2732368ebb0406eaa7790ea6ae46c8d0b", size = 77885 },
 ]
 
 [[package]]

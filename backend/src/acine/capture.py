@@ -9,7 +9,11 @@ from asyncio import Lock, Semaphore, sleep
 
 import cv2
 from numpy import ndarray
-from windows_capture import Frame, InternalCaptureControl, WindowsCapture
+from windows_capture import (  # type: ignore
+    Frame,
+    InternalCaptureControl,
+    WindowsCapture,
+)
 
 
 class GameCapture:  # thanks joshua

@@ -4,7 +4,7 @@ if __name__ == "__main__":
 
     import asyncio
 
-    from autobahn.asyncio.websocket import WebSocketServerFactory
+    from autobahn.asyncio.websocket import WebSocketServerFactory  # type: ignore
 
     factory = WebSocketServerFactory()
     factory.protocol = AcineServerProtocol

@@ -86,7 +86,7 @@ budget issue tracker
 - [ ] time travel capture (pick frame from a recording)
 - [ ] uvloop
 - [ ] server methods tests
-- [ ] mypy type checks
+- [x] mypy type checks
 
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.

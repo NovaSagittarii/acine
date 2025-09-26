@@ -18,7 +18,7 @@ from acine_proto_dist.packet_pb2 import (
 from acine_proto_dist.position_pb2 import Point
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import RuntimeState
-from autobahn.asyncio.websocket import WebSocketServerProtocol
+from autobahn.asyncio.websocket import WebSocketServerProtocol  # type: ignore
 
 from acine import instance_manager
 from acine.capture import GameCapture

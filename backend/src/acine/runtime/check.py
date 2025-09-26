@@ -9,8 +9,8 @@ import cv2
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import Event
 
-from .check_image import check_image
-from .util import now, sleep
+from acine.runtime.check_image import check_image
+from acine.runtime.util import now, sleep
 
 GetImageCallableType = Callable[[], Awaitable[cv2.typing.MatLike]]
 

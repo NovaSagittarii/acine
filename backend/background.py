@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import time
 
-import inquirer
+import inquirer  # type: ignore
 
 from acine.instance_manager import get_routines
 from acine.power.win32 import sleep
@@ -35,8 +35,8 @@ async def main():
             message="What to run?",
             choices=[
                 f"0 run {mrt.next_groups(mrt.next_time())} once",
-                f"1 run specific once",
-                f"2 run background",
+                "1 run specific once",
+                "2 run background",
             ],
             carousel=True,
         )
