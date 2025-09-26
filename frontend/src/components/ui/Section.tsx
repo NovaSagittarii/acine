@@ -14,7 +14,7 @@ export function Section({
 }: SectionProps) {
   return (
     <div
-      className={`flex p-1 border rounded-sm ${hoverClassName} ${className}`}
+      className={`flex gap-1 p-1 border rounded-sm ${hoverClassName} ${className}`}
     >
       {children}
     </div>

@@ -7,11 +7,10 @@ import {
 import { Selectable } from './types';
 import NumberInput from './ui/NumberInput';
 import useForceUpdate from './useForceUpdate';
-import { SelectAuto } from './ui/Select';
 import Button from './ui/Button';
 import { $condition } from './ConditionImageEditor.state';
 import { pluralize } from '../client/util';
-import Section from './ui/Section';
+import SelectTab from './ui/SelectTab';
 
 interface ConditionNumberInputProps<K extends keyof Routine_Condition> {
   /* property */
@@ -48,85 +47,95 @@ export default function Condition({
   const forceUpdate = useForceUpdate();
 
   return (
-    <Section.h1 className='flex flex-col'>
-      {condition.condition?.$case === 'image' && (
-        <div className='absolute right-0 flex gap-2 items-center font-sans'>
-          <div
-            className={
-              'text-sm ' +
-              `${!condition.condition.image.regions.length && 'text-red-500 font-bold'}`
-            }
-          >
-            {pluralize(condition.condition.image.regions.length, 'region')}
-          </div>
-          <Button
-            className='px-1.5! py-0! w-fit bg-black text-white scale-100!'
-            onClick={() => {
-              // duplicate conditional to make typescript happy
-              if (condition.condition?.$case === 'image') {
-                $condition.set(condition.condition?.image);
-              }
-            }}
-          >
-            edit
-          </Button>
-        </div>
-      )}
-
-      {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
-      <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' />
-      {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' /> */}
-      {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' /> */}
-      <div>
-        <SelectAuto
-          value={condition.condition?.$case || 'true'}
-          values={
-            [
-              'true',
-              'image',
-              'text',
-              allowAuto ? 'auto' : null,
-              allowAuto ? 'target' : null,
-            ].filter((x) => x) as (
-              | Exclude<Routine_Condition['condition'], undefined>['$case']
-              | 'true'
-            )[]
+    <div className='flex flex-col'>
+      <SelectTab
+        label={<div className='opacity-50'>condition</div>}
+        value={condition.condition?.$case}
+        values={[
+          { label: 'true', value: undefined, tooltip: 'Always can take.' },
+          {
+            label: 'image',
+            value: 'image',
+            tooltip: 'Look for image in frame (cv2.matchTemplate).',
+          },
+          {
+            label: 'text',
+            value: 'text',
+            tooltip: 'Look for text in frame (OCR).',
+          },
+          {
+            label: '*auto', // * marks "require allowAuto"
+            value: 'auto',
+            tooltip: 'Legacy: Inherit source/target default condition.',
+          },
+          {
+            label: '*target', // * marks "require allowAuto"
+            value: 'target',
+            tooltip: "Inherit target node's default condition",
+          },
+        ].filter(({ label }) => allowAuto || !label.includes('*'))}
+        onChange={(s) => {
+          switch (s) {
+            case undefined:
+              condition.condition = undefined;
+              break;
+            case 'image':
+              condition.condition = {
+                $case: 'image',
+                image: Routine_Condition_Image.create(),
+              };
+              break;
+            case 'text':
+              condition.condition = {
+                $case: 'text',
+                text: Routine_Condition_Text.create(),
+              };
+              break;
+            case 'auto':
+              condition.condition = {
+                $case: 'auto',
+                auto: true,
+              };
+              break;
+            case 'target':
+              condition.condition = {
+                $case: 'target',
+                target: true,
+              };
+              break;
           }
-          onChange={(s) => {
-            switch (s) {
-              case 'true':
-                condition.condition = undefined;
-                break;
-              case 'image':
-                condition.condition = {
-                  $case: 'image',
-                  image: Routine_Condition_Image.create(),
-                };
-                break;
-              case 'text':
-                condition.condition = {
-                  $case: 'text',
-                  text: Routine_Condition_Text.create(),
-                };
-                break;
-              case 'auto':
-                condition.condition = {
-                  $case: 'auto',
-                  auto: true,
-                };
-                break;
-              case 'target':
-                condition.condition = {
-                  $case: 'target',
-                  target: true,
-                };
-                break;
-            }
-            forceUpdate();
-          }}
-        />
-        <span className='opacity-50'>: condition</span>
-      </div>
-    </Section.h1>
+          forceUpdate();
+        }}
+      >
+        {/* maybe a bit messy, but keeps it compact (only the properties matter) */}
+        <ConditionNumberInput c={condition} cb={forceUpdate} p='timeout' />
+        {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='delay' /> */}
+        {/* <ConditionNumberInput c={condition} cb={forceUpdate} p='interval' /> */}
+
+        {condition.condition?.$case === 'image' && (
+          <div className='flex gap-2 items-center font-sans'>
+            <div
+              className={
+                'text-sm ' +
+                `${!condition.condition.image.regions.length && 'text-red-500 font-bold'}`
+              }
+            >
+              {pluralize(condition.condition.image.regions.length, 'region')}
+            </div>
+            <Button
+              className='px-1.5! py-0! w-fit bg-black text-white scale-100!'
+              onClick={() => {
+                // duplicate conditional to make typescript happy
+                if (condition.condition?.$case === 'image') {
+                  $condition.set(condition.condition?.image);
+                }
+              }}
+            >
+              edit
+            </Button>
+          </div>
+        )}
+      </SelectTab>
+    </div>
   );
 }
