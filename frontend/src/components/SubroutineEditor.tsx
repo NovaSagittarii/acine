@@ -30,6 +30,7 @@ export default function SubroutineEditor({ action }: SubroutineEditorProps) {
   }, [routine.nodes]);
   return (
     <Select
+      className={`${!action.subroutine && 'text-red-500 font-bold *:text-black'}`}
       value={action.subroutine}
       values={options.map((n) => [n.name, n.id] as [string, string])}
       onChange={(id) => (action.subroutine = id)}
