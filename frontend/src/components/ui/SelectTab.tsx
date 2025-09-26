@@ -59,7 +59,7 @@ export default function SelectTab<T>({
               }}
               className={
                 `p-1 rounded-sm transition-colors ` +
-                `${index === selectedIndex ? 'bg-amber-100' : 'bg-slate-50'} ` +
+                `${index === selectedIndex ? 'bg-amber-100' : 'bg-black/5'} ` +
                 `border ${index === selectedIndex ? 'border-amber-500' : 'border-transparent hover:border-amber-500/50'}`
               }
               title={tooltip}
