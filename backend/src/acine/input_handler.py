@@ -46,6 +46,7 @@ With further testing, turns out this is a result of changing to v2.
 
 import ctypes
 from os import system
+from typing import Optional
 
 import win32gui
 from ahk import AHK
@@ -58,7 +59,7 @@ win32user.SetProcessDPIAware()
 # GetClientRect will give values with Scaling applied (can be used to do offset)
 
 
-def get_title_bar_height(win_title):
+def get_title_bar_height(win_title: str) -> int:
     """
     Source:
     https://github.com/NiiightmareXD/windows-capture/issues/72#issuecomment-2278956444
@@ -73,7 +74,7 @@ def get_title_bar_height(win_title):
 
 
 class InputHandler:
-    def __init__(self, title: str, cmd: str = None):
+    def __init__(self, title: Optional[str], cmd: str = ""):
         self.can_close = False
         self.y_offset = 0
         if title:
@@ -91,15 +92,16 @@ class InputHandler:
             self.y_offset = get_title_bar_height(self.win.get_title())
         else:
             # target desktop
-            self.title = None
-            self.win = ahk
+            raise NotImplementedError("Targeting desktop is not implemented.")
+            # self.title = None
+            # self.win = ahk # ahk is not compatible with self.win
 
         self.is_mouse_down = False
         self.x = 0
         self.y = 0
         print(f"y-offset(titlebar)={self.y_offset}")
 
-    def mouse_move(self, x: int, y: int):
+    def mouse_move(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
         # shadow offset in windows (... ? no longer seems to be a thing)
@@ -111,20 +113,20 @@ class InputHandler:
 
         self.update_mouse()
 
-    def mouse_down(self):
+    def mouse_down(self) -> None:
         self.is_mouse_down = True
         self.update_mouse()
 
-    def mouse_up(self):
+    def mouse_up(self) -> None:
         self.is_mouse_down = False
         self.update_mouse()
 
-    def update_mouse(self):
+    def update_mouse(self) -> None:
         flags = "D NA" if self.is_mouse_down else "U NA"
         self.win.click(x=self.x, y=self.y, button="L", options=flags)
         # print(self.x, self.y, flags)
 
-    def close(self):
+    def close(self) -> None:
         if self.can_close:
             self.win.close()
 

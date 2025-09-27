@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import heapq
+from typing import List
 
 from acine_proto_dist.routine_pb2 import Routine
 
@@ -18,7 +19,7 @@ class DependencyInfo:
         self.__ok_count: int = 0
         self.ok = False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ok={self.__ok_count} E={self.target.id} d={self.dependency}"
 
     def satisfy_once(self) -> bool:
@@ -35,12 +36,12 @@ class EdgeInfo:
     def __init__(self, edge: Routine.Edge):
         self.edge = edge
 
-        self.dependents: list[DependencyInfo] = []
+        self.dependents: List[DependencyInfo] = []
         """references to DependencyInfo that depend on this edge happening"""
 
-        self.__dependents: dict[int, SchedulerEntry] = {}
+        self.__dependents: dict[str, SchedulerEntry] = {}
 
-        self.dependencies: list[DependencyInfo] = []
+        self.dependencies: List[DependencyInfo] = []
         """DependencyInfo this edge depends on"""
 
         self.fail_count: int = 0
@@ -48,7 +49,7 @@ class EdgeInfo:
         self.pending: int = 0
         """how many instances yet to complete?"""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"pending={self.pending} fail={self.fail_count} "
             + f"triggers[{len(self.dependents)}]={self.dependents}"
@@ -58,12 +59,18 @@ class EdgeInfo:
         self.fail_count += 1
         return self.fail_count
 
-    def broadcast(self, result: ExecResult) -> list[SchedulerEntry]:
+    def broadcast(self, result: ExecResult.ValueType) -> List[SchedulerEntry]:
         """Notifies all subscriptions, returns completions"""
-        completions: list[SchedulerEntry] = []
+        completions: List[SchedulerEntry] = []
         for v in tuple(self.__dependents.values()):
             # on_completed will call unsubscribe (modifying self.__dependents)
-            print("BROADCAST", self.edge.description, result, v.edge.description, v.requirement)
+            print(
+                "BROADCAST",
+                self.edge.description,
+                result,
+                v.edge.description,
+                v.requirement,
+            )
             print("ACTUAL", v.requirement)
             if result >= v.requirement:
                 if v.on_completed(self):
@@ -86,8 +93,8 @@ class SchedulerEntry:
     def __init__(
         self,
         edge: Routine.Edge,
-        deadline: int,
-        requirement: ExecResult = ExecResult.REQUIREMENT_TYPE_COMPLETION,
+        deadline: float,
+        requirement: ExecResult.ValueType = ExecResult.REQUIREMENT_TYPE_COMPLETION,
     ):
         super().__init__()
         self.edge = edge
@@ -101,10 +108,10 @@ class SchedulerEntry:
         self.id = str(SchedulerEntry.counter)
         SchedulerEntry.counter += 1
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"D={self.deadline}+{self.count} {self.edge}".strip()
 
-    def __lt__(self, other: SchedulerEntry):
+    def __lt__(self, other: SchedulerEntry) -> bool:
         if self.deadline == other.deadline:
             return self.count < other.count
         return self.deadline < other.deadline
@@ -120,7 +127,7 @@ class SchedulerEntry:
         print("RESOLVing", e.edge.name, self.deps)
         return not self.deps
 
-    def fail(self):
+    def fail(self) -> None:
         self.count += 1
 
 
@@ -132,7 +139,7 @@ class Scheduler:
     def __init__(self, interface: ISchedulerRoutineInterface):
         self.edges: dict[str, EdgeInfo] = {}
         self.deps: dict[str, DependencyInfo] = {}
-        self.ready_queue: list[SchedulerEntry] = []  # heapq
+        self.ready_queue: List[SchedulerEntry] = []  # heapq
 
         self.interface = interface
         self.routine = interface.routine
@@ -171,10 +178,17 @@ class Scheduler:
         if entry.deps:  # has dependencies to run
             for dep in entry.deps.values():
                 e = self.edges[dep.dependency.requires]
-                print(entry.edge.description, "BLOCKED BY", e.edge.description, dep.dependency.requirement)
+                print(
+                    entry.edge.description,
+                    "BLOCKED BY",
+                    e.edge.description,
+                    dep.dependency.requirement,
+                )
                 e.subscribe(entry)
                 for _ in range(max(0, dep.dependency.count - e.pending)):
-                    self.schedule(e.edge, deadline + 1, requirement=dep.dependency.requirement)
+                    self.schedule(
+                        e.edge, deadline + 1, requirement=dep.dependency.requirement
+                    )
             return True
 
         # Able to run now.
@@ -183,7 +197,7 @@ class Scheduler:
         e.pending -= 1
 
         print("RUN ", edge.id, edge.name, edge.description)
-        result = await self.interface.goto(edge)
+        result: ExecResult.ValueType = await self.interface.goto(edge)
         print("RUN RESULT", result, ">=?", entry.requirement)
 
         candidates = e.broadcast(result)
@@ -195,8 +209,9 @@ class Scheduler:
         progressing = result >= entry.requirement or candidates
         if not progressing:
             e.fail_once()
-
-        return progressing
+            return False
+        else:
+            return True
 
     async def next(self) -> bool:
         """
@@ -217,7 +232,13 @@ class Scheduler:
 
         return True
 
-    def schedule(self, edge: Routine.Edge, deadline: int, update=True, requirement=ExecResult.REQUIREMENT_TYPE_CHECK):
+    def schedule(
+        self,
+        edge: Routine.Edge,
+        deadline: float,
+        update: bool = True,
+        requirement: ExecResult.ValueType = ExecResult.REQUIREMENT_TYPE_CHECK,
+    ) -> None:
         print("SCHEDULE", edge.id, f"d={deadline}")
         self.interface.on_scheduled(edge)
         e = self.edges[edge.id]

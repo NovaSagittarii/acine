@@ -5,6 +5,7 @@ When run as main, creates `test-routine` and prints ids of stored routines.
 """
 
 import os
+from typing import List
 from uuid import uuid4
 
 from acine_proto_dist.routine_pb2 import Routine
@@ -31,7 +32,7 @@ testenv_file = os.path.realpath(
 testenv_cmd = f"start pythonw {testenv_file}"
 
 
-def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
+def create_routine(routine: Routine, id: str = str(uuid4())) -> Routine:
     """creates files for new routine in /data, returns the newly created routine"""
 
     assert (
@@ -59,7 +60,7 @@ def create_routine(routine: Routine, id=str(uuid4())) -> Routine:
     return r
 
 
-def get_routines(full=False) -> list[Routine]:
+def get_routines(full: bool = False) -> List[Routine]:
     """lists all routines available with minimal metadata (name,id,description)"""
 
     out = []

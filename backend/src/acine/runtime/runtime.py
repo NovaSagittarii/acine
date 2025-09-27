@@ -12,6 +12,7 @@ TODO: Possible improvements:
 from __future__ import annotations
 
 import io
+from typing import Callable, List, Optional
 
 import cv2
 import networkx as nx
@@ -22,7 +23,7 @@ from uuid_utils import uuid7
 
 from acine.instance_manager import get_pfs
 from acine.runtime.check import CheckResult, check, check_once
-from acine.runtime.check_image import check_similarity
+from acine.runtime.check_image import ImageBmpType, check_similarity
 from acine.runtime.exceptions import (
     ExecutionError,
     NavigationError,
@@ -41,7 +42,7 @@ class IController:
     interface for i/o, you need to implement get_frame and mouse movements
     """
 
-    async def get_frame(self) -> cv2.typing.MatLike:
+    async def get_frame(self) -> ImageBmpType:
         """
         method for getting the current frame
         """
@@ -94,25 +95,22 @@ class Runtime:
         And just testing a subroutine (queue edges from inside the subroutine).
         """
 
-        def __init__(self, edge: Routine.Edge):
-            self.id = edge.id
-            self.to = edge.to
-            self.edge = edge
-            self.finish_count = 0
+        def __init__(self, edge: Routine.Edge) -> None:
+            self.id: str = edge.id
+            self.to: str = edge.to
+            self.edge: Routine.Edge = edge
+            self.finish_count: int = 0
 
     class Context:
         """
         Routine runtime state
         """
 
-        curr: Routine.Node
-        call_stack: list[Runtime.Call]
+        def __init__(self) -> None:
+            self.curr: Routine.Node = Routine.Node()
+            self.call_stack: List[Runtime.Call] = [Runtime.Call(Routine.Edge())]
 
-        def __init__(self):
-            self.curr = None
-            self.call_stack = [Runtime.Call()]
-
-    context: Context = Context()
+    context: Context
 
     def __init__(
         self,
@@ -120,10 +118,10 @@ class Runtime:
         controller: IController,
         data: RuntimeData = RuntimeData(),
         *,
-        on_change_curr=None,
-        on_change_return=None,
-        on_change_edge=None,
-        enable_logs=False,
+        on_change_curr: Optional[Callable[[Routine.Node], None]] = None,
+        on_change_return: Optional[Callable[[List[Call]], None]] = None,
+        on_change_edge: Optional[Callable[[Optional[Routine.Edge]], None]] = None,
+        enable_logs: bool = False,
     ):
         if routine.nodes:
             assert "start" in routine.nodes, "Node with id=start should exist."
@@ -139,9 +137,10 @@ class Runtime:
         self.nodes = {}  # === routine.nodes
         self.edges = {}
         self.G = nx.DiGraph()
-        self.context.curr = routine.nodes["start"] if routine.nodes else None
-        self.context.call_stack = [Runtime.Call()]
-        self.target_node: Routine.Node | None = None
+        self.context = Runtime.Context()
+        self.context.curr = routine.nodes["start"] if routine.nodes else Routine.Node()
+        self.context.call_stack = [Runtime.Call(Routine.Edge())]
+        self.target_node: Optional[Routine.Node] = None
         self.on_change_curr = on_change_curr
         self.on_change_return = on_change_return
         self.on_change_edge = on_change_edge
@@ -159,13 +158,13 @@ class Runtime:
 
         self.set_curr(self.context.curr)  # pushes update on init
 
-    def set_curr(self, node: Routine.Node):
+    def set_curr(self, node: Routine.Node) -> None:
         assert isinstance(node, Routine.Node), "ACCEPT NODE ONLY"
         self.context.curr = self.nodes[node.id]
         if self.on_change_curr:
             self.on_change_curr(self.context.curr)
 
-    def push(self, edge: Routine.Edge):
+    def push(self, edge: Routine.Edge) -> None:
         assert isinstance(edge, Routine.Edge), "ACCEPT EDGE ONLY"
         self.context.call_stack.append(Runtime.Call(edge))
         if self.on_change_return:
@@ -183,7 +182,7 @@ class Runtime:
     def get_context(self) -> Context:
         return self.context
 
-    def restore_context(self, context: Context):
+    def restore_context(self, context: Context) -> None:
         """
         restore past state; ignores if nodes for the context are missing
         possibly due to loading a new revision of the routine with deleted nodes
@@ -200,7 +199,7 @@ class Runtime:
             if self.on_change_return:
                 self.on_change_return(self.context.call_stack)
 
-    async def goto(self, id: str):
+    async def goto(self, id: str) -> None:
         if id not in self.nodes:
             raise ValueError(id, "target does not exist in loaded routine")
         self.target_node = self.nodes[id]
@@ -304,24 +303,24 @@ class Runtime:
                 ct += 1
 
                 img = await self.controller.get_frame()
-                oklist: list[Routine.Edge] = []
+                okList: List[Routine.Edge] = []
                 for e in u.edges:
                     if self.__precheck_action(e, img):
-                        oklist.append(e)
+                        okList.append(e)
                         if e.trigger == e.EDGE_TRIGGER_TYPE_INTERRUPT:
                             # handle interrupt -- note: current order is first
-                            # in the list will take effect -- maybe later can
+                            # in the List will take effect -- maybe later can
                             # set up priorities
-                            oklist.clear()
+                            okList.clear()
                             take_edge = e
                             break
-                for e in oklist:
+                for e in okList:
                     if e.to == v.id or e.subroutine == v.id:
                         take_edge = e
                         break
                 else:  # did not find a suitable edge
-                    if oklist and ct > 20:  # take whatever ??
-                        take_edge = oklist[0]
+                    if okList and ct > 20:  # take whatever ??
+                        take_edge = okList[0]
                 await sleep(200)
 
             print(
@@ -331,7 +330,7 @@ class Runtime:
             await self.__run_action(take_edge)
         self.target_node = None
 
-    async def queue_edge(self, id: str) -> ExecResult:
+    async def queue_edge(self, id: str) -> ExecResult.ValueType:
         """
         goes to the edge start node and then runs the action on the edge
         """
@@ -374,8 +373,8 @@ class Runtime:
         return ExecResult.REQUIREMENT_TYPE_COMPLETION
 
     def __process_condition(
-        self, edge: Routine.Edge, condition: Routine.Condition, use_dest=True
-    ):
+        self, edge: Routine.Edge, condition: Routine.Condition, use_dest: bool = True
+    ) -> Routine.Condition:
         """
         handles substitution in case of auto
         if use_dest: references the destination node's default condition
@@ -390,7 +389,7 @@ class Runtime:
     async def __check(
         self,
         edge: Routine.Edge,
-        phase: Event.Phase,
+        phase: Event.Phase.ValueType,
         *,
         no_delay: bool = False,
         use_dest: bool = True,
@@ -405,7 +404,7 @@ class Runtime:
         else:
             assert False, "Invalid __check(phase) parameter."
         condition = self.__process_condition(edge, condition, use_dest=use_dest)
-        ref_img: cv2.typing.MatLike | None = None
+        ref_img: Optional[ImageBmpType] = None
         if condition.WhichOneof("condition") == "image":
             ref_img = get_frame(self.routine.id, condition.image.frame_id)
         res, img = await check(
@@ -423,19 +422,19 @@ class Runtime:
         self,
         edge: Routine.Edge,
         condition: Routine.Condition,
-        img: cv2.typing.MatLike,
+        img: ImageBmpType,
         use_dest: bool = True,
-    ) -> CheckResult:
+    ) -> bool:
         """
         processes condition before calling `check_once`
         """
         condition = self.__process_condition(edge, condition, use_dest=use_dest)
-        ref_img: cv2.typing.MatLike | None = None
+        ref_img: Optional[ImageBmpType] = None
         if condition.WhichOneof("condition") == "image":
             ref_img = get_frame(self.routine.id, condition.image.frame_id)
         return check_once(condition, img, ref_img)
 
-    def __precheck_action(self, action: Routine.Edge, img: cv2.typing.MatLike):
+    def __precheck_action(self, action: Routine.Edge, img: ImageBmpType) -> bool:
         """
         Runs precheck once.
         """
@@ -444,11 +443,11 @@ class Runtime:
     async def __log(
         self,
         edge: Routine.Edge,
-        img: cv2.typing.MatLike,
-        phase: Event.Phase = Event.PHASE_UNSPECIFIED,
-        result: Event.Result = Event.RESULT_UNSPECIFIED,
-        comment: str | None = None,
-    ):
+        img: ImageBmpType,
+        phase: Event.Phase.ValueType = Event.PHASE_UNSPECIFIED,
+        result: Event.Result.ValueType = Event.RESULT_UNSPECIFIED,
+        comment: str = "",
+    ) -> None:
         if not self.enable_logs or not self.pfs:
             return
         _, data = cv2.imencode(".bmp", img)
@@ -460,7 +459,7 @@ class Runtime:
         event.timestamp.GetCurrentTime()
         self.data.execution_info.get_or_create(edge.id).events.append(event)
 
-    async def __run_action(self, action: Routine.Edge):
+    async def __run_action(self, action: Routine.Edge) -> None:
         """
         Runs the precheck/action/postcheck of an action
         """
@@ -479,7 +478,7 @@ class Runtime:
             print("EXEC SUBROUTINE", action.description)
             self.push(action)
             self.set_curr(self.nodes[action.subroutine])
-            return True  # Need to abort early when subroutine runs.
+            return  # Need to abort early when subroutine runs.
             # The next shouldn't get set immediately, but stored on stack
             # until after the subroutine completes.
             # Post condition doesn't happen until the subroutine returns.
@@ -507,7 +506,7 @@ class Runtime:
         # update state after postcondition check passes
         self.set_curr(self.nodes[action.to])
 
-    async def __exec_action(self, action: Routine.Edge):
+    async def __exec_action(self, action: Routine.Edge) -> None:
         """
         Executes the action, utility function useful for handling repeats.
 
@@ -532,7 +531,9 @@ class Runtime:
             case _:
                 raise NotImplementedError()
 
-    async def acquire_offset(self, condition: Routine.Condition):
+    async def acquire_offset(
+        self, condition: Routine.Condition
+    ) -> Optional[tuple[int, int]]:
         if condition.WhichOneof("condition") == "image":
             c = condition.image
             ref = get_frame(self.routine.id, c.frame_id)
@@ -543,7 +544,7 @@ class Runtime:
                 return matches[0].position
         return None
 
-    async def run_replay(self, replay: InputReplay, dx=0, dy=0):
+    async def run_replay(self, replay: InputReplay, dx: int = 0, dy: int = 0) -> None:
         """
         simulate a replay in terms of controller calls
         """

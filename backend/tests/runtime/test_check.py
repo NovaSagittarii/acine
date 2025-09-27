@@ -1,12 +1,15 @@
+from typing import cast
+
+import numpy as np
 import pytest
-from acine.runtime.check import Routine, check_once
 from acine_proto_dist.position_pb2 import Rect
-from numpy import random
 from pytest_mock import MockerFixture
+
+from acine.runtime.check import ImageBmpType, Routine, check_once
 
 
 class TestCheck:
-    def test_check_once_null_condition(self):
+    def test_check_once_null_condition(self) -> None:
         """
         Ensure null condition passes through properly.
         """
@@ -15,7 +18,7 @@ class TestCheck:
         assert check_once(c, None) is True
 
     @pytest.mark.parametrize("ret", (True, False))
-    def test_check_once_image(self, mocker: MockerFixture, ret: bool):
+    def test_check_once_image(self, mocker: MockerFixture, ret: bool) -> None:
         """
         Ensure check_once calls check_image for image conditions.
         """
@@ -24,8 +27,8 @@ class TestCheck:
                 frame_id="FRAME_ID", threshold=0.5, regions=[Rect()]
             )
         )
-        img = random.rand(2, 3, 4)
-        ref_img = random.rand(2, 3, 4)
+        img = cast(ImageBmpType, np.random.rand(2, 3, 4))
+        ref_img = cast(ImageBmpType, np.random.rand(2, 3, 4))
 
         p = mocker.patch("acine.runtime.check.check_image")
         p.return_value = ret

@@ -3,11 +3,10 @@ Utility classes that are basic implementation of interfaces.
 """
 
 from acine_proto_dist.routine_pb2 import Routine
-from cv2.typing import MatLike
 
 from acine.capture import GameCapture
 from acine.input_handler import InputHandler
-from acine.runtime.runtime import IController, Runtime
+from acine.runtime.runtime import IController, ImageBmpType, Runtime
 from acine.scheduler.typing import ExecResult, ISchedulerRoutineInterface
 
 
@@ -23,7 +22,7 @@ class BuiltinController(IController):
         self.gc = game_capture
         self.ih = input_handler
 
-    async def get_frame(self) -> MatLike:
+    async def get_frame(self) -> ImageBmpType:
         return await self.gc.get_frame()
 
     async def mouse_move(self, x: int, y: int) -> None:
@@ -41,5 +40,5 @@ class BuiltinSchedulerRoutineInterface(ISchedulerRoutineInterface):
         super().__init__(routine)
         self.runtime = runtime
 
-    async def goto(self, e: Routine.Edge) -> ExecResult:
+    async def goto(self, e: Routine.Edge) -> ExecResult.ValueType:
         return await self.runtime.queue_edge(e.id)

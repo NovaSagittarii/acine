@@ -1,57 +1,71 @@
 from random import randint
+from typing import Any, Never, Tuple, cast
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
-from pytest_mock import MockerFixture, MockType
+from pytest_mock import MockerFixture
 
 from acine.runtime.runtime import CheckResult, Event, IController, Routine, Runtime
 
-r1 = Routine(
-    id="1", name="Test Routine", frames=[], nodes={"start": Routine.Node(id="start")}
-)
+NodeType = Routine.Node.NodeType
+EdgeType = Routine.Edge.EdgeTriggerType
+
+r1 = Routine(id="1", name="Test Routine", nodes={"start": Routine.Node(id="start")})
 
 
 @pytest.fixture
-def mocked_controller(mocker: MockerFixture):
+def mocked_controller(mocker: MockerFixture) -> IController:
     controller = IController()
-    controller.get_frame = mocker.AsyncMock()
-    controller.mouse_down = mocker.AsyncMock()
-    controller.mouse_move = mocker.AsyncMock()
-    controller.mouse_up = mocker.AsyncMock()
+    mocker.patch.object(controller, "get_frame")
+    mocker.patch.object(controller, "mouse_down")
+    mocker.patch.object(controller, "mouse_move")
+    mocker.patch.object(controller, "mouse_up")
     return controller
 
 
 @pytest.fixture(autouse=True)
-def mocked_now(mocker: MockerFixture):
+def mocked_now(mocker: MockerFixture) -> Mock:
     return mocker.patch("acine.runtime.runtime.now")
 
 
 @pytest.fixture(autouse=True)
-def mocked_sleep(mocker: MockerFixture):
-    return mocker.patch("acine.runtime.runtime.sleep", new_callable=mocker.AsyncMock)
+def mocked_sleep(mocker: MockerFixture) -> AsyncMock:
+    return cast(
+        AsyncMock,
+        mocker.patch("acine.runtime.runtime.sleep", new_callable=mocker.AsyncMock),
+    )
+
+
+MockedRuntimeUtilType = Tuple[Mock, AsyncMock, Mock, Runtime]
 
 
 @pytest.fixture
 def mocked_runtime(
-    mocker: MockerFixture, mocked_controller, mocked_now, mocked_sleep
-) -> tuple[MockType, MockType, IController, Runtime]:
+    mocker: MockerFixture,
+    mocked_controller: Mock,
+    mocked_now: Mock,
+    mocked_sleep: AsyncMock,
+) -> MockedRuntimeUtilType:
     rt = Runtime(r1, mocked_controller)
     return (mocked_now, mocked_sleep, mocked_controller, rt)
 
 
 @pytest.fixture
-def mocked_check(mocker: MockerFixture):
+def mocked_check(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("acine.runtime.runtime.check")
 
 
 @pytest.fixture
-def mocked_check_once(mocker: MockerFixture):
+def mocked_check_once(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("acine.runtime.runtime.check_once")
 
 
 @pytest.fixture
-def checks_always_pass(mocker: MockerFixture, mocked_check, mocked_check_once):
+def checks_always_pass(
+    mocker: MockerFixture, mocked_check: AsyncMock, mocked_check_once: AsyncMock
+) -> None:
     mocked_check.return_value = (Event.RESULT_PASS, None)
     mocked_check_once.return_value = CheckResult.PASS
 
@@ -65,8 +79,12 @@ class TestRuntime:
     @pytest.mark.parametrize("x", (1, 4))
     @pytest.mark.parametrize("y", (2, 3))
     async def test_run_replay_mouse_move(
-        self, mocker: MockerFixture, mocked_runtime, x, y
-    ):
+        self,
+        mocker: MockerFixture,
+        mocked_runtime: MockedRuntimeUtilType,
+        x: int,
+        y: int,
+    ) -> None:
         now, sleep, controller, rt = mocked_runtime
 
         event = InputEvent(move=Point(x=x, y=y))
@@ -77,7 +95,9 @@ class TestRuntime:
         sleep.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_run_replay_mouse_up(self, mocker: MockerFixture, mocked_runtime):
+    async def test_run_replay_mouse_up(
+        self, mocker: MockerFixture, mocked_runtime: MockedRuntimeUtilType
+    ) -> None:
         now, sleep, controller, rt = mocked_runtime
 
         event = InputEvent(mouse_up=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
@@ -88,7 +108,9 @@ class TestRuntime:
         sleep.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_invalid_restore_context(self, mocker: MockerFixture, mocked_runtime):
+    async def test_invalid_restore_context(
+        self, mocker: MockerFixture, mocked_runtime: MockedRuntimeUtilType
+    ) -> None:
         now, sleep, controller, rt = mocked_runtime
 
         context = Runtime.Context()
@@ -100,7 +122,9 @@ class TestRuntime:
         assert rt.get_context().curr == old_curr
 
     @pytest.mark.asyncio
-    async def test_invalid_goto(self, mocker: MockerFixture, mocked_runtime):
+    async def test_invalid_goto(
+        self, mocker: MockerFixture, mocked_runtime: MockedRuntimeUtilType
+    ) -> None:
         now, sleep, controller, rt = mocked_runtime
         with pytest.raises(ValueError) as info:
             await rt.goto("INVALID ID")
@@ -115,7 +139,7 @@ class TestRuntimeIntegration:
     @staticmethod
     def node(
         id: str,
-        type: Routine.Node.NodeType = Routine.Node.NodeType.NODE_TYPE_STANDARD,
+        type: NodeType.ValueType = NodeType.NODE_TYPE_STANDARD,
     ) -> Routine.Node:
         return Routine.Node(
             id=id,
@@ -137,8 +161,8 @@ class TestRuntimeIntegration:
     def add_edge(
         u: Routine.Node,
         v: Routine.Node,
-        type=Routine.Edge.EDGE_TRIGGER_TYPE_STANDARD,
-        **kwargs,
+        type: EdgeType.ValueType = EdgeType.EDGE_TRIGGER_TYPE_STANDARD,
+        **kwargs: Any,
     ) -> Routine.Edge:
         e = Routine.Edge(
             id=f"{u.id}->{v.id}", to=v.id, repeat_lower=1, trigger=type, **kwargs
@@ -153,7 +177,9 @@ class TestRuntimeIntegration:
     @pytest.mark.dependency(name="goto")
     @pytest.mark.parametrize("s", ("start", "n2", "n3", "n4"))
     @pytest.mark.parametrize("t", ("start", "n2", "n3", "n4"))
-    async def test_goto(self, mocker: MockerFixture, mocked_controller, s, t):
+    async def test_goto(
+        self, mocker: MockerFixture, mocked_controller: IController, s: str, t: str
+    ) -> None:
         """
               +-----------+
               v           |
@@ -173,7 +199,7 @@ class TestRuntimeIntegration:
 
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
         rt = Runtime(r, mocked_controller)
-        rt.run_replay = mocker.AsyncMock()
+        mocker.patch.object(rt, "run_replay", return_value=None)
         rt.context.curr = [x for x in [n1, n2, n3, n4] if x.id == s][0]
         await rt.goto(t)
         assert rt.context.curr.id == t
@@ -181,7 +207,9 @@ class TestRuntimeIntegration:
     @pytest.mark.asyncio
     @pytest.mark.dependency(name="subroutine", depends=["goto"])
     @pytest.mark.parametrize("to", ("start", "n2", "n3", "n4", "n5", "n6"))
-    async def test_subroutine(self, mocker: MockerFixture, mocked_controller, to: str):
+    async def test_subroutine(
+        self, mocker: MockerFixture, mocked_controller: IController, to: str
+    ) -> None:
         """
         Starting from n1; every node is reachable.
 
@@ -203,21 +231,22 @@ class TestRuntimeIntegration:
 
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4, n5, n6)})
         rt = Runtime(r, mocked_controller)
-        rt.run_replay = mocker.AsyncMock()
+        mocker.patch.object(rt, "run_replay", return_value=None)
+
         rt.context.curr = n1
         await rt.goto(to)
         assert rt.context.curr.id == to
         await rt.goto("n6")
         assert rt.context.curr.id == "n6"
         expected_calls = [mocker.call(e.replay, 0, 0) for e in [e34, e45, e26]]
-        rt.run_replay.assert_has_calls(expected_calls)
+        cast(AsyncMock, rt.run_replay).assert_has_calls(expected_calls)
 
     @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["subroutine"])
     @pytest.mark.parametrize("to", ("n2", "n3", "n4", "n5"))
     async def test_subroutine_nested(
-        self, mocker: MockerFixture, mocked_controller, to: str
-    ):
+        self, mocker: MockerFixture, mocked_controller: IController, to: str
+    ) -> None:
         """
         ```
         n1 ==(n2 ==(n3 -> n4)==> n5)==> n6
@@ -235,24 +264,25 @@ class TestRuntimeIntegration:
 
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4, n5, n6)})
         rt = Runtime(r, mocked_controller)
-        rt.run_replay = mocker.AsyncMock()
+        mocker.patch.object(rt, "run_replay", return_value=None)
+
         rt.context.curr = n1
         await rt.goto(to)
         assert rt.context.curr.id == to
         await rt.goto("n6")
         assert rt.context.curr.id == "n6"
-        rt.run_replay.assert_called_once_with(e34.replay, 0, 0)
+        cast(AsyncMock, rt.run_replay).assert_called_once_with(e34.replay, 0, 0)
 
     @pytest.mark.parametrize("subtest", ("check pre", "check post", "check pre/post"))
     @pytest.mark.asyncio
     async def test_default_condition(
         self,
         mocker: MockerFixture,
-        mocked_controller,
-        mocked_check: MockType,
-        mocked_check_once: MockType,
+        mocked_controller: IController,
+        mocked_check: AsyncMock,
+        mocked_check_once: AsyncMock,
         subtest: str,
-    ):
+    ) -> None:
         """
         n1 -> n2 -> n3
         edge n1->n2 has auto precondition
@@ -269,7 +299,7 @@ class TestRuntimeIntegration:
         mocked_check_once.return_value = CheckResult.ERROR
         r = Routine(nodes={u.id: u for u in (n1, n2, n3)})
         rt = Runtime(r, mocked_controller)
-        rt.run_replay = mocker.AsyncMock()
+        mocker.patch.object(rt, "run_replay", return_value=None)
 
         if "pre" in subtest:  # 1 -> 2
             rt.context.curr = n1
@@ -298,8 +328,11 @@ class TestRuntimeIntegration:
     @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["goto"])
     async def test_interrupt(
-        self, mocker: MockerFixture, checks_always_pass, mocked_controller
-    ):
+        self,
+        mocker: MockerFixture,
+        checks_always_pass: Never,
+        mocked_controller: IController,
+    ) -> None:
         """
         n1 --> n2 <-- n3
         |              ^
@@ -318,14 +351,14 @@ class TestRuntimeIntegration:
 
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
         rt = Runtime(r, mocked_controller)
-        rt.run_replay = mocker.AsyncMock()
+        mocker.patch.object(rt, "run_replay", return_value=None)
 
         rt.context.curr = n1
         await rt.goto(n2.id)
 
         assert rt.context.curr == n2, "should be at n2 after `rt.goto(n2.id)`"
-        rt.run_replay.assert_called()
-        replays = [c.args[0] for c in rt.run_replay.call_args_list]
+        cast(AsyncMock, rt.run_replay).assert_called()
+        replays = [c.args[0] for c in cast(AsyncMock, rt.run_replay).call_args_list]
         assert e12.replay not in replays, "do not take edge n1->n2"
         assert e14.replay in replays, "take edge n1->n4 (interrupt)"
         assert e43.replay in replays, "take edge n4->n3 (after n1->n4 interrupt)"
@@ -334,8 +367,11 @@ class TestRuntimeIntegration:
     @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["goto"])
     async def test_queue_edge_subroutine(
-        self, mocker: MockerFixture, checks_always_pass, mocked_controller
-    ):
+        self,
+        mocker: MockerFixture,
+        checks_always_pass: Never,
+        mocked_controller: IController,
+    ) -> None:
         n1 = self.node("start")
         n2 = self.node("n2")
         n3 = self.node("n3", Routine.Node.NODE_TYPE_INIT)
@@ -345,11 +381,9 @@ class TestRuntimeIntegration:
 
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
         rt = Runtime(r, mocked_controller)
-        rt.run_replay = mocker.AsyncMock()
+        mocker.patch.object(rt, "run_replay", return_value=None, autospec=rt.run_replay)
 
         rt.context.curr = n1
         await rt.queue_edge(e12.id)
         assert rt.context.curr == n2, "should be at n2 after exec subroutine `n1->n2`"
-        rt.run_replay.assert_called_once_with(
-            e34.replay, mocker.ANY, mocker.ANY
-        ), "take edge n3->n4"
+        cast(AsyncMock, rt.run_replay).assert_called_once_with(e34.replay, 0, 0)

@@ -9,7 +9,9 @@ import time
 from functools import lru_cache
 
 import cv2
+
 from acine.persist import resolve
+from acine.runtime.check_image import ImageBmpType
 
 
 def now() -> int:
@@ -21,7 +23,7 @@ def now() -> int:
     return round(time.time() * 1000)
 
 
-async def sleep(ms: int):
+async def sleep(ms: int) -> None:
     """
     Sleeps for some time in milliseconds.
     `asyncio.sleep` (python in general) uses float seconds
@@ -30,11 +32,11 @@ async def sleep(ms: int):
 
 
 @lru_cache(maxsize=64)
-def get_frame(routine_id: str, frame_id: str) -> cv2.typing.MatLike:
+def get_frame(routine_id: str, frame_id: str) -> ImageBmpType:
     """
     Fetches the image data associated with a frame id. (has cache)
     """
     assert routine_id, "routine_id not set"
     assert frame_id, "frame_id not set"
     path = resolve(routine_id, "img", f"{frame_id}.png")  # probably in BGR
-    return cv2.imread(path)
+    return cv2.imread(path)  # type: ignore

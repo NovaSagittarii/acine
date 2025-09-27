@@ -3,16 +3,15 @@ functions for checking conditions
 """
 
 from enum import Enum
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Optional, Tuple
 
-import cv2
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import Event
 
-from acine.runtime.check_image import check_image
+from acine.runtime.check_image import ImageBmpType, check_image
 from acine.runtime.util import now, sleep
 
-GetImageCallableType = Callable[[], Awaitable[cv2.typing.MatLike]]
+GetImageCallableType = Callable[[], Awaitable[ImageBmpType]]
 
 
 # TODO: replace with runtime.Event.Result
@@ -25,10 +24,10 @@ class CheckResult(Enum):
 async def check(
     condition: Routine.Condition,
     get_img: GetImageCallableType,
-    ref_img: cv2.typing.MatLike | None = None,
+    ref_img: Optional[ImageBmpType] = None,
     *,
     no_delay: bool = False,
-) -> tuple[Event.Result, cv2.typing.MatLike | None]:
+) -> Tuple[Event.Result.ValueType, ImageBmpType]:
     """
     Implements runtime for Routine.Condition checks
 
@@ -66,8 +65,8 @@ async def check(
 
 def check_once(
     condition: Routine.Condition,
-    img: cv2.typing.MatLike,
-    ref_img: cv2.typing.MatLike | None = None,
+    img: Optional[ImageBmpType] = None,
+    ref_img: Optional[ImageBmpType] = None,
 ) -> bool:
     """
     Runs a check once, returns True if pass
@@ -77,7 +76,8 @@ def check_once(
         case None:
             return True
         case "image":
-            assert ref_img is not None, "Reference image required for image"
+            assert img is not None, "Input image required for image condition"
+            assert ref_img is not None, "Reference image required for image condition"
             if check_image(condition.image, img, ref_img):
                 return True
         case "text":

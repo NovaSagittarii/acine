@@ -13,6 +13,8 @@ powercfg /requests
 ```
 """
 
+# mypy: ignore-errors
+
 import asyncio
 import datetime
 

@@ -1,27 +1,29 @@
 import math
 from datetime import datetime, timedelta
 from random import randint, random, seed, shuffle
+from typing import List
 
 import pytest
-from acine.scheduler.cron import TZ, next
 from acine_proto_dist.routine_pb2 import Routine
+
+from acine.scheduler.cron import TZ, next
 
 SG = Routine.SchedulingGroup
 
 
 class TestNext:
-    def test_invalid_period(self):
+    def test_invalid_period(self) -> None:
         with pytest.raises(ValueError):
             # period = 0
             # period_preset = unset
             next(0, SG())
 
     @pytest.mark.parametrize("t", ([-1], [1], [999], [0, 0]))
-    def test_invalid_offset(self, t: list[int]):
+    def test_invalid_offset(self, t: List[int]) -> None:
         with pytest.raises(ValueError):
             next(0, SG(period=1, dispatch_times=t))
 
-    def test_invalid_offset_preset(self):
+    def test_invalid_offset_preset(self) -> None:
         with pytest.raises(ValueError):
             next(0, SG(period_preset=SG.PERIOD_DAILY, dispatch_times=[86400]))
         with pytest.raises(ValueError):
@@ -40,7 +42,7 @@ class TestNext:
             pytest.param(True, id="with offset"),
         ),
     )
-    def test_period_offset0(self, max: tuple[int, int], has_millis: bool):
+    def test_period_offset0(self, max: tuple[int, int], has_millis: bool) -> None:
         maxT, maxt = max
         seed(0)
         for id in range(1, 101):
@@ -55,7 +57,7 @@ class TestNext:
     @pytest.mark.parametrize(
         "max", (3, 10, 10**3, 10**6), ids=("tiny", "small", "medium", "large")
     )
-    def test_period_offsets(self, max: int):
+    def test_period_offsets(self, max: int) -> None:
         seed(0)
         for id in range(1, 101):
             T = randint(1, max)
@@ -69,14 +71,14 @@ class TestNext:
 
             dt0 = offsets[i]
             dt1 = offsets[i + 1] if i + 1 < k else T + offsets[0]
-            t = pt + dt0 + (dt1 - dt0) * random()
+            t0: float = pt + dt0 + (dt1 - dt0) * random()
 
             shuffle(offsets)
             expect = pt + dt1
-            result = next(t, SG(period=T, dispatch_times=offsets))
+            result = next(t0, SG(period=T, dispatch_times=offsets))
             assert (
                 expect == result
-            ), f"Test {id}: t={t}, T={T}, dt={offsets}; expect={expect}, got={result}"
+            ), f"Test {id}: t={t0}, T={T}, dt={offsets}; expect={expect}, got={result}"
 
     @pytest.mark.parametrize(
         "period,offsets,curr,expected",
@@ -189,8 +191,12 @@ class TestNext:
         ),
     )
     def test_preset(
-        self, period: SG.Period, offsets: list[int], curr: datetime, expected: datetime
-    ):
+        self,
+        period: SG.Period.ValueType,
+        offsets: List[int],
+        curr: datetime,
+        expected: datetime,
+    ) -> None:
         sg = SG(period_preset=period, dispatch_times=offsets)
         result = next(curr.timestamp(), sg)
         assert datetime.fromtimestamp(result, tz=TZ).__str__() == expected.__str__()

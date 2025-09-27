@@ -1,3 +1,5 @@
+# mypy: ignore-errors
+
 """
 Classifier code for the saved frames, used to determine which state you are in.
 
@@ -43,7 +45,7 @@ import os
 
 import cv2
 import numpy as np
-import ydf
+import ydf  # type: ignore
 from acine_proto_dist.frame_pb2 import Frame
 from acine_proto_dist.routine_pb2 import Routine
 from numpy import ndarray

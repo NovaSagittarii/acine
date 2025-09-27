@@ -9,7 +9,7 @@ from acine.power.win32 import sleep
 from acine.scheduler.managed_runtime import ManagedRuntime
 
 
-async def main():
+async def main() -> int:
     routines = get_routines(full=True)
     questions = [
         inquirer.List(
@@ -44,7 +44,7 @@ async def main():
     mode = int(inquirer.prompt(questions)["mode"].split()[0])
     if mode == 0:
         await mrt.run(mrt.next_time())
-        return
+        return 0
     elif mode == 1:
         questions = [
             inquirer.List(
@@ -58,7 +58,7 @@ async def main():
         sg = list(mrt.S.values())[sgi]
         sg.next_time = 0
         await mrt.run(1)
-        return
+        return 0
 
     while True:
         try:

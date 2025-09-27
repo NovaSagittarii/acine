@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import time
 import traceback
+from types import TracebackType
+from typing import List, Optional
 
 from acine.capture import GameCapture
 from acine.input_handler import InputHandler
@@ -21,25 +25,31 @@ class RoutineInstance:
         )
         self.routine = routine
 
-    def __enter__(self):
+    def __enter__(self) -> RoutineInstance:
         self.time_opened = time.time()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
         self.__add_runtime(time.time() - self.time_opened)
         self.close()
-        if exc_type:
+        if exc_type and exc_val:
             raise exc_val
+        return None
 
-    async def queue_edge(self, edge: Routine.Edge):
+    async def queue_edge(self, edge: Routine.Edge) -> None:
         await self.rt.queue_edge(edge.id)
 
-    def close(self):
+    def close(self) -> None:
         self.gc.close()
         self.ih.close()
         write_runtime_data(self.routine, self.rt.data)
 
-    def __add_runtime(self, duration: float):
+    def __add_runtime(self, duration: float) -> None:
         print(f"exec time {duration / 60:.2f}m")
         assert duration >= 0, "expect nonnegative duration"
         path = [self.routine.id, "time"]
@@ -55,11 +65,11 @@ class RoutineInstance:
 class SchedulingGroupInfo:
     def __init__(self, group: Routine.SchedulingGroup):
         self.group = group
-        self.linked: list[Routine.Edge] = []
+        self.linked: List[Routine.Edge] = []
         self.last_time = time.time()
         self.next_time = next(time.time(), group)
 
-    def on_scheduled(self):
+    def on_scheduled(self) -> None:
         self.last_time = self.next_time
         self.next_time = next(time.time(), self.group)
 
@@ -84,10 +94,10 @@ class ManagedRuntime:
             return float("inf")
         return min(sg.next_time for sg in self.S.values())
 
-    def next_groups(self, t: float):
+    def next_groups(self, t: float) -> List[str]:
         return [sg.group.name for sg in self.S.values() if sg.next_time == t]
 
-    async def run(self, t: float | None = None):
+    async def run(self, t: Optional[float] = None) -> None:
         """
         `t` is seconds since UNIX epoch. When no `t` is provided, uses the current time.
 

@@ -12,7 +12,7 @@ from acine.power.win32 import sleep
 from acine.scheduler.multischeduler import Multischeduler
 
 
-async def main():
+async def main() -> int:
     routines = get_routines(full=True)
     ms = Multischeduler(routines)
 

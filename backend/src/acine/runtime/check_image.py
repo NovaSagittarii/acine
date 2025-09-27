@@ -2,20 +2,26 @@
 Implements image similarity checks
 """
 
+from __future__ import annotations
+
+from typing import List, Literal
+
 import cv2
 import numpy as np
 from acine_proto_dist.routine_pb2 import Routine
+
+ImageBmpType = np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.int8]]
 
 
 class SimilarityResult:
     score: float
     position: tuple[int, int]
 
-    def __init__(self, score, position):
+    def __init__(self, score: float, position: tuple[int, int]) -> None:
         self.score = score
         self.position = position
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         i, j = self.position
         if isinstance(self.score, float):
             return f"{self.score:.3f} @ ({i}, {j})"
@@ -23,18 +29,20 @@ class SimilarityResult:
             # might be given pytest.approx element
             return f"{self.score} @ ({i}, {j})"
 
-    def __eq__(self, value):
-        return self.score == value.score and self.position == value.position
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SimilarityResult):
+            raise NotImplementedError("cannot __eq__", self, other)
+        return self.score == other.score and self.position == other.position
 
 
 def check_similarity(
     condition: Routine.Condition.Image,
-    img: cv2.typing.MatLike,
-    ref_img: cv2.typing.MatLike,
+    img: ImageBmpType,
+    ref_img: ImageBmpType,
     *,
     return_one: bool = False,
     argpartition: bool = False,
-) -> list[SimilarityResult]:
+) -> List[SimilarityResult]:
     """
     Finds areas of sufficiently similar areas using cv2.matchTemplate.
     Positions are sorted descending.
@@ -108,7 +116,7 @@ def check_similarity(
     if res[i][j] < condition.threshold:
         return []
     elif return_one:
-        return [SimilarityResult(res[i][j], (i + rylo, j + rxlo))]
+        return [SimilarityResult(res[i][j], (int(i + rylo), int(j + rxlo)))]
 
     result = []
 
@@ -133,10 +141,10 @@ def check_similarity(
         if vis[i][j]:
             continue
 
-        li, ri = max(0, i - pn), min(n, i + pn)
-        lj, rj = max(0, j - pm), min(m, j + pm)
+        li, ri = max(0, int(i - pn)), min(n, i + pn)
+        lj, rj = max(0, int(j - pm)), min(m, j + pm)
         vis[li : ri + 1, lj : rj + 1] = 1
-        result.append(SimilarityResult(score, (i + rylo, j + rxlo)))
+        result.append(SimilarityResult(score, (int(i + rylo), int(j + rxlo))))
 
         if len(result) >= condition.match_limit:
             break
@@ -146,8 +154,8 @@ def check_similarity(
 
 def check_image(
     condition: Routine.Condition.Image,
-    img: cv2.typing.MatLike,
-    ref_img: cv2.typing.MatLike,
+    img: ImageBmpType,
+    ref_img: ImageBmpType,
 ) -> bool:
     """
     checks condition "image" type

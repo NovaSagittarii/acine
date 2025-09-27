@@ -6,6 +6,7 @@ but partially offscreen.
 """
 
 from asyncio import Lock, Semaphore, sleep
+from typing import Optional
 
 import cv2
 from numpy import ndarray
@@ -15,14 +16,16 @@ from windows_capture import (  # type: ignore
     WindowsCapture,
 )
 
+from acine.runtime.check_image import ImageBmpType
+
 
 class GameCapture:  # thanks joshua
     """
     Window capture instance, need to call .close() afterwards.
     """
 
-    def __init__(self, window_name: str | None = None):
-        self.data: cv2.typing.MatLike = None
+    def __init__(self, window_name: Optional[str] = None):
+        self.data: ImageBmpType = ndarray((1, 1, 3))
         """cv2.MatLike frame data"""
 
         self.window_name = window_name or None  # prefer None over empty string ""
@@ -51,7 +54,7 @@ class GameCapture:  # thanks joshua
         print("Capture Session Opened", self.window_name)
 
         @self.capture.event
-        def on_frame_arrived(frame: Frame, control: InternalCaptureControl):
+        def on_frame_arrived(frame: Frame, control: InternalCaptureControl) -> None:
             # Note: when minimized, this callback does not run
 
             if self.closed:
@@ -83,12 +86,12 @@ class GameCapture:  # thanks joshua
 
         # called when the window closes
         @self.capture.event
-        def on_closed():
+        def on_closed() -> None:
             print("Capture Session Closed")
 
         self.capture.start_free_threaded()
 
-    async def __next_frame(self):
+    async def __next_frame(self) -> None:
         """waits it gets the next frame"""
         while self.data is None:
             await sleep(0.1)
@@ -100,7 +103,7 @@ class GameCapture:  # thanks joshua
         async with self.get_png_frame_lock:
             await self.capture_callback_semaphore.acquire()
 
-    async def get_frame(self) -> cv2.typing.MatLike:
+    async def get_frame(self) -> ImageBmpType:
         """gets a MatLike frame for cv2"""
         await self.__next_frame()
         return self.data
@@ -115,7 +118,7 @@ class GameCapture:  # thanks joshua
 if __name__ == "__main__":
     import asyncio
 
-    async def run():
+    async def run() -> None:
         g = GameCapture("Arknights")
         f, *dimensions = await g.get_png_frame()
         print("frame", f, dimensions)

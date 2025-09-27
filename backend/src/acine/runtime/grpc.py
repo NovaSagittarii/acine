@@ -1,3 +1,5 @@
+# mypy: ignore-errors
+
 """
 gRPC service rpc handlers for acine runtime
 
@@ -10,9 +12,9 @@ import asyncio
 import logging
 
 import acine_proto_dist.runtime_pb2_grpc as runtime_grpc
-import google.protobuf.empty_pb2 as Empty
 import grpc
 from acine_proto_dist.routine_pb2 import Routine
+from google.protobuf.empty_pb2 import Empty
 
 rt = Routine()
 
