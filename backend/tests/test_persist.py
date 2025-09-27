@@ -9,7 +9,7 @@ from acine.persist import PrefixedFilesystem, mkdir, resolve
 
 
 @pytest.fixture
-def pfs() -> Generator[PrefixedFilesystem]:
+def pfs() -> Generator[PrefixedFilesystem, None, None]:
     test_dir = resolve("test")
     assert "backend\\data" in test_dir or "backend/data" in test_dir, "sanity check"
     if os.path.exists(test_dir):
