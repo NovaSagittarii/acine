@@ -191,7 +191,7 @@ class Runtime:
         if context.curr.id not in self.nodes:
             valid = False
         for e in context.call_stack:
-            if e and e.id not in self.edges:
+            if e and e.id and e.id not in self.edges:
                 valid = False
         if valid:
             self.set_curr(context.curr)
