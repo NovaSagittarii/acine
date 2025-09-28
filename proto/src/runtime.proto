@@ -63,9 +63,19 @@ message Event {
   string archive_id = 3;                    // id of frame for this event
   Result result = 4;                        // result of (precondition/action)
   string comment = 5;                       // additional info
+  Level level = 6;                          // event urgency
   oneof type {
-    LogEvent log = 6;
-    ErrorEvent error = 7;
+    LogEvent log = 7;
+    ErrorEvent error = 8;
+  }
+
+  enum Level {
+    LEVEL_UNSPECIFIED = 0;
+    LEVEL_LOG = 1;       // for logging
+    LEVEL_INFO = 2;      // unused
+    LEVEL_WARN = 3;      // unused
+    LEVEL_ERROR = 4;     // unused
+    LEVEL_CRITICAL = 5;  // needs attention (f.e. nav broken)
   }
 
   enum Phase {

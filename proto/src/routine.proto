@@ -13,6 +13,7 @@ message Routine {
   map<string, Frame> frames = 4;  // all frames
   map<string, State> states = 5;  // all states
   map<string, Node> nodes = 6;    // all nodes, id="start" is the starting node
+  // map<string, Edge> edges = 10;   // all edges?? useful for log access
   map<string, SchedulingGroup> sgroups = 7;
 
   string start_command = 8;

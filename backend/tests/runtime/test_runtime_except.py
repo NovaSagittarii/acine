@@ -68,6 +68,7 @@ class MockRuntime(Runtime):
         *,
         no_delay: bool = False,
         use_dest: bool = False,
+        critical: bool = False,
     ) -> CheckResult:
         condition = (
             edge.precondition
@@ -187,7 +188,7 @@ class TestRuntimeExceptions:
         sab.nodes["start"].edges.pop()
         rt = MockRuntime(sab, mocker)
         with pytest.raises(NoPathError):
-            await rt.queue_edge(sab.nodes["a"].edges[0].id)
+            await rt.goto(sab.nodes["a"].id)
         assert rt.context.curr.id == "start"
 
     @pytest.mark.skip(reason="currently subroutines cannot fail")

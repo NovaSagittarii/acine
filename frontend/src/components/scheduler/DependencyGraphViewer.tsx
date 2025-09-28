@@ -27,28 +27,34 @@ export default function RoutineViewer() {
             e.trigger ===
             Routine_Edge_EdgeTriggerType.EDGE_TRIGGER_TYPE_SCHEDULED,
         )
-        .map((e) => [e.id, e]),
+        .map((e) => {
+          e.u = n.id;
+          return [e.id, e];
+        }),
     ),
   );
 
   const [selectedNode, setSelectedNode] = useState<NodeType | null>(null);
 
   const nodes = useCallback(() => {
-    return Object.values(dnodes).map((u) => {
-      const extra = {} as GraphNode;
-      const n = routine.nodes[u.u];
-      if (n.defaultCondition?.condition?.$case === 'image') {
-        const { frameId } = n.defaultCondition.condition.image;
-        const url = frames[frameId];
-        extra.icon = url;
-      }
-      return {
-        ...extra,
-        id: u.id,
-        label: n.name,
-        subLabel: n.description,
-      } as GraphNode;
-    });
+    return Object.values(dnodes)
+      .map((u) => {
+        const extra = {} as GraphNode;
+        const n = routine.nodes[u.u];
+        if (!n) return null;
+        if (n.defaultCondition?.condition?.$case === 'image') {
+          const { frameId } = n.defaultCondition.condition.image;
+          const url = frames[frameId];
+          extra.icon = url;
+        }
+        return {
+          ...extra,
+          id: u.id,
+          label: n.name,
+          subLabel: n.description,
+        } as GraphNode;
+      })
+      .filter((x) => x !== null);
   }, [frames, routine]);
   const edges = useCallback(() => {
     return Object.values(dnodes).flatMap((u) =>

@@ -1,4 +1,7 @@
 import {
+  Event_Level,
+  Event_Phase,
+  Event_Result,
   Routine_Edge,
   Routine_Edge_EdgeTriggerType as TriggerType,
 } from 'acine-proto-dist';
@@ -166,8 +169,46 @@ export default function Edge({
           </Collapse>
         </>
       )}
+      {logs.executionInfo[edge.id]?.events?.filter(
+        (x) => x.level === Event_Level.LEVEL_CRITICAL,
+      ) && <div className='text-red-500'>Check logs</div>}
       <Collapse label={`logs (${logs.executionInfo[edge.id]?.events.length})`}>
-        {JSON.stringify(logs.executionInfo[edge.id]?.events, null, 2)}
+        <div className='flex flex-col'>
+          {logs.executionInfo[edge.id]?.events.map(
+            ({ archiveId, level, phase, result, timestamp }, index) => (
+              <div key={index} className='flex gap-4'>
+                <div className='font-mono text-sm'>
+                  {timestamp?.toISOString()} {archiveId}
+                </div>
+                {level === Event_Level.LEVEL_CRITICAL ? (
+                  <div className='text-red-500 font-bold'>!</div>
+                ) : (
+                  <div className='text-blue-500 font-bold'>i</div>
+                )}
+                <div>
+                  {
+                    Object.fromEntries([
+                      [Event_Phase.PHASE_PRECONDITION, 'Precondition'],
+                      [Event_Phase.PHASE_POSTCONDITION, 'Postcondition'],
+                      [Event_Phase.PHASE_ACTION, 'Action'],
+                    ])[phase]
+                  }
+                </div>
+                <div>
+                  {
+                    Object.fromEntries([
+                      [Event_Result.RESULT_ERROR, 'error'],
+                      [Event_Result.RESULT_FAIL, 'fail'],
+                      [Event_Result.RESULT_PASS, 'pass'],
+                      [Event_Result.RESULT_TIMEOUT, 'timeout'],
+                      [Event_Result.RESULT_UNSPECIFIED, '?'],
+                    ])[result]
+                  }
+                </div>
+              </div>
+            ),
+          )}
+        </div>
       </Collapse>
     </div>
   );

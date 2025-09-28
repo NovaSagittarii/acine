@@ -73,7 +73,6 @@ class Runtime:
     """
 
     routine: Routine
-    curr: Routine.Node
     nodes: dict[str, Routine.Node]
     edges: dict[str, Routine.Edge]
     G: nx.DiGraph
@@ -334,6 +333,8 @@ class Runtime:
         """
         goes to the edge start node and then runs the action on the edge
         """
+        if id not in self.edges:
+            raise ValueError("Edge does not exist.")
         # s = self.context.curr  # source
         e = self.edges[id]
         for _ in range(10):  # insist you can navigate there (old behavior)
@@ -344,6 +345,8 @@ class Runtime:
                 pass
                 # return ExecResult.REQUIREMENT_TYPE_ATTEMPT
                 # raise NavigationError(s.id, e.u)
+            except NavigationError:
+                pass
         else:
             return ExecResult.REQUIREMENT_TYPE_ATTEMPT
 
@@ -393,6 +396,7 @@ class Runtime:
         *,
         no_delay: bool = False,
         use_dest: bool = True,
+        critical: bool = False,
     ) -> CheckResult:
         """
         processes condition before calling `check`
@@ -410,7 +414,13 @@ class Runtime:
         res, img = await check(
             condition, self.controller.get_frame, ref_img, no_delay=no_delay
         )
-        await self.__log(edge, img, phase, res)
+        await self.__log(
+            edge,
+            img,
+            phase=phase,
+            result=res,
+            level=Event.LEVEL_CRITICAL if critical else Event.LEVEL_LOG,
+        )
         if res == Event.RESULT_PASS:
             return CheckResult.PASS
         elif res == Event.RESULT_TIMEOUT:
@@ -446,6 +456,7 @@ class Runtime:
         img: ImageBmpType,
         phase: Event.Phase.ValueType = Event.PHASE_UNSPECIFIED,
         result: Event.Result.ValueType = Event.RESULT_UNSPECIFIED,
+        level: Event.Level.ValueType = Event.LEVEL_LOG,
         comment: str = "",
     ) -> None:
         if not self.enable_logs or not self.pfs:
@@ -455,7 +466,9 @@ class Runtime:
         id = uuid7().hex
         await self.pfs.write_archive([f"{id}.bmp"], buffer.getvalue())
 
-        event = Event(archive_id=id, phase=phase, result=result, comment=comment)
+        event = Event(
+            archive_id=id, phase=phase, result=result, comment=comment, level=level
+        )
         event.timestamp.GetCurrentTime()
         self.data.execution_info.get_or_create(edge.id).events.append(event)
 
@@ -488,14 +501,17 @@ class Runtime:
             for i in range(max(action.repeat_lower, action.repeat_upper)):
                 if i >= action.repeat_lower:
                     res = await self.__check(
-                        action, Event.PHASE_POSTCONDITION, use_dest=True
+                        action,
+                        Event.PHASE_POSTCONDITION,
+                        use_dest=True,
+                        critical=action.repeat_upper == 1,
                     )
                     if res == CheckResult.PASS:
                         break  # can exit repeating early
                 await self.__exec_action(action)
             else:  # final postcondition check
                 res = await self.__check(
-                    action, Event.PHASE_POSTCONDITION, use_dest=True
+                    action, Event.PHASE_POSTCONDITION, use_dest=True, critical=True
                 )
                 if res != CheckResult.PASS:
                     # print("! ! X postcheck fail")
