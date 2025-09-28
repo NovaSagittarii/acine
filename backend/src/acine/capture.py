@@ -9,7 +9,7 @@ from asyncio import Lock, Semaphore, sleep
 from typing import Optional
 
 import cv2
-from numpy import ndarray
+from numpy import ndarray, uint8
 from windows_capture import (  # type: ignore
     Frame,
     InternalCaptureControl,
@@ -25,7 +25,7 @@ class GameCapture:  # thanks joshua
     """
 
     def __init__(self, window_name: Optional[str] = None):
-        self.data: ImageBmpType = ndarray((1, 1, 3))
+        self.data: ImageBmpType = ndarray((1, 1, 3), dtype=uint8)
         """cv2.MatLike frame data"""
 
         self.window_name = window_name or None  # prefer None over empty string ""
