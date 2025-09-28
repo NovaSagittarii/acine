@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 from acine_proto_dist.routine_pb2 import Routine
 
-ImageBmpType = np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.int8]]
+ImageBmpType = np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.uint8]]
 
 
 class SimilarityResult:
