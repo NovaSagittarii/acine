@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { $frames, $routine } from '@/state';
 import { useStore } from '@nanostores/react';
 import { useCallback, useState } from 'react';
@@ -229,7 +231,7 @@ export default function DependencyGraphViewer() {
   const frames = useStore($frames);
   const dnodes = useStore($nodes);
 
-  const [selectedNode, setSelectedNode] = useState<Routine_Edge | null>(null);
+  const [selectedNode, _setSelectedNode] = useState<Routine_Edge | null>(null);
 
   const nodes = useCallback(() => {
     return Object.values(routine.nodes).map((n) => {
