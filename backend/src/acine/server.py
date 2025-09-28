@@ -165,9 +165,6 @@ class AcineServerProtocol(WebSocketServerProtocol):
         Retains context if possible, i.e. same current_node still exists.
         """
 
-        if not self.gc or not self.ih:
-            return
-
         old_context = None
         if self.rt:
             # save and restore old position (if exists)
@@ -182,6 +179,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
         else:
             # no routine existed before so gc/ih are unset
             self.prepare_routine(routine)
+
+        assert self.gc and self.ih, "Peripherals should be initialized."
 
         self.rt = Runtime(
             routine,
