@@ -14,7 +14,6 @@ import {
   $loadedRoutine,
   $logs,
 } from './state';
-import { frameToObjectURL } from './client/encoder';
 
 /** callbacks for specific id's */
 const wsListeners: Record<number, (arg0: pb.Packet) => void> = {};
@@ -22,6 +21,8 @@ const wsListeners: Record<number, (arg0: pb.Packet) => void> = {};
 const wsUrl = document.location.origin
   .replace('http', 'ws')
   .replace(/(:\d+)?$/, ':9000');
+const httpUrl = document.location.origin.replace(/(:\d+)?$/, ':9001');
+
 export const ws = new WebSocket(wsUrl);
 ws.onopen = () => {
   console.log('ws open');
@@ -70,7 +71,8 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
           // an HTTP server would not have been a bad idea...
           $frames.set(
             Object.fromEntries(
-              frameOperation.frames.map((f) => [f.id, frameToObjectURL(f)]),
+              frameOperation.frames.map((f) => [f.id, '']),
+              // frameOperation.frames.map((f) => [f.id, frameToObjectURL(f)]),
             ),
           );
           break;
@@ -142,6 +144,11 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
       console.warn('Unhandled packet', packet);
   }
 };
+
+export function getImageUrl(imageId: string) {
+  if (!$routine.get().id) throw new Error('Expected a set `routine.id`.');
+  return `${httpUrl}/data/${$routine.get().id}/img/${imageId}`;
+}
 
 /**
  * - (if `!id`) request the current frame

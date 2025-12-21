@@ -1,4 +1,4 @@
-import { $frames, $routine } from '@/state';
+import { $routine } from '@/state';
 import { atom } from 'nanostores';
 import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -6,6 +6,7 @@ import { GraphCanvas, GraphCanvasRef, GraphEdge, GraphNode } from 'reagraph';
 import Checkbox from '../ui/Checkbox';
 import { Routine_Edge, Routine_Edge_EdgeTriggerType } from 'acine-proto-dist';
 import Edge from '../Edge';
+import { getImageUrl } from '../../App.state';
 
 const $is3d = atom(false);
 const $follow = atom(true);
@@ -18,7 +19,6 @@ export default function RoutineViewer() {
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
   const routine = useStore($routine);
-  const frames = useStore($frames);
   const dnodes = Object.fromEntries(
     Object.values(routine.nodes).flatMap((n) =>
       n.edges
@@ -44,7 +44,7 @@ export default function RoutineViewer() {
         if (!n) return null;
         if (n.defaultCondition?.condition?.$case === 'image') {
           const { frameId } = n.defaultCondition.condition.image;
-          const url = frames[frameId];
+          const url = getImageUrl(frameId);
           extra.icon = url;
         }
         return {
@@ -55,7 +55,7 @@ export default function RoutineViewer() {
         } as GraphNode;
       })
       .filter((x) => x !== null);
-  }, [frames, routine]);
+  }, [routine]);
   const edges = useCallback(() => {
     return Object.values(dnodes).flatMap((u) =>
       u.dependencies.map(

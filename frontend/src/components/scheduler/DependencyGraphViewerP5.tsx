@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { $frames, $routine } from '@/state';
+import { $routine } from '@/state';
 import { useStore } from '@nanostores/react';
 import { useCallback, useState } from 'react';
 import { $nodes } from './util';
@@ -15,6 +15,7 @@ import {
   ReactP5Wrapper,
   SketchProps,
 } from '@p5-wrapper/react';
+import { getImageUrl } from '../../App.state';
 
 type MySketchProps = SketchProps & {
   nodes: Record<string, GraphNode>;
@@ -228,7 +229,6 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
  */
 export default function DependencyGraphViewer() {
   const routine = useStore($routine);
-  const frames = useStore($frames);
   const dnodes = useStore($nodes);
 
   const [selectedNode, _setSelectedNode] = useState<Routine_Edge | null>(null);
@@ -238,7 +238,7 @@ export default function DependencyGraphViewer() {
       const extra = {} as GraphNode;
       if (n.defaultCondition?.condition?.$case === 'image') {
         const { frameId } = n.defaultCondition.condition.image;
-        const url = frames[frameId];
+        const url = getImageUrl(frameId);
         extra.icon = url;
       }
       return {
@@ -249,7 +249,7 @@ export default function DependencyGraphViewer() {
         adj: n.edges,
       } as GraphNode;
     });
-  }, [frames, routine, dnodes]);
+  }, [routine, dnodes]);
   const edges = useCallback(() => {
     const a: Record<string, UnionFindElement> = Object.fromEntries(
       Object.keys(routine.nodes).map((k) => [k, makeSet()]),

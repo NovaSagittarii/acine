@@ -74,7 +74,7 @@ function RoutineEditor() {
           saveCurrentFrame = () => {
             const routine = $routine.get();
             if (!routine) throw new Error('invalid routine ' + routine); // eslint-disable-line @typescript-eslint/restrict-plus-operands
-            const persistentURL = URL.createObjectURL(blob);
+            const persistentURL = ''; // URL.createObjectURL(blob);
             $frames.set({ ...$frames.get(), [frame.id]: persistentURL });
             routine.frames[frame.id] = pb.Frame.create({ id: frame.id });
             persistFrame(frame);

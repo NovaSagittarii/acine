@@ -12,7 +12,7 @@ import Select, { SelectAuto } from './ui/Select';
 
 import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
-import { runtimeConditionQuery } from '../App.state';
+import { getImageUrl, runtimeConditionQuery } from '../App.state';
 import useForceUpdate from './useForceUpdate';
 
 const METHOD_TYPES_DISPLAY = [
@@ -39,14 +39,16 @@ export default function ConditionImageEditor() {
   };
 
   const [src, setSrc] = useState<string>('');
-  const [currFrameId, setCurrFrameId] = useState(Object.values(frames)[0]);
+  const [currFrameId, setCurrFrameId] = useState<string>(
+    Object.keys(frames)[0],
+  );
   useEffect(() => {
     if (condition !== null) {
       setOpen(true);
       const { frameId } = condition;
       if (frameId) {
         setCurrFrameId(frameId);
-        setSrc(frames[frameId]);
+        setSrc(getImageUrl(frameId));
         console.log('with condition, call set src', condition);
       }
 
@@ -64,13 +66,13 @@ export default function ConditionImageEditor() {
         // use previous one
         if (condition) {
           condition.frameId = currFrameId;
-          setSrc(frames[currFrameId]);
+          setSrc(getImageUrl(currFrameId));
           changed = true;
         }
       }
       if (changed) forceUpdate();
     }
-  }, [condition, frames, currFrameId]);
+  }, [condition, currFrameId]);
 
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
@@ -91,7 +93,7 @@ export default function ConditionImageEditor() {
     forceUpdate();
     if (condition) {
       if (!manual && condition.regions && condition.allowRegions.length) {
-        // suppress auto refresh when there are allow regions being used
+        // suppress auto refresh when there are allow regions being used.
         // those are heavy queries.
         return;
       }
@@ -208,7 +210,7 @@ export default function ConditionImageEditor() {
                     key={index}
                     className='select-none absolute left-0 top-0'
                     style={{ opacity: 1 / (index + 1) }}
-                    src={p.frame?.id && frames[p.frame.id]}
+                    src={p.frame?.id && getImageUrl(p.frame.id)}
                     draggable={false}
                   />
                 ))}
@@ -228,7 +230,7 @@ export default function ConditionImageEditor() {
               <div key={index} className='h-fit w-fit relative'>
                 <img
                   className='select-none w-full'
-                  src={x.frame?.id && frames[x.frame.id]}
+                  src={x.frame?.id && getImageUrl(x.frame.id)}
                   draggable={false}
                 />
                 <ConditionOverlay

@@ -1,19 +1,19 @@
 import { useStore } from '@nanostores/react';
 import { Routine_State } from 'acine-proto-dist';
 
-import { $frames, $sourceDimensions } from '@/state';
+import { $sourceDimensions } from '@/state';
 import EditableRoutineProperty from '@/ui/EditableRoutineProperty';
 import MouseRegion from '@/ui/MouseRegion';
 import { toPercentage } from '../client/util';
 import { Selectable } from './types';
 import useForceUpdate from './useForceUpdate';
+import { getImageUrl } from '../App.state';
 
 interface StateProps extends Selectable {
   state: Routine_State;
 }
 
 function State({ state, selected = false }: StateProps) {
-  const frames = useStore($frames);
   const [width, height] = useStore($sourceDimensions);
   const forceUpdate = useForceUpdate();
 
@@ -51,7 +51,7 @@ function State({ state, selected = false }: StateProps) {
           // takes up space (to expand parent box properly)
           <img
             key={index}
-            src={frames[sampleId]}
+            src={getImageUrl(sampleId)}
             className='opacity-0'
             draggable={false}
           />
@@ -59,7 +59,7 @@ function State({ state, selected = false }: StateProps) {
         {state.samples.map((sampleId, index) => (
           <img
             key={index}
-            src={frames[sampleId]}
+            src={getImageUrl(sampleId)}
             className='absolute left-0 top-0 pointer-events-none'
             // need pointer-events-none to prevent dragging the images
             style={{ opacity: 1 / (index + 1) }}
@@ -88,7 +88,7 @@ function State({ state, selected = false }: StateProps) {
         {state.samples.map((sampleId, index) => (
           <img
             key={index}
-            src={frames[sampleId]}
+            src={getImageUrl(sampleId)}
             draggable={false}
             className='hover:opacity-40'
             onClick={() => {

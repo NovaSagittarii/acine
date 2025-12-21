@@ -1,9 +1,9 @@
-import { $frames, $routine, $runtimeContext } from '@/state';
+import { $routine, $runtimeContext } from '@/state';
 import { atom } from 'nanostores';
 import { useStore } from '@nanostores/react';
 import { useCallback, useEffect, useRef } from 'react';
 import { GraphCanvas, GraphCanvasRef, GraphEdge, GraphNode } from 'reagraph';
-import { runtimeGoto, runtimeQueueEdge } from '../App.state';
+import { getImageUrl, runtimeGoto, runtimeQueueEdge } from '../App.state';
 import Checkbox from './ui/Checkbox';
 import { getEdgeDisplay } from './Edge.util';
 import Node from './Node';
@@ -18,13 +18,12 @@ export default function RoutineViewer() {
 
   const routine = useStore($routine);
   const context = useStore($runtimeContext);
-  const frames = useStore($frames);
   const nodes = useCallback(() => {
     return Object.values(routine.nodes).map((n) => {
       const extra = {} as GraphNode;
       if (n.defaultCondition?.condition?.$case === 'image') {
         const { frameId } = n.defaultCondition.condition.image;
-        const url = frames[frameId];
+        const url = getImageUrl(frameId);
         extra.icon = url;
       }
       return {
@@ -34,7 +33,7 @@ export default function RoutineViewer() {
         subLabel: n.description,
       } as GraphNode;
     });
-  }, [frames, routine]);
+  }, [routine]);
   const edges = useCallback(() => {
     return Object.values(routine.nodes).flatMap((n) =>
       n.edges

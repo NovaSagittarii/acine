@@ -6,14 +6,18 @@ https://github.com/pallets/quart/?tab=readme-ov-file#quickstart
 """
 
 import io
+import re
 from pathlib import Path
 
 from quart import Quart, Response, send_file
+from quart_cors import cors
 
 from acine.persist import PrefixedFilesystem
 from acine.persist import path as data_path
 
 app = Quart(__name__)
+app = cors(app, allow_origin=re.compile("https?://localhost:(4173|5173)"))
+# app = cors(app, allow_origin='*')  # if remote access
 
 
 @app.route("/data/<routine_id>/img/<img_id>")

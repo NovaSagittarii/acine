@@ -27,6 +27,7 @@ dependencies = [
     "pytest-watcher>=0.4.3",
     "pywin32>=311",
     "quart>=0.20.0",
+    "quart-cors>=0.8.0",
     "scikit-image==0.25.2",
     "types-aiofiles>=24.1.0.20250822",
     "types-networkx>=3.5.0.20250918",
