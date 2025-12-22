@@ -4,13 +4,13 @@ Image persistence / save to disk.
 
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Final, List, Optional
 
 import py7zr
 from aiofiles import open as aopen
 
-dirname = os.path.dirname(__file__)
-path = os.path.join(dirname, "..", "..", "data")
+DIRNAME: Final[str] = os.path.dirname(__file__)
+PATH: Final[str] = os.path.join(DIRNAME, "..", "..", "data")
 
 
 def resolve(*paths: str) -> str:
@@ -18,7 +18,7 @@ def resolve(*paths: str) -> str:
     Resolves file path relative to data folder
     """
     assert not paths or isinstance(paths[0], str), "expect strings"
-    return os.path.realpath(os.path.join(path, *paths))
+    return os.path.realpath(os.path.join(PATH, *paths))
 
 
 async def fs_write(filename: List[str], contents: bytes) -> None:
