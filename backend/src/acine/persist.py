@@ -4,7 +4,7 @@ Image persistence / save to disk.
 
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import py7zr
 from aiofiles import open as aopen
@@ -60,6 +60,48 @@ def mkdir(dirpath: List[str]) -> None:
     os.makedirs(resolve(*dirpath), exist_ok=True)
 
 
+class OutputStream(py7zr.io.Py7zIO):
+    """Writer for in-memory extraction, based on example network storage writer from
+    https://py7zr.readthedocs.io/en/latest/advanced.html#example-to-extract-into-network-storage
+    """
+
+    def __init__(self, fname: str):
+        self.fname = fname
+        self.length = 0
+        self.data = bytearray()
+
+    def write(self, data: bytes | bytearray) -> int:
+        # py7zr calls this multiple times to append extracted data
+        # returns number of bytes written, check py7zr.io.HashIO
+        self.length += len(data)
+        self.data += data
+        return len(data)
+
+    def read(self, _: Optional[int] = None) -> bytes:
+        return b""
+
+    def seek(self, offset: int, whence: int = 0) -> int:
+        return offset
+
+    def flush(self) -> None:
+        pass
+
+    def size(self) -> int:
+        return self.length
+
+
+class OutputStreamFactory(py7zr.io.WriterFactory):
+    """Factory class to return StreamWriter object."""
+
+    def __init__(self) -> None:
+        self.files: dict[str, OutputStream] = {}
+
+    def create(self, filename: str) -> py7zr.io.Py7zIO:
+        product = OutputStream(filename)
+        self.files[filename] = product
+        return product
+
+
 class PrefixedFilesystem:
     """
     Calls persist module methods (fs read/write sync/async) with extra prefix.
@@ -96,13 +138,7 @@ class PrefixedFilesystem:
         return await fs_read([*self.prefix, *filename])
 
     async def read_archive(self, filename: List[str]) -> bytes:
-        mkdir([*self.prefix, "tmp"])
-        os.chdir(self.resolve("tmp"))
-        path = Path(*filename)
+        factory = OutputStreamFactory()
         with py7zr.SevenZipFile(Path(self.resolve("archive.7z")), "r") as archive:
-            try:
-                archive.extract(path=self.resolve("tmp"), targets=filename)
-                async with aopen(path, "rb") as file:
-                    return await file.read()
-            finally:
-                os.remove(path)
+            archive.extract(factory=factory, path=self.resolve("tmp"), targets=filename)
+        return next(iter(factory.files.values())).data
