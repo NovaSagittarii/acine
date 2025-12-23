@@ -68,11 +68,11 @@ budget issue tracker
   - [x] variable display scaling support
   - [ ] hotkeys on buttons
   - [ ] metrics (high-level version of duration logging)
-  - [ ] memory-only 7z access
+  - [x] memory-only 7z access
     - https://pypi.org/project/py7zr/
     - https://py7zr.readthedocs.io/en/v1.0.0/advanced.html
     - [x] in-memory extraction (read)
-    - [ ] in-memory archive (write)
+    - [x] in-memory archive (write)
 - v1.1.0 Runtime Optimization
   - some sort of template match cache to speed up future queries
   - find the magic pixel(s)
