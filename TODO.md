@@ -70,9 +70,10 @@ budget issue tracker
   - [ ] metrics (high-level version of duration logging)
   - [x] memory-only 7z access
     - https://pypi.org/project/py7zr/
-    - https://py7zr.readthedocs.io/en/v1.0.0/advanced.html
     - [x] in-memory extraction (read)
+      - https://py7zr.readthedocs.io/en/v1.0.0/advanced.html
     - [x] in-memory archive (write)
+      - simulating library internal datatypes
 - v1.1.0 Runtime Optimization
   - some sort of template match cache to speed up future queries
   - find the magic pixel(s)
