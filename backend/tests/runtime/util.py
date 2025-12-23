@@ -1,0 +1,55 @@
+"""
+Runtime Testing Utils
+- Graph generation
+"""
+
+from itertools import pairwise
+
+from acine.runtime.runtime import Routine
+
+
+def create_from_edges(edges: list[Routine.Edge]) -> Routine:
+    adj: dict[str, list[Routine.Edge]] = {}
+    for i, e in enumerate(edges):
+        # handle defaults
+        if not e.trigger:
+            e.trigger = e.EdgeTriggerType.EDGE_TRIGGER_TYPE_STANDARD
+        if not e.id:
+            e.id = f"e{i}"
+
+        # update adj
+        assert e.u, "edge requires source endpoint"
+        assert e.to, "edge requires target endpoint"
+        if e.u not in adj:
+            adj[e.u] = []
+        if e.to not in adj:
+            adj[e.to] = []
+        adj[e.u].append(e)
+    return Routine(
+        nodes={
+            id: Routine.Node(
+                id=id,
+                name=id,
+                type=Routine.Node.NodeType.NODE_TYPE_STANDARD,
+                edges=edges,
+            )
+            for id, edges in adj.items()
+        }
+    )
+
+
+def forest(k: int = 10) -> Routine:
+    """
+    Generates a set of k disconnected nodes (start, n1, ... n(k-1)).
+    (Not meant to be routed on)
+    """
+    ids = ["start"] + [f"n{i}" for i in range(1, k)]
+    return create_from_edges([Routine.Edge(u=id, to=id) for id in ids])
+
+
+def chain(k: int = 10) -> Routine:
+    """start -> n1 -> n2 -> n3 -> ... -> n(k-1)"""
+    ids = ["start"] + [f"n{i}" for i in range(1, k)]
+    return create_from_edges(
+        [Routine.Edge(u=source, to=target) for source, target in pairwise(ids)]
+    )
