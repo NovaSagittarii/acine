@@ -463,7 +463,7 @@ class Runtime:
             return
         _, data = cv2.imencode(".bmp", img)
         buffer = io.BytesIO(data)
-        id = uuid7().hex
+        id = str(uuid7())
         await self.pfs.write_archive([f"{id}.bmp"], buffer.getvalue())
 
         event = Event(
