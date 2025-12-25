@@ -2,6 +2,7 @@
 A more complete test suite for Runtime?
 """
 
+from copy import deepcopy
 from typing import Iterator
 
 import pytest
@@ -113,5 +114,30 @@ class TestGoto:
     @pytest.mark.parametrize("target", ("n1", "n3", "n9"))
     async def test_basic(self, runtime: Runtime, target: str) -> None:
         assert runtime.context.curr.id == "start", "Runtime initializes to start."
+        await runtime.goto(target)
+        assert runtime.context.curr.id == target, "should reach target"
+
+
+class TestContext:
+    """
+    `get_context` and `restore_context` are used to restore state when the
+    navigation graph is updated by the editor.
+
+    NOTE: Not sure at what graph size that it becomes practical to handle
+    each update separately instead of pushing the graph every time.
+    """
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
+    @pytest.mark.parametrize("target", ("n4", "n7", "n9"))
+    @pytest.mark.parametrize("source", ("n1", "n2", "n3"))
+    async def test_basic(self, runtime: Runtime, source: str, target: str) -> None:
+        await runtime.goto(source)
+        assert runtime.context.curr.id == source, "should reach source (tmp)"
+        ctx = deepcopy(runtime.get_context())
+        await runtime.goto(target)
+        assert runtime.context.curr.id == target, "should reach target"
+        runtime.restore_context(ctx)
+        assert runtime.context.curr.id == source, "should be back at source"
         await runtime.goto(target)
         assert runtime.context.curr.id == target, "should reach target"
