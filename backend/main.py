@@ -1,10 +1,14 @@
+import asyncio
+
+from autobahn.asyncio.websocket import WebSocketServerFactory  # type: ignore
+
+from acine.instance_manager import EXAMPLE_ID, Routine, create_testenv, validate_routine
 from acine.server import AcineServerProtocol
 
 if __name__ == "__main__":
-
-    import asyncio
-
-    from autobahn.asyncio.websocket import WebSocketServerFactory  # type: ignore
+    # make sure Example Routine (testenv) exists
+    if not validate_routine(Routine(id=EXAMPLE_ID)):
+        create_testenv()
 
     factory = WebSocketServerFactory()
     factory.protocol = AcineServerProtocol

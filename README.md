@@ -47,6 +47,10 @@ Have an installation of Python and NodeJS.
    npm run dev:testenv  # starts testenv (lightweight tkinter app)
    ```
 
+   > [!NOTE]
+   > Opening the example routine in the editor will launch
+   > testenv so it's unlikely you need to run it via npm run.
+
 5. Run
 
    ```sh
@@ -61,7 +65,11 @@ Have an installation of Python and NodeJS.
 acine uses [AutoHotkey](https://www.autohotkey.com/) via the
 [ahk](https://github.com/spyoungtech/ahk) Python package to simulate inputs.
 In windowed mode (useful if you want to still use the device), there are
-issues with Unity/UE-based games, but the following environments work well.
+issues with Unity/UE-based games (they read from hardware mouse location,
+ignoring mouse events sent to window).
 
-- [crosvm](https://github.com/google/crosvm) / [Google Play Games beta](https://play.google.com/googleplaygames)
-- [Mumu Emulator](https://www.mumuplayer.com)
+| Platform                                                                                                       | OS                   | Windowed support                | Screenless support (i.e. laptop closed) |
+| -------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- | --------------------------------------- |
+| [crosvm](https://github.com/google/crosvm) / [Google Play Games beta](https://play.google.com/googleplaygames) | win32                | :white_check_mark:              | :white_check_mark:                      |
+| [Mumu Emulator](https://www.mumuplayer.com)                                                                    | win32                | :white_check_mark:              | :x: screen does not update              |
+| Unity/Unreal Engine                                                                                            | win32 (probably any) | :x: virtual mouse does not work | :grey_question:                         |

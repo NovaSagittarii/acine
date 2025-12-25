@@ -28,4 +28,4 @@ async def read_img(routine_id: str, img_id: str) -> Response:
 @app.route("/data/<routine_id>/archive/<img_id>")
 async def read_img_archive(routine_id: str, img_id: str) -> Response:
     data = await PrefixedFilesystem([routine_id]).read_archive([f"{img_id}.bmp"])
-    return await send_file(io.BytesIO(data), mimetype="image/bmp")
+    return await send_file(io.BytesIO(data), mimetype="image/bmp", cache_timeout=300)

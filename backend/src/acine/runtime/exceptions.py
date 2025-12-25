@@ -1,7 +1,21 @@
 from acine_proto_dist.routine_pb2 import Routine
 
 
-class NavigationError(RuntimeError):
+class AcineRuntimeError(RuntimeError):
+    """Unspecified acine run-time error."""
+
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
+class AcineInterrupt(AcineRuntimeError):
+    """Runtime was interrupted and is now terminating/terminated."""
+
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
+class AcineNavigationError(AcineRuntimeError):
     """Unable to navigate for whatever reason."""
 
     def __init__(self, u: str, v: str):
@@ -13,7 +27,7 @@ class NavigationError(RuntimeError):
         """Attempted to"""
 
 
-class NoPathError(NavigationError):
+class AcineNoPath(AcineNavigationError):
     """
     No navigable path from u to v.
 
@@ -25,7 +39,7 @@ class NoPathError(NavigationError):
         super().__init__(u, v)
 
 
-class ExecutionError(RuntimeError):
+class ExecutionError(AcineRuntimeError):
     """Unable to complete an edge transition for whatever reason."""
 
     def __init__(self, edge: Routine.Edge):
