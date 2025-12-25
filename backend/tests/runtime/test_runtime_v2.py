@@ -2,15 +2,15 @@
 A more complete test suite for Runtime?
 """
 
-from typing import Generator
+from typing import Iterator
 
 import pytest
 from pytest_mock import MockerFixture
 
 from acine.runtime.runtime import (
+    AcineNavigationError,
     ExecResult,
     IController,
-    NavigationError,
     Routine,
     Runtime,
 )
@@ -35,8 +35,9 @@ def mocked_controller(mocker: MockerFixture) -> IController:
 def runtime(
     request: pytest.FixtureRequest,
     mocked_controller: IController,
-) -> Runtime:
-    return Runtime(request.param, mocked_controller)
+) -> Iterator[Runtime]:
+    with Runtime(request.param, mocked_controller) as rt:
+        yield rt
 
 
 class TestInvalid:
@@ -63,7 +64,7 @@ class TestInvalid:
 
 
 @pytest.fixture(scope="class")
-def class_setup_teardown() -> Generator[None, None, None]:
+def class_setup_teardown() -> Iterator[None]:
     print("\nSetting up class-level resources...")
     yield  # This is where the tests in the class will run
     print("Tearing down class-level resources...")
@@ -91,7 +92,7 @@ class TestQueueEdge:
     @pytest.mark.parametrize("runtime", (forest(),), indirect=True, ids=["forest"])
     async def test_attempt(self, mocker: MockerFixture, runtime: Runtime) -> None:
         mocked_goto = mocker.patch.object(runtime, "goto")
-        mocked_goto.side_effect = NavigationError("a", "b")
+        mocked_goto.side_effect = AcineNavigationError("a", "b")
         assert (
             await runtime.queue_edge("e2") == ExecResult.REQUIREMENT_TYPE_ATTEMPT
         ), "Unable to get there."

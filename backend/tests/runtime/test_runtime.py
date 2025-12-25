@@ -1,5 +1,5 @@
 from random import randint
-from typing import Any, Never, Tuple, cast
+from typing import Any, Iterator, Never, Tuple, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -47,9 +47,9 @@ def mocked_runtime(
     mocked_controller: Mock,
     mocked_now: Mock,
     mocked_sleep: AsyncMock,
-) -> MockedRuntimeUtilType:
-    rt = Runtime(r1, mocked_controller)
-    return (mocked_now, mocked_sleep, mocked_controller, rt)
+) -> Iterator[MockedRuntimeUtilType]:
+    with Runtime(r1, mocked_controller) as rt:
+        yield (mocked_now, mocked_sleep, mocked_controller, rt)
 
 
 @pytest.fixture
@@ -93,7 +93,6 @@ class TestRuntime:
         controller.mouse_move.assert_called_with(x, y)
         now.assert_called()
         sleep.assert_called_once()
-        rt.__exit__()
 
     @pytest.mark.asyncio
     async def test_run_replay_mouse_up(
@@ -107,7 +106,6 @@ class TestRuntime:
         controller.mouse_up.assert_called()
         now.assert_called()
         sleep.assert_called_once()
-        rt.__exit__()
 
     @pytest.mark.asyncio
     async def test_invalid_restore_context(
@@ -122,7 +120,6 @@ class TestRuntime:
         assert rt.get_context().curr == old_curr
         rt.restore_context(context)
         assert rt.get_context().curr == old_curr
-        rt.__exit__()
 
     @pytest.mark.asyncio
     async def test_invalid_goto(
@@ -132,7 +129,6 @@ class TestRuntime:
         with pytest.raises(ValueError) as info:
             await rt.goto("INVALID ID")
         assert "target does not exist" in str(info.value)
-        rt.__exit__()
 
 
 class TestRuntimeIntegration:

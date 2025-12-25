@@ -199,7 +199,7 @@ class Runtime:
         if hasattr(self, "worker"):
             self.worker_terminate = True
             self.worker.join()
-        if self.exc_info[1]:
+        if hasattr(self, "exc_info") and self.exc_info[1]:
             raise self.exc_info[1].with_traceback(self.exc_info[2])
 
     # __enter__/__exit is for test usage (auto-cleanup)
