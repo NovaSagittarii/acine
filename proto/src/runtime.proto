@@ -26,8 +26,8 @@ message RuntimeData {
   reserved 2;     // frames?
   reserved 3;     // states?
   reserved 4;     // nodes?
-  reserved 5;     // map<string, ExecutionInfo> edges = 5;    // edge aux data
-  reserved 6;     // map<string, ExecutionInfo> sgroups = 6;  // sgroup aux data
+  map<string, ExecutionInfo> edges = 5;           // edge aux data
+  map<string, ExecutionInfo> sgroups = 6;         // sgroup aux data
   map<string, ExecutionInfo> execution_info = 7;  // all aux data
 }
 
@@ -40,14 +40,15 @@ message RuntimeState {
 
 message ExecutionInfo {
   string id = 1;
-  repeated Event events = 2;
+  repeated Event events = 2;  // probably unused
   Metric stats = 3;
 
   google.protobuf.Timestamp last_run = 4;
   // Last completed execution.
   //
   // In SchedulingGroup -- Used to determine whether a group needs to
-  // be scheduled as catch-up. Previously, only triggered on refresh time.
+  // be scheduled as catch-up. This happens if now is after the next time
+  // to schedule a run since the last run.
 }
 
 message Metric {
