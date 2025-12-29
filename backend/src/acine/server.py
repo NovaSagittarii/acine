@@ -62,21 +62,21 @@ class Controller(IController):
     async def mouse_move(self, x: int, y: int) -> None:
         p = Packet(input_event=InputEvent(move=Point(x=x, y=y)))
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return self.ih.mouse_move(x, y)
+        return await self.ih.mouse_move(x, y)
 
     async def mouse_down(self) -> None:
         p = Packet(
             input_event=InputEvent(mouse_down=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
         )
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return self.ih.mouse_down()
+        return await self.ih.mouse_down()
 
     async def mouse_up(self) -> None:
         p = Packet(
             input_event=InputEvent(mouse_up=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
         )
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return self.ih.mouse_up()
+        return await self.ih.mouse_up()
 
 
 class AcineServerProtocol(WebSocketServerProtocol):
@@ -242,14 +242,14 @@ class AcineServerProtocol(WebSocketServerProtocol):
         match event_type:
             case "move":
                 pos: Point = packet.input_event.move
-                self.ih.mouse_move(pos.x, pos.y)
+                await self.ih.mouse_move(pos.x, pos.y)
             case "mouse_up" | "mouse_down":
                 if event_type == "mouse_up":
                     button = packet.input_event.mouse_up
-                    self.ih.mouse_up()
+                    await self.ih.mouse_up()
                 else:
                     button = packet.input_event.mouse_down
-                    self.ih.mouse_down()
+                    await self.ih.mouse_down()
                 match button:
                     case InputEvent.MouseButton.MOUSE_BUTTON_LEFT:
                         pass

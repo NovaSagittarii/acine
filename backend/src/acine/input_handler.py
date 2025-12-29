@@ -49,10 +49,9 @@ from os import system
 from typing import Optional
 
 import win32gui
-from ahk import AHK
+from ahk import AsyncAHK
 
-AHK(version="v1")
-ahk = AHK(version="v2")
+ahk = AsyncAHK(version="v2")
 
 win32user = ctypes.windll.user32
 win32user.SetProcessDPIAware()
@@ -75,33 +74,47 @@ def get_title_bar_height(win_title: str) -> int:
 
 class InputHandler:
     def __init__(self, title: Optional[str], cmd: str = ""):
+        self._title = title
+        self._cmd = cmd
+
         self.can_close = False
         self.y_offset = 0
-        if title:
-            if cmd and not ahk.list_windows(title=title):
-                system(cmd)
-            self.title = title
-            self.win = ahk.win_wait(title, timeout=600, detect_hidden_windows=True)
-            self.win.minimize()
-            self.win.restore()
-            self.win.activate()  # min/res/act used to ensure mouse works
-            self.win.to_bottom()  # not necessary
-            print(self.win.title, self.win)
-            print(self.win.get_position())
-            self.can_close = True
-            self.y_offset = get_title_bar_height(self.win.get_title())
-        else:
-            # target desktop
-            raise NotImplementedError("Targeting desktop is not implemented.")
-            # self.title = None
-            # self.win = ahk # ahk is not compatible with self.win
+        self._init_completed = False
 
         self.is_mouse_down = False
         self.x = 0
         self.y = 0
         print(f"y-offset(titlebar)={self.y_offset}")
 
-    def mouse_move(self, x: int, y: int) -> None:
+    async def init(self):
+        if self._init_completed:
+            return
+        self._init_completed = True
+        title = self._title
+        cmd = self._cmd
+
+        if title:
+            if cmd and not await ahk.list_windows(title=title):
+                system(cmd)
+            self.title = title
+            self.win = await ahk.win_wait(
+                title, timeout=600, detect_hidden_windows=True
+            )
+            await self.win.minimize()
+            await self.win.restore()
+            await self.win.activate()  # min/res/act used to ensure mouse works
+            await self.win.to_bottom()  # not necessary
+            print(await self.win.title, self.win)
+            print(await self.win.get_position())
+            self.can_close = True
+            self.y_offset = get_title_bar_height(await self.win.get_title())
+        else:
+            # target desktop
+            raise NotImplementedError("Targeting desktop is not implemented.")
+            # self.title = None
+            # self.win = ahk # ahk is not compatible with self.
+
+    async def mouse_move(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
         # shadow offset in windows (... ? no longer seems to be a thing)
@@ -111,24 +124,26 @@ class InputHandler:
         # window title bar (required in AHK v2)
         self.y -= self.y_offset
 
-        self.update_mouse()
+        await self.update_mouse()
 
-    def mouse_down(self) -> None:
+    async def mouse_down(self) -> None:
         self.is_mouse_down = True
-        self.update_mouse()
+        await self.update_mouse()
 
-    def mouse_up(self) -> None:
+    async def mouse_up(self) -> None:
         self.is_mouse_down = False
-        self.update_mouse()
+        await self.update_mouse()
 
-    def update_mouse(self) -> None:
+    async def update_mouse(self) -> None:
+        await self.init()
         flags = "D NA" if self.is_mouse_down else "U NA"
-        self.win.click(x=self.x, y=self.y, button="L", options=flags)
+        await self.win.click(x=self.x, y=self.y, button="L", options=flags)
         # print(self.x, self.y, flags)
 
-    def close(self) -> None:
+    async def close(self) -> None:
+        await self.init()
         if self.can_close:
-            self.win.close()
+            await self.win.close()
 
 
 if __name__ == "__main__":
