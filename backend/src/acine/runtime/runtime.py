@@ -137,14 +137,12 @@ class Runtime:
         if routine.nodes:
             assert "start" in routine.nodes, "Node with id=start should exist."
 
-        self.routine = routine
-        self.controller = controller
-        self.data = data or RuntimeData()
+        self.routine: Final = routine
+        self.controller: Final = controller
+        self.data: Final = data or RuntimeData()
         # i can't believe default parameter is a reference ...
-        self.enable_logs = enable_logs
-        self.pfs = None
-        if self.enable_logs:
-            self.pfs = get_pfs(routine)
+        self.enable_logs: Final = enable_logs
+        self.pfs: Final = get_pfs(routine) if self.enable_logs else None
 
         self.nodes: dict[str, Routine.Node] = {}  # === routine.nodes
         self.edges: dict[str, Routine.Edge] = {}
