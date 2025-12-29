@@ -55,7 +55,7 @@ export default function RoutineViewer() {
         } as GraphNode;
       })
       .filter((x) => x !== null);
-  }, [routine]);
+  }, [routine, dnodes]);
   const edges = useCallback(() => {
     return Object.values(dnodes).flatMap((u) =>
       u.dependencies.map(
@@ -69,7 +69,7 @@ export default function RoutineViewer() {
           }) as GraphEdge,
       ),
     );
-  }, [routine]);
+  }, [routine, dnodes]);
 
   useEffect(() => {
     if (follow) {

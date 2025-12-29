@@ -157,6 +157,8 @@ message Routine {
 
       /* takes on from/to node's default condition
        * CANNOT be used as a node's default condition
+       *
+       * TODO: Replace with source=23 -- simplify implementation
        */
       bool auto = 23;
 

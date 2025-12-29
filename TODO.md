@@ -42,8 +42,8 @@ budget issue tracker
   - [x] implement dependency (implicit)
   - [x] implement scheduling groups
   - [ ] implement scheduler (multicore EDF, Postorder DFS)
-  - [ ] implement action duration logging
-  - [ ] implement scheduled action
+  - [x] implement action duration logging
+  - [x] implement scheduled action
   - [ ] implement dependency (implicit) with navigation listen
 - v0.4.0 Background Runtime
   - [x] single routine background task
@@ -60,9 +60,11 @@ budget issue tracker
 - v0.7.0 Scheduler Error Handling (Faults)
   - [x] variable success modes
   - [ ] variable subroutine success mode (resolve/reject/recover return nodes)
-  - [ ] failure modes: "cannot reach", "reach but timeout"
+  - [ ] failure modes
+    - [x] cannot reach
+    - [ ] reach but timeout
   - [ ] scheduled retry/backoff
-  - [ ] temporary deletion of failed edge
+  - [x] temporary deletion of failed edge
 - v1.0.0 Quality of Life
   - [x] node/edge preset
   - [x] variable display scaling support
@@ -77,21 +79,26 @@ budget issue tracker
 - v1.1.0 Runtime Optimization
   - some sort of template match cache to speed up future queries
   - find the magic pixel(s)
+- v1.2.0 Multi-Instance
+  - ConfigMap for multiple instances
+  - Parameters (parameterized actions, parameterized conditions)
 
 ### Lower Priority
 
 - [ ] implement search by node name (frontend editor)
-- [ ] implement graph based editor
+- [x] implement graph based editor
 - [ ] route display
 - [x] migrate venv to uv
 - [ ] self loop with "sample"/"data source" action (text match parse)
 - [ ] move (py, proto) comments to after
+  - partially done
 - [x] proto map<> instead of repeated
 - [ ] ts alias, import sorting
+  - https://github.com/trivago/prettier-plugin-sort-imports
 - [ ] gpu related capture
 - [ ] time travel capture (pick frame from a recording)
 - [ ] uvloop
-- [ ] server methods tests
+- [ ] server methods tests (E2E)
 - [x] mypy type checks
 
 Currently the tasks below aren't being considered (even lower priority) after

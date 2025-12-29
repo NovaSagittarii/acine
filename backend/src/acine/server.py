@@ -25,6 +25,7 @@ from autobahn.websocket.types import ConnectionRequest  # type: ignore
 from acine import instance_manager
 from acine.capture import GameCapture
 from acine.input_handler import InputHandler
+from acine.instance_manager import write_runtime_data
 from acine.persist import PrefixedFilesystem
 from acine.runtime.check_image import SimilarityResult, check_similarity
 from acine.runtime.runtime import IController, ImageBmpType, Runtime
@@ -99,6 +100,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
         # cleanup
         if self.gc:
             print("run cleanup")
+            write_runtime_data(self.rt.routine, self.rt.data)  # persist logs
             self.gc.close()
             self.gc = None
             self.ih = None
@@ -188,6 +190,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
             on_change_curr=self.on_change_curr,
             on_change_return=self.on_change_return,
             on_change_edge=self.on_change_edge,
+            enable_logs=True,
         )
         if old_context:
             self.rt.restore_context(old_context)

@@ -65,7 +65,7 @@ export default function RoutineViewer() {
       }
     }
     if (!follow) graphRef.current?.fitNodesInView();
-  }, [context?.currentNode?.id, follow]);
+  }, [context?.stackEdges, context?.currentNode?.id, follow]);
 
   return (
     <div className='relative flex w-full h-full overflow-hidden'>

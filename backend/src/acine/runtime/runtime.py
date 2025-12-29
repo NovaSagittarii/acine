@@ -21,12 +21,18 @@ import cv2
 import networkx as nx
 from acine_proto_dist.input_event_pb2 import InputReplay
 from acine_proto_dist.routine_pb2 import Routine
-from acine_proto_dist.runtime_pb2 import Event, RuntimeData
+from acine_proto_dist.runtime_pb2 import Action, RuntimeData, RuntimeState
 from uuid_utils import uuid7
 
 from acine.instance_manager import get_pfs
-from acine.logging import is_edge_ready, mark_failure, mark_success
-from acine.runtime.check import CheckResult, check, check_once
+from acine.logging import (
+    ActionLogger,
+    NavigationLogger,
+    is_edge_ready,
+    mark_failure,
+    mark_success,
+)
+from acine.runtime.check import ActionResult, check, check_once
 from acine.runtime.check_image import ImageBmpType, check_similarity
 from acine.runtime.exceptions import (
     AcineInterrupt,
@@ -266,7 +272,10 @@ class Runtime:
                     # will fall through first time before waiting for
                     # MainThread to call goto
                     try:
-                        await self.__run_action(self.worker_queued_edge)
+                        with NavigationLogger(
+                            self.data, self.get_runtime_state(), comment="queue_edge"
+                        ) as logger:
+                            await self.__run_action(self.worker_queued_edge, logger)
                         await resolve()
                     except AcineRuntimeError as e:
                         await resolve(e)
@@ -275,136 +284,144 @@ class Runtime:
                 await resolve()
                 continue
 
-            # --- Build graph with current state of return stack.
-            # NOTE: currently not optimized
-            # TODO: benchmark to see if precompute is necessary
-            H = self.G.copy()
-            """
-            modified graph with extra edges to handle subroutines
+            with NavigationLogger(self.data, self.get_runtime_state()) as logger:
+                # --- Build graph with current state of return stack.
+                # NOTE: currently not optimized
+                # TODO: benchmark to see if precompute is necessary
+                H = self.G.copy()
+                """
+                modified graph with extra edges to handle subroutines
 
-            for any edge `e` with subroutine (u -> v) that goes to node `s`
-            - add an edge (u -> s) linked to edge `e`
-              - to handle triggering subroutines
+                for any edge `e` with subroutine (u -> v) that goes to node `s`
+                - add an edge (u -> s) linked to edge `e`
+                - to handle triggering subroutines
 
-            for any return nodes `r` with some node `k` on the call stack
-            - add an edge (r -> k)
-              - to handle ending subroutines
+                for any return nodes `r` with some node `k` on the call stack
+                - add an edge (r -> k)
+                - to handle ending subroutines
 
-            otherwise you are forced to take the subroutine so you can leave
-            the subroutine edge in there.
-            """
-            # NOTE: the DiGraph doesn't have multiedge so need to
-            # explicitly add these edges again later
-            for u in self.routine.nodes.values():
-                for edge in u.edges:
-                    if edge.WhichOneof("action") == "subroutine":
-                        H.add_edge(u.id, edge.subroutine, data=edge)
-            # BFS/reachability based way for subroutine depth 2+
-            # NOTE: you **could** precompute a RET-reachability for each node
-            curr = self.context.curr
-            for i in range(1, len(self.context.call_stack)):
-                ret = self.nodes[self.context.call_stack[-i].to]
-                reachable = list(nx.descendants(self.G, curr.id))
-                # might be the case that the RET from stack is itself a return node
-                # ^ why ???
-                reachable.append(curr.id)
-                for uid in reachable:
-                    u = self.nodes[uid]
-                    if u.type & Routine.Node.NODE_TYPE_RETURN:
-                        H.add_edge(u.id, ret.id)
-                curr = ret
+                otherwise you are forced to take the subroutine so you can leave
+                the subroutine edge in there.
+                """
+                # NOTE: the DiGraph doesn't have multiedge so need to
+                # explicitly add these edges again later
+                for u in self.routine.nodes.values():
+                    for edge in u.edges:
+                        if edge.WhichOneof("action") == "subroutine":
+                            H.add_edge(u.id, edge.subroutine, data=edge)
+                # BFS/reachability based way for subroutine depth 2+
+                # NOTE: you **could** precompute a RET-reachability for each node
+                curr = self.context.curr
+                for i in range(1, len(self.context.call_stack)):
+                    ret = self.nodes[self.context.call_stack[-i].to]
+                    reachable = list(nx.descendants(self.G, curr.id))
+                    # might be the case that the RET from stack is itself a return node
+                    # ^ why ???
+                    reachable.append(curr.id)
+                    for uid in reachable:
+                        u = self.nodes[uid]
+                        if u.type & Routine.Node.NODE_TYPE_RETURN:
+                            H.add_edge(u.id, ret.id)
+                    curr = ret
 
-            # --- Determine the ranking for which next nodes are closer to target.
-            ranking: list[Routine.Node] = []
-            s: str = self.context.curr.id  # source
-            t: str = self.target_node.id  # target
-            while len(H.adj[self.context.curr.id]):
-                try:
-                    path = nx.shortest_path(H, s, t)
-                    assert len(path) >= 2, "Path should go somewhere."
-                    ranking.append(self.nodes[path[1]])
-                    H.remove_edge(*path[:2])
-                except nx.NetworkXNoPath:
-                    break
-            if not ranking:
-                await resolve(AcineNoPath(s, t))
-                continue
-
-            # --- Determine the ranking for edges to take.
-            def index_of(node: Routine.Node) -> int:  # .index with js behavior
-                try:
-                    return ranking.index(node)
-                except ValueError:
-                    return -1
-
-            def calc_dist(e: Routine.Edge) -> int:
-                check = [e.to]
-                if e.WhichOneof("action") == "subroutine":
-                    check.append(e.subroutine)
-                res = [index_of(self.nodes[eid]) for eid in check]
-                res = [x for x in res if x != -1]
-                return min(res) if res else -1
-
-            sorted_edge_tuples = sorted(
-                [  # lower is better (treat as cost/penalty)
-                    (
-                        e.trigger != e.EDGE_TRIGGER_TYPE_INTERRUPT,  # interrupt
-                        calc_dist(e),  # estimated remaining distance
-                        e,
-                    )
-                    for e in self.nodes[self.context.curr.id].edges
-                    if is_edge_ready(self.data, e)
-                    or e.trigger == e.EDGE_TRIGGER_TYPE_INTERRUPT  # interrupt
-                ]
-            )
-            # remove useless edges... though navigation should be fully connected?
-            sorted_edges = [
-                e
-                for not_interrupt, priority, e in sorted_edge_tuples
-                if priority >= 0 or not not_interrupt
-            ]
-            if not sorted_edges:
-                await resolve(AcineNoPath(s, t))
-                continue
-
-            # --- Knowing the edge priority, start checking.
-            # keep looking at preconditions until one passes all but higher
-            # priority ones have timed out
-            # or if any interrupts become active
-            start_time = now()
-            is_complete = False
-            while not self.worker_terminate and not is_complete:
-                img = await self.controller.get_frame()
-                for edge in sorted_edges:
-                    if not is_edge_ready(self.data, edge):
-                        continue  # skip unready edges
-                    condition = self.__resolve_condition(edge, edge.precondition, False)
-                    # ok = self.__check_once(edge, condition, img=img)
-                    ok = self.__precheck_action(edge, img)
-                    if not ok:
-                        if now() > start_time + (condition.timeout or DEFAULT_TIMEOUT):
-                            # timed out
-                            mark_failure(self.data.edges.get_or_create(edge.id))
-                            pass
-                        elif edge.trigger != edge.EDGE_TRIGGER_TYPE_INTERRUPT:
-                            # need to wait for higher priority non-interrupt
-                            # to time out before attempting lower priority
-                            break  # quit loop to try again from 1st check
-                    else:
-                        # found something to take
-                        mark_success(self.data.edges.get_or_create(edge.id))
-                        is_complete = True
-                        try:
-                            await self.__run_action(edge)
-                        except PostconditionTimeoutError:
-                            pass
+                # --- Determine the ranking for which next nodes are closer to target.
+                ranking: list[Routine.Node] = []
+                s: str = self.context.curr.id  # source
+                t: str = self.target_node.id  # target
+                while len(H.adj[self.context.curr.id]):
+                    try:
+                        path = nx.shortest_path(H, s, t)
+                        assert len(path) >= 2, "Path should go somewhere."
+                        ranking.append(self.nodes[path[1]])
+                        H.remove_edge(*path[:2])
+                    except nx.NetworkXNoPath:
                         break
-                else:
-                    # if managed to get through all edges, as in they ALL timed out
-                    # then there is no path from this node.
+                if not ranking:
+                    logger.set_exception(logger.Exception.EXCEPTION_NO_PATH)
                     await resolve(AcineNoPath(s, t))
-                    break
-                await asyncio.sleep(0)
+                    continue
+
+                # --- Determine the ranking for edges to take.
+                def index_of(node: Routine.Node) -> int:  # .index with js behavior
+                    try:
+                        return ranking.index(node)
+                    except ValueError:
+                        return -1
+
+                def calc_dist(e: Routine.Edge) -> int:
+                    check = [e.to]
+                    if e.WhichOneof("action") == "subroutine":
+                        check.append(e.subroutine)
+                    res = [index_of(self.nodes[eid]) for eid in check]
+                    res = [x for x in res if x != -1]
+                    return min(res) if res else -1
+
+                sorted_edge_tuples = sorted(
+                    [  # lower is better (treat as cost/penalty)
+                        (
+                            e.trigger != e.EDGE_TRIGGER_TYPE_INTERRUPT,  # interrupt
+                            calc_dist(e),  # estimated remaining distance
+                            e,
+                        )
+                        for e in self.nodes[self.context.curr.id].edges
+                        if is_edge_ready(self.data, e)
+                        or e.trigger == e.EDGE_TRIGGER_TYPE_INTERRUPT  # interrupt
+                    ]
+                )
+                # remove useless edges... though navigation should be fully connected?
+                sorted_edges = [
+                    e
+                    for not_interrupt, priority, e in sorted_edge_tuples
+                    if priority >= 0 or not not_interrupt
+                ]
+                if not sorted_edges:
+                    logger.set_exception(logger.Exception.EXCEPTION_NO_PATH)
+                    await resolve(AcineNoPath(s, t))
+                    continue
+
+                # --- Knowing the edge priority, start checking.
+                # keep looking at preconditions until one passes all but higher
+                # priority ones have timed out
+                # or if any interrupts become active
+                start_time = now()
+                is_complete = False
+                while not self.worker_terminate and not is_complete:
+                    img = await self.controller.get_frame()
+                    for edge in sorted_edges:
+                        if not is_edge_ready(self.data, edge):
+                            continue  # skip unready edges
+                        condition = self.__resolve_condition(
+                            edge, edge.precondition, False
+                        )
+                        # ok = self.__check_once(edge, condition, img=img)
+                        ok = self.__precheck_action(edge, img)
+                        if not ok:
+                            if now() > start_time + (
+                                condition.timeout or DEFAULT_TIMEOUT
+                            ):
+                                # timed out
+                                mark_failure(self.data.edges.get_or_create(edge.id))
+                                pass
+                            elif edge.trigger != edge.EDGE_TRIGGER_TYPE_INTERRUPT:
+                                # need to wait for higher priority non-interrupt
+                                # to time out before attempting lower priority
+                                break  # quit loop to try again from 1st check
+                        else:
+                            # found something to take
+                            mark_success(self.data.edges.get_or_create(edge.id))
+                            is_complete = True
+                            try:
+                                await self.__run_action(edge, logger)
+                            except PostconditionTimeoutError:
+                                pass
+                            break
+                    else:
+                        # if managed to get through all edges, as in they ALL timed out
+                        # then there is no path from this node.
+                        logger.set_exception(logger.Exception.EXCEPTION_NO_PATH)
+                        await resolve(AcineNoPath(s, t))
+                        break
+                    await asyncio.sleep(0)
 
     def set_curr(self, node: Routine.Node) -> None:
         assert isinstance(node, Routine.Node), "ACCEPT NODE ONLY"
@@ -426,6 +443,13 @@ class Runtime:
 
     def peek(self) -> Runtime.Call:
         return self.context.call_stack[-1]
+
+    def get_runtime_state(self) -> RuntimeState:
+        return RuntimeState(
+            current_node=Routine.Node(id=self.context.curr.id),
+            target_node=self.target_node and Routine.Node(id=self.target_node.id),
+            stack_edges=[Routine.Edge(id=c.edge.id) for c in self.context.call_stack],
+        )
 
     def get_context(self) -> Context:
         return self.context
@@ -457,6 +481,8 @@ class Runtime:
         self.worker_has_work.set()
         while not self.worker_busy.wait(THREADING_EVENT_TIMEOUT):
             pass
+        # TODO: if python runtime exception, it won't get caught. instead
+        #       you need to run in debugger to find it. (fix this later)
         if self.worker_result:
             raise self.worker_result
         return
@@ -522,18 +548,20 @@ class Runtime:
     async def __check(
         self,
         edge: Routine.Edge,
-        phase: Event.Phase.ValueType,
+        phase: Action.Phase.ValueType,
+        logger: ActionLogger,
         *,
         no_delay: bool = False,
-        use_dest: bool = True,
         critical: bool = False,
-    ) -> CheckResult:
+    ) -> ActionResult.ValueType:
         """
-        processes condition before calling `check`
+        resolves condition and then calls `check`
         """
-        if phase == Event.PHASE_PRECONDITION:
+
+        use_dest = phase == Action.PHASE_POSTCONDITION
+        if phase == Action.PHASE_PRECONDITION:
             condition = edge.precondition
-        elif phase == Event.PHASE_POSTCONDITION:
+        elif phase == Action.PHASE_POSTCONDITION:
             condition = edge.postcondition
         else:
             assert False, "Invalid __check(phase) parameter."
@@ -545,18 +573,11 @@ class Runtime:
             condition, self.controller.get_frame, ref_img, no_delay=no_delay
         )
         await self.__log(
-            edge,
+            logger,
             img,
             phase=phase,
-            result=res,
-            level=Event.LEVEL_CRITICAL if critical else Event.LEVEL_LOG,
         )
-        if res == Event.RESULT_PASS:
-            return CheckResult.PASS
-        elif res == Event.RESULT_TIMEOUT:
-            return CheckResult.TIMEOUT
-        else:
-            return CheckResult.ERROR
+        return res
 
     def __check_once(
         self,
@@ -582,12 +603,9 @@ class Runtime:
 
     async def __log(
         self,
-        edge: Routine.Edge,
+        logger: ActionLogger,
         img: ImageBmpType,
-        phase: Event.Phase.ValueType = Event.PHASE_UNSPECIFIED,
-        result: Event.Result.ValueType = Event.RESULT_UNSPECIFIED,
-        level: Event.Level.ValueType = Event.LEVEL_LOG,
-        comment: str = "",
+        phase: Action.Phase.ValueType = Action.PHASE_UNSPECIFIED,
     ) -> None:
         if not self.enable_logs or not self.pfs:
             return
@@ -596,13 +614,11 @@ class Runtime:
         id = str(uuid7())
         await self.pfs.write_archive([f"{id}.bmp"], buffer.getvalue())
 
-        event = Event(
-            archive_id=id, phase=phase, result=result, comment=comment, level=level
-        )
-        event.timestamp.GetCurrentTime()
-        self.data.execution_info.get_or_create(edge.id).events.append(event)
+        logger.log(phase, id)
 
-    async def __run_action(self, action: Routine.Edge) -> None:
+    async def __run_action(
+        self, action: Routine.Edge, navgiation_logger: NavigationLogger
+    ) -> None:
         """
         Runs the precheck/action/postcheck of an action
         """
@@ -610,36 +626,40 @@ class Runtime:
         if self.on_change_edge:
             self.on_change_edge(action)
 
-        res = await self.__check(action, Event.PHASE_PRECONDITION, use_dest=False)
-        if res != CheckResult.PASS:
-            if self.on_change_edge:
-                self.on_change_edge(None)
-            raise PreconditionTimeoutError(action)
-
-        if action.repeat_upper < action.repeat_lower:  # overrides (see frontend)
-            action.repeat_upper = 1000
-        for i in range(max(action.repeat_lower, action.repeat_upper)):
-            if i >= action.repeat_lower:
-                res = await self.__check(
-                    action,
-                    Event.PHASE_POSTCONDITION,
-                    use_dest=True,
-                    critical=action.repeat_upper == 1,
-                )
-                if res == CheckResult.PASS:
-                    break  # executed sufficient times and passed, we're done
-            await self.__exec_action(action)
-        else:  # final postcondition check
-            res = await self.__check(
-                action, Event.PHASE_POSTCONDITION, use_dest=True, critical=True
-            )
-            if res != CheckResult.PASS:
+        with navgiation_logger.action(action) as logger:
+            res = await self.__check(action, Action.PHASE_PRECONDITION, logger)
+            if res != ActionResult.RESULT_PASS:
                 if self.on_change_edge:
                     self.on_change_edge(None)
-                raise PostconditionTimeoutError(action)
+                logger.finalize(logger.Result.RESULT_TIMEOUT)
+                raise PreconditionTimeoutError(action)
 
-        # update state after postcondition check passes
-        self.set_curr(self.nodes[action.to])
+            if action.repeat_upper < action.repeat_lower:  # overrides (see frontend)
+                action.repeat_upper = 1000
+            for i in range(max(action.repeat_lower, action.repeat_upper)):
+                if i >= action.repeat_lower:
+                    res = await self.__check(
+                        action,
+                        Action.PHASE_POSTCONDITION,
+                        logger,
+                        critical=action.repeat_upper == 1,
+                    )
+                    if res == ActionResult.RESULT_PASS:
+                        break  # executed sufficient times and passed, we're done
+                await self.__exec_action(action)
+            else:  # final postcondition check
+                res = await self.__check(
+                    action, Action.PHASE_POSTCONDITION, logger, critical=True
+                )
+                if res != ActionResult.RESULT_PASS:
+                    if self.on_change_edge:
+                        self.on_change_edge(None)
+                    logger.finalize(logger.Result.RESULT_TIMEOUT)
+                    raise PostconditionTimeoutError(action)
+
+            logger.finalize(logger.Result.RESULT_PASS)
+            # update state after postcondition check passes
+            self.set_curr(self.nodes[action.to])
 
     async def __exec_action(self, action: Routine.Edge) -> None:
         """

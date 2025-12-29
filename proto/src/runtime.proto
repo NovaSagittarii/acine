@@ -29,6 +29,7 @@ message RuntimeData {
   map<string, ExecutionInfo> edges = 5;           // edge aux data
   map<string, ExecutionInfo> sgroups = 6;         // sgroup aux data
   map<string, ExecutionInfo> execution_info = 7;  // all aux data
+  repeated Event events = 8;                      // logs of all events
 }
 
 message RuntimeState {
@@ -59,54 +60,68 @@ message Metric {
 }
 
 message Event {
-  google.protobuf.Timestamp timestamp = 1;  // when this happened
-  Phase phase = 2;                          // which phase
-  string archive_id = 3;                    // id of frame for this event
-  Result result = 4;                        // result of (precondition/action)
-  string comment = 5;                       // additional info
-  Level level = 6;                          // event urgency
-  oneof type {
-    LogEvent log = 7;
-    ErrorEvent error = 8;
+  google.protobuf.Timestamp time_start = 1;  // when this started
+  google.protobuf.Timestamp time_end = 2;    // when this ended
+  string node_id = 3;                        // from where this happened
+  Event.Debug debug = 4;                     // route calculations
+  RuntimeState context = 5;                  // runtime internal state
+  Level level = 6;                           // event urgency
+  Action.Log action = 7;                     // an action was taken
+  Exception exception = 8;  // something broke before action could be taken
+
+  // debug info for event
+  message Debug {
+    string comment = 1;            // any debug string
+    repeated string rankings = 2;  // edge ranking for prioritizing
   }
 
-  enum Level {
-    LEVEL_UNSPECIFIED = 0;
-    LEVEL_LOG = 1;       // for logging
-    LEVEL_INFO = 2;      // unused
-    LEVEL_WARN = 3;      // unused
-    LEVEL_ERROR = 4;     // unused
-    LEVEL_CRITICAL = 5;  // needs attention (f.e. nav broken)
+  // sync with acine/runtime/exceptions.py
+  enum Exception {
+    EXCEPTION_UNSPECIFIED = 0;  // no error
+    EXCEPTION_GENERIC = 1;      // generic error (too lazy to sync)
+    EXCEPTION_INTERRUPT = 2;    // interrupted so shutting down
+    EXCEPTION_NO_PATH = 3;
+  }
+}
+
+enum Level {
+  LEVEL_UNSPECIFIED = 0;
+  LEVEL_LOG = 1;       // for logging
+  LEVEL_INFO = 2;      // unused
+  LEVEL_WARN = 3;      // unused
+  LEVEL_ERROR = 4;     // unused
+  LEVEL_CRITICAL = 5;  // needs attention (f.e. nav broken)
+}
+
+message Action {
+  // a record of an action happening
+  message Log {
+    string id = 1;                     // id of edge that was taken
+    Action.Phase phase = 2;            // how far it got
+    Action.Result result = 3;          // result of (precondition/action)
+    repeated Action.Event events = 4;  // more granular log
+  }
+
+  message Event {
+    google.protobuf.Timestamp timestamp = 1;  // when this happened
+    string archive_id = 2;                    // id of frame for this
+    Action.Phase phase = 3;                   // current phase
   }
 
   enum Phase {
     PHASE_UNSPECIFIED = 0;
-    PHASE_PRECONDITION = 1;
-    PHASE_POSTCONDITION = 2;
-    PHASE_ACTION = 3;
+    PHASE_PRECONDITION = 1;   // started precondition but didnt pass
+    PHASE_POSTCONDITION = 2;  // started postcondition but didnt pass
+    PHASE_ACTION = 3;         // started action but didnt complete
+    PHASE_COMPLETION = 4;     // completed pre/act/post
   }
 
   enum Result {
     RESULT_UNSPECIFIED = 0;
-    RESULT_PASS = 1;     // condition pass OR action completion
-    RESULT_TIMEOUT = 2;  // condition timeout
-    RESULT_FAIL = 3;     // condition fail
-    RESULT_ERROR = 4;    // something broke
+    RESULT_PASS = 1;        // condition pass OR action completion
+    RESULT_TIMEOUT = 2;     // condition timeout
+    RESULT_INTERRUPT = 3;   // action was interrupted
+    RESULT_ERROR = 4;       // something broke
+    RESULT_NOT_ATOMIC = 5;  // error during subroutine
   }
-}
-
-message LogEvent {
-  google.protobuf.Timestamp start = 1;
-  double duration = 2;  // how long it took to finish
-}
-
-message ErrorEvent {
-  ErrorType type = 1;
-}
-
-enum ErrorType {
-  ERROR_TYPE_UNSPECIFIED = 0;
-  ERROR_TYPE_PRECONDITION = 1;   // rare (scheduled but then it failed)
-  ERROR_TYPE_POSTCONDITION = 2;  // postcondition never happened
-  ERROR_TYPE_NOT_ATOMIC = 3;     // error during subroutine
 }

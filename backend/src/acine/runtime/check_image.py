@@ -4,13 +4,13 @@ Implements image similarity checks
 
 from __future__ import annotations
 
-from typing import List, Literal
+from typing import List, Literal, TypeAlias
 
 import cv2
 import numpy as np
 from acine_proto_dist.routine_pb2 import Routine
 
-ImageBmpType = np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.uint8]]
+ImageBmpType: TypeAlias = np.ndarray[tuple[int, int, Literal[3]], np.dtype[np.uint8]]
 
 
 class SimilarityResult:

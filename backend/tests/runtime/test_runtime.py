@@ -7,7 +7,7 @@ from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture
 
-from acine.runtime.runtime import CheckResult, Event, IController, Routine, Runtime
+from acine.runtime.runtime import ActionResult, IController, Routine, Runtime
 
 NodeType = Routine.Node.NodeType
 EdgeType = Routine.Edge.EdgeTriggerType
@@ -66,8 +66,8 @@ def mocked_check_once(mocker: MockerFixture) -> AsyncMock:
 def checks_always_pass(
     mocker: MockerFixture, mocked_check: AsyncMock, mocked_check_once: AsyncMock
 ) -> None:
-    mocked_check.return_value = (Event.RESULT_PASS, None)
-    mocked_check_once.return_value = CheckResult.PASS
+    mocked_check.return_value = (ActionResult.RESULT_PASS, None)
+    mocked_check_once.return_value = True
 
 
 def single_event_replay(event: InputEvent) -> InputReplay:
@@ -329,7 +329,7 @@ class TestRuntimeIntegration:
         e23 = self.add_edge(n2, n3, postcondition=Routine.Condition(auto=True))
 
         # should be using check when you queue_edge
-        mocked_check.return_value = (Event.RESULT_PASS, None)
+        mocked_check.return_value = (ActionResult.RESULT_PASS, None)
         mocked_check_once.return_value = True
         r = Routine(nodes={u.id: u for u in (n1, n2, n3)})
         with Runtime(r, mocked_controller) as rt:

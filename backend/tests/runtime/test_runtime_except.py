@@ -1,19 +1,25 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TypeAlias
 
 import pytest
-from acine_proto_dist.runtime_pb2 import Event
 from pytest_mock import MockerFixture
 
 from acine.runtime.exceptions import (
     AcineNoPath,
     SubroutineExecutionError,
 )
-from acine.runtime.runtime import CheckResult, ExecResult, IController, Routine, Runtime
+from acine.runtime.runtime import (
+    Action,
+    ActionResult,
+    ExecResult,
+    IController,
+    Routine,
+    Runtime,
+)
 
-NodeType = Routine.Node.NodeType
-EdgeType = Routine.Edge.EdgeTriggerType
+NodeType: TypeAlias = Routine.Node.NodeType
+EdgeType: TypeAlias = Routine.Edge.EdgeTriggerType
 
 
 class MockRoutine:
@@ -72,24 +78,25 @@ class MockRuntime(Runtime):
     async def __check(
         s,
         edge: Routine.Edge,
-        phase: Event.Phase.ValueType,
+        phase: Action.Phase.ValueType,
+        logger: object,
         *,
         no_delay: bool = False,
         use_dest: bool = False,
         critical: bool = False,
-    ) -> CheckResult:
+    ) -> ActionResult.ValueType:
         condition = (
             edge.precondition
-            if phase == Event.PHASE_PRECONDITION
+            if phase == Action.PHASE_PRECONDITION
             else edge.postcondition
         )
         condition = super()._Runtime__resolve_condition(  # type: ignore
             edge, condition, use_dest=use_dest
         )
         if condition.WhichOneof("condition") is None:
-            return CheckResult.PASS
+            return ActionResult.RESULT_PASS
         else:
-            return CheckResult.TIMEOUT
+            return ActionResult.RESULT_TIMEOUT
 
     def __precheck_action(self, action: Routine.Edge, img: object) -> bool:
         condition = super()._Runtime__resolve_condition(  # type: ignore

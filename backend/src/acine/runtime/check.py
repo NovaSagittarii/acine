@@ -2,23 +2,16 @@
 functions for checking conditions
 """
 
-from enum import Enum
-from typing import Awaitable, Callable, Optional, Tuple
+from typing import Awaitable, Callable, Optional, Tuple, TypeAlias
 
 from acine_proto_dist.routine_pb2 import Routine
-from acine_proto_dist.runtime_pb2 import Event
+from acine_proto_dist.runtime_pb2 import Action
 
 from acine.runtime.check_image import ImageBmpType, check_image
 from acine.runtime.util import now, sleep
 
-GetImageCallableType = Callable[[], Awaitable[ImageBmpType]]
-
-
-# TODO: replace with runtime.Event.Result
-class CheckResult(Enum):
-    ERROR = 0
-    PASS = 1
-    TIMEOUT = 2
+GetImageCallableType: TypeAlias = Callable[[], Awaitable[ImageBmpType]]
+ActionResult: TypeAlias = Action.Result
 
 
 async def check(
@@ -27,7 +20,7 @@ async def check(
     ref_img: Optional[ImageBmpType] = None,
     *,
     no_delay: bool = False,
-) -> Tuple[Event.Result.ValueType, ImageBmpType]:
+) -> Tuple[ActionResult.ValueType, ImageBmpType]:
     """
     Implements runtime for Routine.Condition checks
 
@@ -44,8 +37,8 @@ async def check(
 
     ct = 0
     while True:
-        timeout_info = f"{(timeout - now()) / 1000:.1f}s left"
-        print("[?] check", ct, timeout_info, end="\r")
+        # timeout_info = f"{(timeout - now()) / 1000:.1f}s left"
+        # print("[?] check", ct, timeout_info, end="\r")
         ct += 1
 
         next = now() + condition.interval
@@ -53,12 +46,12 @@ async def check(
 
         if check_once(condition, img, ref_img):
             print("[== OK ==]", ct)
-            return (Event.RESULT_PASS, img)
+            return (ActionResult.RESULT_PASS, img)
 
         # allow at least one check before timeout
         if now() > timeout or next > timeout:
             print(f"[X] check timeout after {timeout_duration / 1000:.1f}s")
-            return (Event.RESULT_TIMEOUT, img)
+            return (ActionResult.RESULT_TIMEOUT, img)
 
         await sleep(next - now())
 
