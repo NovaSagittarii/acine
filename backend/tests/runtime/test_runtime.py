@@ -1,8 +1,9 @@
 from random import randint
-from typing import Any, Iterator, Never, Tuple, cast
+from typing import Any, AsyncIterator, Never, Tuple, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+import pytest_asyncio
 from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture
@@ -41,13 +42,13 @@ def mocked_sleep(mocker: MockerFixture) -> AsyncMock:
 MockedRuntimeUtilType = Tuple[Mock, AsyncMock, Mock, Runtime]
 
 
-@pytest.fixture
-def mocked_runtime(
+@pytest_asyncio.fixture
+async def mocked_runtime(
     mocker: MockerFixture,
     mocked_controller: Mock,
     mocked_now: Mock,
     mocked_sleep: AsyncMock,
-) -> Iterator[MockedRuntimeUtilType]:
+) -> AsyncIterator[MockedRuntimeUtilType]:
     with Runtime(r1, mocked_controller) as rt:
         yield (mocked_now, mocked_sleep, mocked_controller, rt)
 

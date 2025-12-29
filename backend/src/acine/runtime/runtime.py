@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import asyncio
 import io
-import threading
 from types import TracebackType
 from typing import Callable, Final, List, Optional, Type, TypeAlias, Union
 
@@ -173,8 +172,8 @@ class Runtime:
 
         # Runtime worker -- another thread whose call stack represents the
         # current state of the navigator on the recursive navgraph.
-        self.worker_has_work = threading.Event()
-        self.worker_busy = threading.Event()
+        self.worker_has_work = asyncio.Event()
+        self.worker_busy = asyncio.Event()
         """`await` on this.acquire() if waiting until worker settles."""
         self.worker_queued_edge: Optional[Routine.Edge] = None
         """force exec an edge from MainThread self.queue_edge() call"""
@@ -185,9 +184,9 @@ class Runtime:
 
         self.exc_info: OptExcInfo = (None, None, None)
 
-        def run_worker() -> None:
+        async def run_worker() -> None:
             try:
-                asyncio.run(self.exec_subroutine(self.nodes["start"]))
+                await self.exec_subroutine(self.nodes["start"])
             except AcineInterrupt:
                 # normal exit
                 pass
@@ -197,14 +196,20 @@ class Runtime:
                 self.exc_info = sys.exc_info()
                 raise exception
 
-        self.worker = threading.Thread(target=run_worker)
-        """worker thread for the navigator"""
-        self.worker.start()
+        # self.worker = threading.Thread(target=run_worker)
+        # """worker thread for the navigator"""
+        # self.worker.start()
+
+        loop = asyncio.get_event_loop()
+        self.task = loop.create_task(run_worker())
 
     def __del__(self) -> None:
         if hasattr(self, "worker"):
             self.worker_terminate = True
-            self.worker.join()
+            # self.worker.join()
+            coro = self.task.get_coro()
+            if coro:
+                asyncio.run(coro)  # run until exits
         if hasattr(self, "exc_info") and self.exc_info[1]:
             raise self.exc_info[1].with_traceback(self.exc_info[2])
 
@@ -247,9 +252,9 @@ class Runtime:
             self.worker_result = result
             self.worker_has_work.clear()
             self.worker_busy.set()
-            while not self.worker_has_work.wait(THREADING_EVENT_TIMEOUT):
-                if self.worker_terminate:
-                    raise AcineInterrupt()
+            await self.worker_has_work.wait()
+            if self.worker_terminate:
+                raise AcineInterrupt()
             self.worker_busy.clear()
 
         self.set_curr(entry)
@@ -479,8 +484,7 @@ class Runtime:
         self.target_node = self.nodes[id]
         self.worker_busy.clear()
         self.worker_has_work.set()
-        while not self.worker_busy.wait(THREADING_EVENT_TIMEOUT):
-            pass
+        await self.worker_busy.wait()
         # TODO: if python runtime exception, it won't get caught. instead
         #       you need to run in debugger to find it. (fix this later)
         if self.worker_result:
@@ -504,8 +508,7 @@ class Runtime:
             self.worker_busy.clear()
             self.worker_queued_edge = e
             self.worker_has_work.set()
-            while not self.worker_busy.wait(THREADING_EVENT_TIMEOUT):
-                pass
+            await self.worker_busy.wait()
             if self.worker_result:
                 raise self.worker_result
         except PreconditionTimeoutError:

@@ -3,9 +3,10 @@ A more complete test suite for Runtime?
 """
 
 from copy import deepcopy
-from typing import Iterator
+from typing import AsyncIterator, Iterator
 
 import pytest
+import pytest_asyncio
 from pytest_mock import MockerFixture
 
 from acine.runtime.runtime import (
@@ -32,11 +33,11 @@ def mocked_controller(mocker: MockerFixture) -> IController:
     return controller
 
 
-@pytest.fixture
-def runtime(
+@pytest_asyncio.fixture
+async def runtime(
     request: pytest.FixtureRequest,
     mocked_controller: IController,
-) -> Iterator[Runtime]:
+) -> AsyncIterator[Runtime]:
     with Runtime(request.param, mocked_controller) as rt:
         yield rt
 
