@@ -49,7 +49,7 @@ from os import system
 from typing import Optional
 
 import win32gui
-from ahk import AsyncAHK
+from ahk import AsyncAHK, AsyncWindow
 
 ahk = AsyncAHK(version="v2")
 
@@ -81,12 +81,16 @@ class InputHandler:
         self.y_offset = 0
         self._init_completed = False
 
+        self.win: Optional[AsyncWindow] = None
+
         self.is_mouse_down = False
         self.x = 0
         self.y = 0
         print(f"y-offset(titlebar)={self.y_offset}")
 
     async def init(self):
+        # scuffed way of doing it but it sorta works. NOTE: first move is slow
+        # TODO: proper initialization
         if self._init_completed:
             return
         self._init_completed = True
@@ -137,12 +141,13 @@ class InputHandler:
     async def update_mouse(self) -> None:
         await self.init()
         flags = "D NA" if self.is_mouse_down else "U NA"
-        await self.win.click(x=self.x, y=self.y, button="L", options=flags)
+        if self.win:
+            await self.win.click(x=self.x, y=self.y, button="L", options=flags)
         # print(self.x, self.y, flags)
 
     async def close(self) -> None:
         await self.init()
-        if self.can_close:
+        if self.win and self.can_close:
             await self.win.close()
 
 
