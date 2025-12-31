@@ -75,6 +75,8 @@ def check_once(
                 return True
         case "text":
             raise NotImplementedError()
+        case "fail":
+            return False
         case _:
             raise NotImplementedError()
     return False
