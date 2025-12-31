@@ -202,7 +202,8 @@ class TestRuntimeIntegration:
         r = Routine(nodes={u.id: u for u in (n1, n2, n3, n4)})
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
-            rt.context.curr = [x for x in [n1, n2, n3, n4] if x.id == s][0]
+            await rt.goto(s)
+            assert rt.context.curr.id == s
             await rt.goto(t)
             assert rt.context.curr.id == t
 
@@ -247,7 +248,7 @@ class TestRuntimeIntegration:
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
-            rt.context.curr = n1
+            assert rt.context.curr == n1
             await rt.goto(to)
             assert rt.context.curr.id == to
             await rt.goto("n6")
@@ -292,7 +293,7 @@ class TestRuntimeIntegration:
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
-            rt.context.curr = n1
+            assert rt.context.curr == n1
             await rt.goto(to)
             assert rt.context.curr.id == to
             await rt.goto("n6")
@@ -337,7 +338,7 @@ class TestRuntimeIntegration:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
             if "pre" in subtest:  # 1 -> 2
-                rt.context.curr = n1
+                assert rt.context.curr == n1
                 await rt.queue_edge(e12.id)
                 # call pattern is (condition, getframe/frame, no_delay)
                 checked = list(c.args[0] for c in mocked_check.call_args_list)
@@ -349,7 +350,8 @@ class TestRuntimeIntegration:
                 assert checked[1] == e12.postcondition
                 mocked_check_once.assert_not_called()
             else:
-                rt.context.curr = n2
+                await rt.goto(n2.id)
+                assert rt.context.curr == n2
             mocked_check.reset_mock()
 
             if "post" in subtest:  # 2 -> 3
@@ -388,7 +390,7 @@ class TestRuntimeIntegration:
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
-            rt.context.curr = n1
+            assert rt.context.curr == n1
             await rt.goto(n2.id)
 
             assert rt.context.curr == n2, "should be at n2 after `rt.goto(n2.id)`"
@@ -425,7 +427,7 @@ class TestRuntimeIntegration:
                 rt, "run_replay", return_value=None, autospec=rt.run_replay
             )
 
-            rt.context.curr = n1
+            assert rt.context.curr == n1
             await rt.queue_edge(e12.id)
             assert (
                 rt.context.curr == n2
@@ -465,7 +467,7 @@ class TestRuntimeIntegration:
                 rt, "run_replay", return_value=None, autospec=rt.run_replay
             )
 
-            rt.context.curr = n1
+            assert rt.context.curr == n1
             await rt.queue_edge(e16.id)
             assert (
                 rt.context.curr == n6
