@@ -1,6 +1,18 @@
 from acine_proto_dist.routine_pb2 import Routine
 
 
+class AcineTaskComplete(Exception):
+    """
+    Not really an error, but used as a 'no error' exception to exit out
+    of a task group.
+
+    NOTE: used only in some runtime implementations (see different branches)
+    """
+
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
 class AcineRuntimeError(RuntimeError):
     """Unspecified acine run-time error."""
 
