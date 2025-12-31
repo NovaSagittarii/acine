@@ -321,7 +321,7 @@ class Runtime:
                     if okList and ct > 20:  # take whatever ??
                         take_edge = okList[0]
                 await sleep(200)
-
+            print()
             print(
                 f"RUN {take_edge.description}",
                 f" => {self.nodes[take_edge.to].name}",
