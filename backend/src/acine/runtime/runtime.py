@@ -320,7 +320,7 @@ class Runtime:
                 else:  # did not find a suitable edge
                     if okList and ct > 20:  # take whatever ??
                         take_edge = okList[0]
-                await sleep(200)
+                # await sleep(200)  # probably no need for implicit postdelay
             print()
             print(
                 f"RUN {take_edge.description}",
