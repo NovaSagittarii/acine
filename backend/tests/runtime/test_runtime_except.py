@@ -153,10 +153,8 @@ def srt2() -> Routine:
     return r.get()
 
 
-def disable_condition(condition: Routine.Condition) -> None:  # via impossible threshold
-    condition.MergeFrom(
-        Routine.Condition(image=Routine.Condition.Image(threshold=2), timeout=1)
-    )
+def disable_condition(condition: Routine.Condition) -> None:
+    condition.MergeFrom(Routine.Condition(fail=True, timeout=1))
 
 
 def enable_condition(condition: Routine.Condition) -> None:
