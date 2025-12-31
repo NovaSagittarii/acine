@@ -2,6 +2,7 @@
 A more complete test suite for Runtime?
 """
 
+import asyncio
 from copy import deepcopy
 from typing import AsyncIterator, Iterator
 
@@ -117,6 +118,30 @@ class TestGoto:
         assert runtime.context.curr.id == "start", "Runtime initializes to start."
         await runtime.goto(target)
         assert runtime.context.curr.id == target, "should reach target"
+
+
+class TestGotoOnline:
+    """
+    `goto` online tests, only required for editor
+    """
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
+    async def test_goto_abort(self, runtime: Runtime) -> None:
+        # make n3 -> n4 not reachable
+        runtime.routine.nodes["n3"].edges[0].precondition.MergeFrom(
+            Routine.Condition(fail=True, timeout=30000)
+        )
+        # goto n4 should attempt to take failed n3->n4 multiple times before
+        # timing out. but it shouldn't time out because it quits after 0.1s
+        # when the updated target of n3 is set
+
+        async def delayed_abort() -> None:
+            await asyncio.sleep(0.1)
+            await runtime.goto("n3")
+
+        await asyncio.gather(runtime.goto("n4"), delayed_abort())
+        assert runtime.context.curr.id == "n3", "should halt and reach n3"
 
 
 class TestContext:
