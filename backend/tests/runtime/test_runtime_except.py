@@ -199,7 +199,6 @@ class TestRuntimeExceptions:
             assert rt.context.curr.id == "b"
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(reason="Navigation is incomplete.")
     @async_timelimit(1)
     async def test_nav_fail(self, sab: Routine, mocker: MockerFixture) -> None:
         """start -/> a -> b"""
