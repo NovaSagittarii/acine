@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime
 from random import random
 from types import TracebackType
-from typing import Optional, TypeAlias
+from typing import Optional, Sequence, TypeAlias
 
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import (
@@ -70,7 +70,10 @@ def is_edge_ready(data: RuntimeData, edge: Routine.Edge) -> bool:
 
 
 class NavigationLogger:
-    """Log navigation state"""
+    """
+    Log navigation state.
+    Appends to given runtime_data on __exit__.
+    """
 
     Exception: TypeAlias = Event.Exception
 
@@ -110,6 +113,10 @@ class NavigationLogger:
     def set_exception(self, exception: Event.Exception.ValueType) -> None:
         """Mark event failure"""
         self.event.exception = exception
+
+    def set_ranking(self, ranking: Sequence[str]) -> None:
+        self.event.debug.ClearField("rankings")
+        self.event.debug.rankings.extend(ranking)
 
 
 class ActionLogger:

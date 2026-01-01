@@ -240,7 +240,7 @@ class Runtime:
                     next_id = e.subroutine  # retry
                 else:  # try checking for action completion
                     with NavigationLogger(
-                        self.data, self.get_runtime_state(), comment="ret pop"
+                        self.data, self.get_runtime_state(), comment="goto::ret_pop"
                     ).action(e) as logger:
                         res = await self.__check(
                             e, Action.Phase.PHASE_POSTCONDITION, logger, use_dest=True
@@ -260,7 +260,9 @@ class Runtime:
                 self.set_curr(self.nodes[next_id])
                 continue
 
-            with NavigationLogger(self.data, self.get_runtime_state()) as navlogger:
+            with NavigationLogger(
+                self.data, self.get_runtime_state(), comment="goto"
+            ) as navlogger:
                 # --- Build graph with current state of return stack.
                 # NOTE: currently not optimized
                 # TODO: benchmark to see if precompute is necessary
@@ -352,6 +354,7 @@ class Runtime:
                 if not sorted_edges:
                     navlogger.set_exception(navlogger.Exception.EXCEPTION_NO_PATH)
                     raise AcineNoPath(s, t)
+                navlogger.set_ranking([e.id for e in sorted_edges])
 
                 # --- Knowing the edge priority, start checking.
                 # keep looking at preconditions until one passes all but higher
