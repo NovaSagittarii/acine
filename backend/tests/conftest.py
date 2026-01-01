@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import sys
 from typing import Any, Callable, Coroutine, Optional, TypeVar
 
 import pytest
@@ -49,11 +50,16 @@ def pytest_runtest_call(item: Any) -> Any:
     async_test_func: Callable[[], Coroutine[Any, Any, Any]] = test_func
 
     async def wrapped(*args: object, **kwargs: object) -> None:
-        try:
-            async with asyncio.timeout(time_limit):
-                await async_test_func(*args, **kwargs)
-        except asyncio.TimeoutError as exc:
-            raise AsyncioTimeLimitExceeded(time_limit) from exc
+        # https://stackoverflow.com/a/60364406
+        # do not put time limit if running in debugger
+        if "pdb" in sys.modules:
+            await async_test_func(*args, **kwargs)
+        else:
+            try:
+                async with asyncio.timeout(time_limit):
+                    await async_test_func(*args, **kwargs)
+            except asyncio.TimeoutError as exc:
+                raise AsyncioTimeLimitExceeded(time_limit) from exc
 
     item.obj = wrapped
     yield
