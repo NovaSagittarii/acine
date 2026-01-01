@@ -186,7 +186,7 @@ def test_enable_disable_condition() -> None:
     c = Routine.Condition()
     assert c.WhichOneof("condition") is None
     disable_condition(c)
-    assert c.WhichOneof("condition") == "image"
+    assert c.WhichOneof("condition") == "fail"
     enable_condition(c)
     assert c.WhichOneof("condition") is None
 
