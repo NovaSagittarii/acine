@@ -73,12 +73,6 @@ class Runtime:
     Routine runtime
     """
 
-    routine: Routine
-    nodes: dict[str, Routine.Node]
-    edges: dict[str, Routine.Edge]
-    G: nx.DiGraph
-    controller: IController
-
     class Call:
         """
         Routine subroutine call (goes on call_stack)
@@ -116,7 +110,7 @@ class Runtime:
         self,
         routine: Routine,
         controller: IController,
-        data: RuntimeData = RuntimeData(),
+        data: Optional[RuntimeData] = None,
         *,
         on_change_curr: Optional[Callable[[Routine.Node], None]] = None,
         on_change_return: Optional[Callable[[List[Call]], None]] = None,
@@ -128,15 +122,15 @@ class Runtime:
 
         self.routine = routine
         self.controller = controller
-        self.data = data
+        self.data = data or RuntimeData()  # default parameter is a reference :moyai:
         self.enable_logs = enable_logs
         self.pfs = None
         if self.enable_logs:
             self.pfs = get_pfs(routine)
 
-        self.nodes = {}  # === routine.nodes
-        self.edges = {}
-        self.G = nx.DiGraph()
+        self.nodes: dict[str, Routine.Node] = {}  # === routine.nodes
+        self.edges: dict[str, Routine.Edge] = {}
+        self.G: nx.DiGraph = nx.DiGraph()
         self.context = Runtime.Context()
         self.context.curr = routine.nodes["start"] if routine.nodes else Routine.Node()
         self.context.call_stack = [Runtime.Call(Routine.Edge())]
