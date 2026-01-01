@@ -41,10 +41,6 @@ title = "TestEnv"
 
 
 class Controller(IController):
-    ws: WebSocketServerProtocol
-    gc: GameCapture
-    ih: InputHandler
-
     def __init__(
         self,
         websocket: WebSocketServerProtocol,
@@ -80,11 +76,13 @@ class Controller(IController):
 
 
 class AcineServerProtocol(WebSocketServerProtocol):
-    gc: Optional[GameCapture] = None
-    ih: Optional[InputHandler] = None
-    rt: Optional[Runtime] = None
-    fs = PrefixedFilesystem()
-    current_task: Optional[asyncio.Task] = None
+    def __init__(self):
+        super().__init__()
+        self.gc: Optional[GameCapture] = None
+        self.ih: Optional[InputHandler] = None
+        self.rt: Optional[Runtime] = None
+        self.fs = PrefixedFilesystem()
+        self.current_task: Optional[asyncio.Task] = None
 
     def onConnect(self, request: ConnectionRequest) -> None:
         """WebSocketServerProtocol method, 'connect' event"""
@@ -136,7 +134,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "routine":
                     data = Routine.SerializeToString(packet.routine)
                     await self.fs.write(["rt.pb"], data)
-                    self.load_routine(packet.routine)
+                    await self.load_routine(packet.routine)
                 case "get_routine":
                     await self.on_get_routine(packet)
                 case "set_curr":
@@ -150,18 +148,19 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "sample_current":
                     await self.on_sample_condition(packet, True)
 
-    def prepare_routine(self, routine: Routine) -> None:
+    async def prepare_routine(self, routine: Routine) -> None:
         """
         Updates input_handler/game_capture and FS prefix based on the routine.
         """
 
         self.ih = InputHandler(routine.window_name, cmd=routine.start_command)
+        await self.ih.init()
         if self.gc:
             self.gc.close()
         self.gc = GameCapture(routine.window_name)
         self.fs.set_prefix([routine.id])
 
-    def load_routine(self, routine: Routine) -> None:
+    async def load_routine(self, routine: Routine) -> None:
         """
         Reloads the runtime with an updated routine.
         Retains context if possible, i.e. same current_node still exists.
@@ -177,10 +176,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
             if self.rt.routine.window_name != routine.window_name:
                 # if window_name is different, recreate gc/ih
-                self.prepare_routine(routine)
+                await self.prepare_routine(routine)
         else:
             # no routine existed before so gc/ih are unset
-            self.prepare_routine(routine)
+            await self.prepare_routine(routine)
 
         assert self.gc and self.ih, "Peripherals should be initialized."
 
@@ -408,14 +407,14 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
     async def on_create_routine(self, packet: Packet) -> None:
         routine = instance_manager.create_routine(packet.create_routine)
-        self.load_routine(routine)
+        await self.load_routine(routine)
 
         packet = Packet(get_routine=routine)
         self.sendMessage(packet.SerializeToString(), isBinary=True)
 
     async def on_load_routine(self, packet: Packet) -> None:
         routine = instance_manager.get_routine(packet.load_routine)
-        self.load_routine(routine)
+        await self.load_routine(routine)
 
         packet = Packet(get_routine=routine)
         self.sendMessage(packet.SerializeToString(), isBinary=True)
