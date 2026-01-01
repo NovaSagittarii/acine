@@ -138,7 +138,7 @@ class ActionLogger:
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         if self.action.events:
-            assert self.action.result, "ActionLogger should be finalized."
+            assert self.action.result is not None, "ActionLogger should be finalized."
             self.action.events.sort(key=lambda e: e.timestamp.ToDatetime())
             self.action.phase = self.action.events[-1].phase
         if exc_type and exc_val:

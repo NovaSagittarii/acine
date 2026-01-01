@@ -484,6 +484,7 @@ class Runtime:
         await self.__log(
             edge,
             img,
+            logger,
             phase=phase,
             result=res,
             level=Level.LEVEL_CRITICAL if critical else Level.LEVEL_LOG,
@@ -521,6 +522,7 @@ class Runtime:
         self,
         edge: Routine.Edge,
         img: ImageBmpType,
+        logger: ActionLogger,
         phase: Action.Phase.ValueType = Action.Phase.PHASE_UNSPECIFIED,
         result: Action.Result.ValueType = Action.Result.RESULT_UNSPECIFIED,
         level: Level.ValueType = Level.LEVEL_LOG,
@@ -533,6 +535,7 @@ class Runtime:
         id = str(uuid7())
         await self.pfs.write_archive([f"{id}.bmp"], buffer.getvalue())
 
+        logger.log(phase, id)
         # event = Event(
         #     archive_id=id, phase=phase, result=result, comment=comment, level=level
         # )
@@ -561,6 +564,7 @@ class Runtime:
                 print("EXEC SUBROUTINE", action.description)
                 self.push(action)
                 self.set_curr(self.nodes[action.subroutine])
+                logger.finalize(logger.Result.RESULT_PASS)
                 return  # Need to abort early when subroutine runs.
                 # The next shouldn't get set immediately, but stored on stack
                 # until after the subroutine completes.
@@ -597,6 +601,7 @@ class Runtime:
 
         # update state after postcondition check passes
         self.set_curr(self.nodes[action.to])
+        logger.finalize(logger.Result.RESULT_PASS)
 
     async def __exec_action(self, action: Routine.Edge) -> None:
         """
