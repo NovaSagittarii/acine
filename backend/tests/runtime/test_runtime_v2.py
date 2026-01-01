@@ -136,11 +136,20 @@ class TestGotoOnline:
         # timing out. but it shouldn't time out because it quits after 0.1s
         # when the updated target of n3 is set
 
+        async def to_be_cancelled() -> None:
+            try:
+                await runtime.goto("n4")
+            except asyncio.CancelledError:
+                pass
+
+        initial_goto = asyncio.create_task(to_be_cancelled())
+
         async def delayed_abort() -> None:
             await asyncio.sleep(0.1)
+            initial_goto.cancel()
             await runtime.goto("n3")
 
-        await asyncio.gather(runtime.goto("n4"), delayed_abort())
+        await asyncio.gather(initial_goto, delayed_abort())
         assert runtime.context.curr.id == "n3", "should halt and reach n3"
 
 
