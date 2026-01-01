@@ -43,13 +43,14 @@ async def runtime(
         yield rt
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestInvalid:
-    def test_no_start(self, mocked_controller: IController) -> None:
+    async def test_no_start(self, mocked_controller: IController) -> None:
         """the node with id=start is required to initialize"""
         with pytest.raises(AssertionError):
             Runtime(Routine(nodes={"A": Routine.Node()}), mocked_controller)
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "runtime", (forest(), chain()), indirect=True, ids=["forest", "chain"]
     )
@@ -57,7 +58,6 @@ class TestInvalid:
         with pytest.raises(ValueError):
             await runtime.queue_edge("INVALID")
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "runtime", (forest(), chain()), indirect=True, ids=["forest", "chain"]
     )
@@ -73,6 +73,8 @@ def class_setup_teardown() -> Iterator[None]:
     print("Tearing down class-level resources...")
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 @pytest.mark.usefixtures("class_setup_teardown")
 class TestRunEdge:
     """
@@ -82,6 +84,8 @@ class TestRunEdge:
     """
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestQueueEdge:
     """
     `queue_edge` should only make calls to `goto` and `run_edge`.
@@ -91,7 +95,6 @@ class TestQueueEdge:
     ok this doesn't really do that much.
     """
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("runtime", (forest(),), indirect=True, ids=["forest"])
     async def test_attempt(self, mocker: MockerFixture, runtime: Runtime) -> None:
         mocked_goto = mocker.patch.object(runtime, "goto")
@@ -102,6 +105,8 @@ class TestQueueEdge:
         mocked_goto.assert_called()
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestGoto:
     """
     `goto` handles path-finding. It handles edge failures and rerouting.
@@ -111,7 +116,6 @@ class TestGoto:
     TODO: figure out how to test this later
     """
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
     @pytest.mark.parametrize("target", ("n1", "n3", "n9"))
     async def test_basic(self, runtime: Runtime, target: str) -> None:
@@ -120,12 +124,13 @@ class TestGoto:
         assert runtime.context.curr.id == target, "should reach target"
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestGotoOnline:
     """
     `goto` online tests, only required for editor
     """
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
     async def test_goto_abort(self, runtime: Runtime) -> None:
         # make n3 -> n4 not reachable
@@ -153,6 +158,8 @@ class TestGotoOnline:
         assert runtime.context.curr.id == "n3", "should halt and reach n3"
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestContext:
     """
     `get_context` and `restore_context` are used to restore state when the
@@ -162,7 +169,6 @@ class TestContext:
     each update separately instead of pushing the graph every time.
     """
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
     @pytest.mark.parametrize("target", ("n4", "n7", "n9"))
     @pytest.mark.parametrize("source", ("n1", "n2", "n3"))

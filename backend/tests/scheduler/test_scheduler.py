@@ -30,6 +30,8 @@ class AlwaysOk(ISchedulerRoutineInterface):
         self.on_scheduled_callback(edge)
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestBasic:
     """Very basic dependencies. (star graph)"""
 
@@ -63,7 +65,6 @@ class TestBasic:
         ri = AlwaysOk(r)
         return (edges, ri.goto, Scheduler(ri))
 
-    @pytest.mark.asyncio
     async def test_init(self) -> None:
         edges, goto, _ = self.__basic([(0, 1)])
         assert len(edges[0].dependencies) == 0, "0 is independent"
@@ -73,7 +74,6 @@ class TestBasic:
         await goto(6)
         goto.assert_has_calls([call(5), call(6)])
 
-    @pytest.mark.asyncio
     async def test_nodep(self) -> None:
         edges, goto, s = self.__basic([(0, 1)])
         s.schedule(edges[0], 0)
@@ -81,7 +81,6 @@ class TestBasic:
         goto.assert_has_calls([call(edges[0])])
         assert not await s.next(), "no more"
 
-    @pytest.mark.asyncio
     async def test_dep2(self) -> None:
         edges, goto, s = self.__basic([(0, 1)])
         s.schedule(edges[1], 0)
@@ -89,7 +88,6 @@ class TestBasic:
             await s.next()
         goto.assert_has_calls([call(edges[0]), call(edges[1])])
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (3, 5, 10, 100))
     async def test_dep_n(self, n: int) -> None:
         edges, goto, s = self.__basic([(i, n) for i in range(n)])
@@ -100,7 +98,6 @@ class TestBasic:
         goto.assert_called_with(edges[n])
         goto.assert_has_calls([call(edges[i]) for i in range(n + 1)], any_order=True)
 
-    @pytest.mark.asyncio
     async def test_tree(self) -> None:
         edges, goto, s = self.__basic([(0, 1), (1, 3), (2, 3)])
         s.schedule(edges[3], 0)
@@ -249,8 +246,9 @@ class TestMockRuntime:
         a._process_call(a.edges[1])
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestOrdering:
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (2, 4, 7, 15, 16, 99))
     @pytest.mark.parametrize("b", (2, 5))
     async def test_tree(self, n: int, b: int) -> None:
@@ -260,7 +258,6 @@ class TestOrdering:
         assert not await a.next(), "Should finish within `2n + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (99,))
     @pytest.mark.parametrize("b", (2, 10))
     @pytest.mark.parametrize("k", (3, 10))
@@ -272,7 +269,6 @@ class TestOrdering:
         assert not await a.next(), "Should finish within `5kn + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("n", (99,))
     @pytest.mark.parametrize("b", (2, 10))
     @pytest.mark.parametrize("k", (10,))
@@ -284,7 +280,6 @@ class TestOrdering:
         assert not await a.next(), "Should finish within `2kn + 5` iterations."
         a.goto.assert_any_call(a.edges[0])
 
-    @pytest.mark.asyncio
     async def test_tree_random(self) -> None:
         seed(0)
         k = 10
@@ -310,7 +305,6 @@ class TestOrdering:
                 extra = [f"Failed on test {id} -- {e.args[0]}", f"edges={edges}"]
                 raise AssertionError("\n".join((*extra, *e.args)))
 
-    @pytest.mark.asyncio
     async def test_transitive(self) -> None:
         a = MockRuntime([(0, 4), (0, 2), (2, 4)])
         a.schedule(0)
@@ -318,7 +312,6 @@ class TestOrdering:
         assert not await a.next(), "Should finish"
         a.goto.assert_any_call(a.edges[0])
 
-    @pytest.mark.asyncio
     async def test_overlap(self) -> None:
         edges: List[Tuple[int, int]] = []
         for k in range(5):

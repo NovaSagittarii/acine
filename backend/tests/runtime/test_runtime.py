@@ -75,8 +75,9 @@ def single_event_replay(event: InputEvent) -> InputReplay:
     return InputReplay(events=[event])
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestRuntime:
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("x", (1, 4))
     @pytest.mark.parametrize("y", (2, 3))
     async def test_run_replay_mouse_move(
@@ -95,7 +96,6 @@ class TestRuntime:
         now.assert_called()
         sleep.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_run_replay_mouse_up(
         self, mocker: MockerFixture, mocked_runtime: MockedRuntimeUtilType
     ) -> None:
@@ -108,7 +108,6 @@ class TestRuntime:
         now.assert_called()
         sleep.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_invalid_restore_context(
         self, mocker: MockerFixture, mocked_runtime: MockedRuntimeUtilType
     ) -> None:
@@ -122,7 +121,6 @@ class TestRuntime:
         rt.restore_context(context)
         assert rt.get_context().curr == old_curr
 
-    @pytest.mark.asyncio
     async def test_invalid_goto(
         self, mocker: MockerFixture, mocked_runtime: MockedRuntimeUtilType
     ) -> None:
@@ -132,6 +130,8 @@ class TestRuntime:
         assert "target does not exist" in str(info.value)
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestRuntimeIntegration:
     """
     Various tests on the graph traversal algorithm
@@ -175,7 +175,6 @@ class TestRuntimeIntegration:
         u.edges.append(e)
         return e
 
-    @pytest.mark.asyncio
     @pytest.mark.dependency(name="goto")
     @pytest.mark.parametrize("s", ("start", "n2", "n3", "n4"))
     @pytest.mark.parametrize("t", ("start", "n2", "n3", "n4"))
@@ -207,7 +206,6 @@ class TestRuntimeIntegration:
             await rt.goto(t)
             assert rt.context.curr.id == t
 
-    @pytest.mark.asyncio
     @pytest.mark.dependency(name="subroutine", depends=["goto"])
     @pytest.mark.parametrize(
         "to",
@@ -256,7 +254,6 @@ class TestRuntimeIntegration:
             expected_calls = [mocker.call(e.replay, 0, 0) for e in [e34, e45, e26]]
             cast(AsyncMock, rt.run_replay).assert_has_calls(expected_calls)
 
-    @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["subroutine"])
     @pytest.mark.parametrize(
         "to",
@@ -308,7 +305,6 @@ class TestRuntimeIntegration:
             "check pre/post",
         ),
     )
-    @pytest.mark.asyncio
     async def test_default_condition(
         self,
         mocker: MockerFixture,
@@ -360,7 +356,6 @@ class TestRuntimeIntegration:
                 assert checked[0] == e23.precondition
                 assert checked[1] == n3.default_condition
 
-    @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["goto"])
     async def test_interrupt(
         self,
@@ -399,7 +394,6 @@ class TestRuntimeIntegration:
             assert e43.replay in replays, "take edge n4->n3 (after n1->n4 interrupt)"
             assert e32.replay in replays, "take edge n3->n2 (after n4->n3)"
 
-    @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["goto"])
     @pytest.mark.parametrize("repeat", (1, 2, 3))
     async def test_queue_edge_subroutine(
@@ -434,7 +428,6 @@ class TestRuntimeIntegration:
                 [mocker.call(e34.replay, 0, 0) for _ in range(repeat)]
             )
 
-    @pytest.mark.asyncio
     @pytest.mark.dependency(depends=["goto"])
     @pytest.mark.parametrize("repeat_outer", (1, 2, 3))
     @pytest.mark.parametrize("repeat_inner", (1, 5, 7))

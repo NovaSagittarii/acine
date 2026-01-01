@@ -171,15 +171,14 @@ def test_enable_disable_condition() -> None:
     assert c.WhichOneof("condition") is None
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
 class TestRuntimeExceptions:
-    @pytest.mark.asyncio
     async def test_basic(self, sab: Routine, mocker: MockerFixture) -> None:
         with MockRuntime(sab, mocker) as rt:
             await rt.goto("b")
             assert rt.context.curr.id == "b"
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio_time_limit(time_limit=2)
     async def test_nav_fail(self, sab: Routine, mocker: MockerFixture) -> None:
         """start -/> a -> b"""
         e = sab.nodes["start"].edges[0]
@@ -189,7 +188,6 @@ class TestRuntimeExceptions:
             assert await rt.queue_edge(e2.id) == ExecResult.REQUIREMENT_TYPE_ATTEMPT
             assert rt.context.curr.id == "start"
 
-    @pytest.mark.asyncio
     async def test_precondition_fail(self, sab: Routine, mocker: MockerFixture) -> None:
         """start -> a -/> b"""
         e = sab.nodes["a"].edges[0]
@@ -198,7 +196,6 @@ class TestRuntimeExceptions:
             assert await rt.queue_edge(e.id) == ExecResult.REQUIREMENT_TYPE_CHECK
             assert rt.context.curr.id == "a"
 
-    @pytest.mark.asyncio
     async def test_postcondition_fail(
         self, sab: Routine, mocker: MockerFixture
     ) -> None:
@@ -209,7 +206,6 @@ class TestRuntimeExceptions:
             assert await rt.queue_edge(e.id) == ExecResult.REQUIREMENT_TYPE_EXECUTE
             assert rt.context.curr.id == "a"
 
-    @pytest.mark.asyncio
     async def test_no_path(self, sab: Routine, mocker: MockerFixture) -> None:
         sab.nodes["start"].edges.pop()
         with MockRuntime(sab, mocker) as rt:
@@ -218,7 +214,6 @@ class TestRuntimeExceptions:
             assert rt.context.curr.id == "start"
 
     @pytest.mark.skip(reason="currently subroutines cannot fail")
-    @pytest.mark.asyncio
     async def test_subroutine_exec_fail(
         self, srt: Routine, mocker: MockerFixture
     ) -> None:
@@ -230,7 +225,6 @@ class TestRuntimeExceptions:
             assert rt.context.curr.id == "a", "subroutine fail to complete"
 
     @pytest.mark.skip(reason="currently subroutines cannot fail")
-    @pytest.mark.asyncio
     async def test_nested_subroutine_exec_postcondition_fail(
         self, srt2: Routine, mocker: MockerFixture
     ) -> None:
