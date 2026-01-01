@@ -216,9 +216,9 @@ class TestRuntimeIntegration:
             "n2",
             "n3",  # if failed this, probably didn't consider taking subroutine edge
             "n4",
-            pytest.param(
-                "n5", marks=pytest.mark.xfail(reason="n5 is ret node, ends up on n2")
-            ),
+            # pytest.param(
+            #     "n5", marks=pytest.mark.xfail(reason="n5 is ret node, CAN autoret")
+            # ),
             "n6",
         ),
     )
@@ -248,7 +248,7 @@ class TestRuntimeIntegration:
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
-            assert rt.context.curr == n1
+            assert rt.context.curr.id == n1.id
             await rt.goto(to)
             assert rt.context.curr.id == to
             await rt.goto("n6")
@@ -263,12 +263,12 @@ class TestRuntimeIntegration:
         (
             "n2",
             "n3",
-            pytest.param(
-                "n4", marks=pytest.mark.xfail(reason="goto ret node will autoresolve")
-            ),
-            pytest.param(
-                "n5", marks=pytest.mark.xfail(reason="goto ret node will autoresolve")
-            ),
+            # pytest.param(
+            #     "n4", marks=pytest.mark.xfail(reason="goto ret node CAN autoresolve")
+            # ),
+            # pytest.param(
+            #     "n5", marks=pytest.mark.xfail(reason="goto ret node CAN autoresolve")
+            # ),
         ),
     )
     async def test_subroutine_nested(
@@ -293,7 +293,7 @@ class TestRuntimeIntegration:
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
-            assert rt.context.curr == n1
+            assert rt.context.curr.id == n1.id
             await rt.goto(to)
             assert rt.context.curr.id == to
             await rt.goto("n6")
@@ -304,9 +304,7 @@ class TestRuntimeIntegration:
         "subtest",
         (
             "check pre",
-            pytest.param(
-                "check post", marks=pytest.mark.xfail(reason="its bugged?? idk")
-            ),
+            "check post",
             "check pre/post",
         ),
     )
@@ -338,7 +336,7 @@ class TestRuntimeIntegration:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
             if "pre" in subtest:  # 1 -> 2
-                assert rt.context.curr == n1
+                assert rt.context.curr.id == n1.id
                 await rt.queue_edge(e12.id)
                 # call pattern is (condition, getframe/frame, no_delay)
                 checked = list(c.args[0] for c in mocked_check.call_args_list)
@@ -351,7 +349,7 @@ class TestRuntimeIntegration:
                 mocked_check_once.assert_not_called()
             else:
                 await rt.goto(n2.id)
-                assert rt.context.curr == n2
+                assert rt.context.curr.id == n2.id
             mocked_check.reset_mock()
 
             if "post" in subtest:  # 2 -> 3
@@ -390,10 +388,10 @@ class TestRuntimeIntegration:
         with Runtime(r, mocked_controller) as rt:
             mocker.patch.object(rt, "run_replay", return_value=None)
 
-            assert rt.context.curr == n1
+            assert rt.context.curr.id == n1.id
             await rt.goto(n2.id)
 
-            assert rt.context.curr == n2, "should be at n2 after `rt.goto(n2.id)`"
+            assert rt.context.curr.id == n2.id, "should be at n2 after `rt.goto(n2.id)`"
             cast(AsyncMock, rt.run_replay).assert_called()
             replays = [c.args[0] for c in cast(AsyncMock, rt.run_replay).call_args_list]
             assert e12.replay not in replays, "do not take edge n1->n2"
@@ -427,7 +425,7 @@ class TestRuntimeIntegration:
                 rt, "run_replay", return_value=None, autospec=rt.run_replay
             )
 
-            assert rt.context.curr == n1
+            assert rt.context.curr.id == n1.id
             await rt.queue_edge(e12.id)
             assert (
                 rt.context.curr == n2
@@ -467,7 +465,7 @@ class TestRuntimeIntegration:
                 rt, "run_replay", return_value=None, autospec=rt.run_replay
             )
 
-            assert rt.context.curr == n1
+            assert rt.context.curr.id == n1.id
             await rt.queue_edge(e16.id)
             assert (
                 rt.context.curr == n6
