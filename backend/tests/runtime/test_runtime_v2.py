@@ -18,7 +18,7 @@ from acine.runtime.runtime import (
     Runtime,
 )
 
-from .util import chain, forest  # type: ignore
+from .util import chain, create_from_edge_list, forest  # type: ignore
 
 NodeType = Routine.Node.NodeType
 EdgeType = Routine.Edge.EdgeTriggerType
@@ -182,3 +182,27 @@ class TestContext:
         assert runtime.context.curr.id == source, "should be back at source"
         await runtime.goto(target)
         assert runtime.context.curr.id == target, "should reach target"
+
+
+@pytest.mark.asyncio
+@pytest.mark.asyncio_time_limit(time_limit=2)
+class TestLogging:
+    @pytest.mark.parametrize(
+        "runtime",
+        (
+            create_from_edge_list(
+                ("start", "n1", "longest"),
+                ("n1", "n2"),
+                ("n2", "goal"),
+                ("start", "n3", "longer"),
+                ("n3", "goal"),
+                ("start", "goal", "best"),
+            ),
+        ),
+        indirect=True,
+    )
+    async def test_ranking(self, runtime: Runtime) -> None:
+        """With no data, prefer the shorter path."""
+        await runtime.goto("goal")
+        assert runtime.data.events[0].context.target_node.id == "goal"
+        assert runtime.data.events[0].debug.rankings == ["best", "longer", "longest"]
