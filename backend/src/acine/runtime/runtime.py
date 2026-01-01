@@ -18,16 +18,17 @@ import cv2
 import networkx as nx
 from acine_proto_dist.input_event_pb2 import InputReplay
 from acine_proto_dist.routine_pb2 import Routine
-from acine_proto_dist.runtime_pb2 import Event, RuntimeData
+from acine_proto_dist.runtime_pb2 import Level, RuntimeData, RuntimeState
 from uuid_utils import uuid7
 
 from acine.instance_manager import get_pfs
-from acine.runtime.check import CheckResult, check, check_once
+from acine.logging import ActionLogger, NavigationLogger
+from acine.runtime.check import Action, ActionResult, check, check_once
 from acine.runtime.check_image import ImageBmpType, check_similarity
 from acine.runtime.exceptions import (
+    AcineNavigationError,
+    AcineNoPath,
     ExecutionError,
-    NavigationError,
-    NoPathError,
     PostconditionTimeoutError,
     PreconditionTimeoutError,
     SubroutineExecutionError,
@@ -157,6 +158,15 @@ class Runtime:
 
         self.set_curr(self.context.curr)  # pushes update on init
 
+    def __enter__(self) -> Runtime:
+        return self
+
+    def __exit__(self, *arg: object) -> None:
+        self.__del__()
+
+    def __del__(self) -> None:
+        pass
+
     def set_curr(self, node: Routine.Node) -> None:
         assert isinstance(node, Routine.Node), "ACCEPT NODE ONLY"
         self.context.curr = self.nodes[node.id]
@@ -177,6 +187,13 @@ class Runtime:
 
     def peek(self) -> Runtime.Call:
         return self.context.call_stack[-1]
+
+    def get_runtime_state(self) -> RuntimeState:
+        return RuntimeState(
+            current_node=Routine.Node(id=self.context.curr.id),
+            target_node=self.target_node and Routine.Node(id=self.target_node.id),
+            stack_edges=[Routine.Edge(id=c.edge.id) for c in self.context.call_stack],
+        )
 
     def get_context(self) -> Context:
         return self.context
@@ -218,10 +235,13 @@ class Runtime:
                     # force repeat
                     next_id = e.subroutine  # retry
                 else:  # try checking for action completion
-                    res = await self.__check(
-                        e, Event.PHASE_POSTCONDITION, use_dest=True
-                    )
-                    if res == CheckResult.PASS:
+                    with NavigationLogger(
+                        self.data, self.get_runtime_state(), comment="ret pop"
+                    ).action(e) as logger:
+                        res = await self.__check(
+                            e, Action.Phase.PHASE_POSTCONDITION, logger, use_dest=True
+                        )
+                    if res == ActionResult.RESULT_PASS:
                         self.pop()
                         next_id = e.to  # complete
                     else:  # didn't pass
@@ -290,7 +310,7 @@ class Runtime:
             try:
                 path = nx.shortest_path(H, self.context.curr.id, id)
             except nx.NetworkXNoPath:
-                raise NoPathError(self.context.curr.id, id)
+                raise AcineNoPath(self.context.curr.id, id)
             u = self.nodes[path[0]]
             v = self.nodes[path[1]]
 
@@ -298,6 +318,7 @@ class Runtime:
             print()
             ct = 1
             while take_edge is None:
+                await sleep(0)  # yield to another task (if exists)
                 print("[?] get_frame", ct, end="\r")
                 ct += 1
 
@@ -326,7 +347,10 @@ class Runtime:
                 f"RUN {take_edge.description}",
                 f" => {self.nodes[take_edge.to].name}",
             )
-            await self.__run_action(take_edge)
+            with NavigationLogger(
+                self.data, self.get_runtime_state(), comment="goto"
+            ) as logger:
+                await self.__run_action(take_edge, logger)
         self.target_node = None
 
     async def queue_edge(self, id: str) -> ExecResult.ValueType:
@@ -337,21 +361,15 @@ class Runtime:
             raise ValueError("Edge does not exist.")
         # s = self.context.curr  # source
         e = self.edges[id]
-        for _ in range(10):  # insist you can navigate there (old behavior)
-            try:
-                await self.goto(e.u)
-                break
-            except ExecutionError:
-                pass
-                # return ExecResult.REQUIREMENT_TYPE_ATTEMPT
-                # raise NavigationError(s.id, e.u)
-            except NavigationError:
-                pass
-        else:
-            return ExecResult.REQUIREMENT_TYPE_ATTEMPT
-
         try:
-            await self.__run_action(e)
+            await self.goto(e.u)
+        except AcineNavigationError:
+            return ExecResult.REQUIREMENT_TYPE_ATTEMPT
+        try:
+            with NavigationLogger(
+                self.data, self.get_runtime_state(), comment="queue_edge"
+            ) as logger:
+                await self.__run_action(e, logger)
         except PreconditionTimeoutError:
             return ExecResult.REQUIREMENT_TYPE_CHECK
         except PostconditionTimeoutError:
@@ -370,12 +388,12 @@ class Runtime:
                 else:
                     # timeout during a child subroutine postcondition
                     raise SubroutineExecutionError(e)
-            except (ExecutionError, NavigationError):
+            except (ExecutionError, AcineNavigationError):
                 raise SubroutineExecutionError(e)
 
         return ExecResult.REQUIREMENT_TYPE_COMPLETION
 
-    def __process_condition(
+    def __resolve_condition(
         self, edge: Routine.Edge, condition: Routine.Condition, use_dest: bool = True
     ) -> Routine.Condition:
         """
@@ -392,22 +410,24 @@ class Runtime:
     async def __check(
         self,
         edge: Routine.Edge,
-        phase: Event.Phase.ValueType,
+        phase: Action.Phase.ValueType,
+        logger: ActionLogger,
         *,
         no_delay: bool = False,
         use_dest: bool = True,
         critical: bool = False,
-    ) -> CheckResult:
+    ) -> ActionResult.ValueType:
         """
         processes condition before calling `check`
         """
-        if phase == Event.PHASE_PRECONDITION:
+        if phase == Action.Phase.PHASE_PRECONDITION:
             condition = edge.precondition
-        elif phase == Event.PHASE_POSTCONDITION:
+            condition = self.__resolve_condition(edge, condition, use_dest=False)
+        elif phase == Action.Phase.PHASE_POSTCONDITION:
             condition = edge.postcondition
+            condition = self.__resolve_condition(edge, condition, use_dest=True)
         else:
             assert False, "Invalid __check(phase) parameter."
-        condition = self.__process_condition(edge, condition, use_dest=use_dest)
         ref_img: Optional[ImageBmpType] = None
         if condition.WhichOneof("condition") == "image":
             ref_img = get_frame(self.routine.id, condition.image.frame_id)
@@ -419,14 +439,14 @@ class Runtime:
             img,
             phase=phase,
             result=res,
-            level=Event.LEVEL_CRITICAL if critical else Event.LEVEL_LOG,
+            level=Level.LEVEL_CRITICAL if critical else Level.LEVEL_LOG,
         )
-        if res == Event.RESULT_PASS:
-            return CheckResult.PASS
-        elif res == Event.RESULT_TIMEOUT:
-            return CheckResult.TIMEOUT
+        if res == ActionResult.RESULT_PASS:
+            return ActionResult.RESULT_PASS
+        elif res == ActionResult.RESULT_TIMEOUT:
+            return ActionResult.RESULT_TIMEOUT
         else:
-            return CheckResult.ERROR
+            return ActionResult.RESULT_ERROR
 
     def __check_once(
         self,
@@ -438,7 +458,7 @@ class Runtime:
         """
         processes condition before calling `check_once`
         """
-        condition = self.__process_condition(edge, condition, use_dest=use_dest)
+        condition = self.__resolve_condition(edge, condition, use_dest=use_dest)
         ref_img: Optional[ImageBmpType] = None
         if condition.WhichOneof("condition") == "image":
             ref_img = get_frame(self.routine.id, condition.image.frame_id)
@@ -454,9 +474,9 @@ class Runtime:
         self,
         edge: Routine.Edge,
         img: ImageBmpType,
-        phase: Event.Phase.ValueType = Event.PHASE_UNSPECIFIED,
-        result: Event.Result.ValueType = Event.RESULT_UNSPECIFIED,
-        level: Event.Level.ValueType = Event.LEVEL_LOG,
+        phase: Action.Phase.ValueType = Action.Phase.PHASE_UNSPECIFIED,
+        result: Action.Result.ValueType = Action.Result.RESULT_UNSPECIFIED,
+        level: Level.ValueType = Level.LEVEL_LOG,
         comment: str = "",
     ) -> None:
         if not self.enable_logs or not self.pfs:
@@ -466,13 +486,15 @@ class Runtime:
         id = str(uuid7())
         await self.pfs.write_archive([f"{id}.bmp"], buffer.getvalue())
 
-        event = Event(
-            archive_id=id, phase=phase, result=result, comment=comment, level=level
-        )
-        event.timestamp.GetCurrentTime()
-        self.data.execution_info.get_or_create(edge.id).events.append(event)
+        # event = Event(
+        #     archive_id=id, phase=phase, result=result, comment=comment, level=level
+        # )
+        # event.timestamp.GetCurrentTime()
+        # self.data.execution_info.get_or_create(edge.id).events.append(event)
 
-    async def __run_action(self, action: Routine.Edge) -> None:
+    async def __run_action(
+        self, action: Routine.Edge, navigation_logger: NavigationLogger
+    ) -> None:
         """
         Runs the precheck/action/postcheck of an action
         """
@@ -480,44 +502,51 @@ class Runtime:
         if self.on_change_edge:
             self.on_change_edge(action)
 
-        res = await self.__check(action, Event.PHASE_PRECONDITION, use_dest=False)
-        if res != CheckResult.PASS:
-            # print("X ? ? precheck fail")
-            if self.on_change_edge:
-                self.on_change_edge(None)
-            raise PreconditionTimeoutError(action)
+        with navigation_logger.action(action) as logger:
+            res = await self.__check(action, Action.Phase.PHASE_PRECONDITION, logger)
+            if res != ActionResult.RESULT_PASS:
+                if self.on_change_edge:
+                    self.on_change_edge(None)
+                logger.finalize(logger.Result.RESULT_TIMEOUT)
+                raise PreconditionTimeoutError(action)
 
-        if action.WhichOneof("action") == "subroutine" and action.repeat_lower >= 1:
-            print("EXEC SUBROUTINE", action.description)
-            self.push(action)
-            self.set_curr(self.nodes[action.subroutine])
-            return  # Need to abort early when subroutine runs.
-            # The next shouldn't get set immediately, but stored on stack
-            # until after the subroutine completes.
-            # Post condition doesn't happen until the subroutine returns.
-        else:
-            if action.repeat_upper < action.repeat_lower:  # overrides (see frontend)
-                action.repeat_upper = 1000
-            for i in range(max(action.repeat_lower, action.repeat_upper)):
-                if i >= action.repeat_lower:
+            if action.WhichOneof("action") == "subroutine" and action.repeat_lower >= 1:
+                print("EXEC SUBROUTINE", action.description)
+                self.push(action)
+                self.set_curr(self.nodes[action.subroutine])
+                return  # Need to abort early when subroutine runs.
+                # The next shouldn't get set immediately, but stored on stack
+                # until after the subroutine completes.
+                # Post condition doesn't happen until the subroutine returns.
+            else:
+                if action.repeat_upper < action.repeat_lower:
+                    action.repeat_upper = 1000  # overrides (see frontend)
+                for i in range(max(action.repeat_lower, action.repeat_upper)):
+                    if i >= action.repeat_lower:
+                        res = await self.__check(
+                            action,
+                            Action.Phase.PHASE_POSTCONDITION,
+                            logger,
+                            use_dest=True,
+                            critical=action.repeat_upper == 1,
+                        )
+                        if res == ActionResult.RESULT_PASS:
+                            break  # can exit repeating early
+                    await self.__exec_action(action)
+                else:  # final postcondition check
                     res = await self.__check(
                         action,
-                        Event.PHASE_POSTCONDITION,
+                        Action.Phase.PHASE_POSTCONDITION,
+                        logger,
                         use_dest=True,
-                        critical=action.repeat_upper == 1,
+                        critical=True,
                     )
-                    if res == CheckResult.PASS:
-                        break  # can exit repeating early
-                await self.__exec_action(action)
-            else:  # final postcondition check
-                res = await self.__check(
-                    action, Event.PHASE_POSTCONDITION, use_dest=True, critical=True
-                )
-                if res != CheckResult.PASS:
-                    # print("! ! X postcheck fail")
-                    if self.on_change_edge:
-                        self.on_change_edge(None)
-                    raise PostconditionTimeoutError(action)
+                    if res != ActionResult.RESULT_PASS:
+                        # print("! ! X postcheck fail")
+                        if self.on_change_edge:
+                            self.on_change_edge(None)
+                        logger.finalize(logger.Result.RESULT_TIMEOUT)
+                        raise PostconditionTimeoutError(action)
 
         # update state after postcondition check passes
         self.set_curr(self.nodes[action.to])

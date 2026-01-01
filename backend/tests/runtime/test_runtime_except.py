@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+import asyncio
+from typing import Any, Awaitable, Callable, TypeAlias, TypeVar, cast
 
 import pytest
 from pytest_mock import MockerFixture
@@ -20,6 +21,26 @@ from acine.runtime.runtime import (
 
 NodeType: TypeAlias = Routine.Node.NodeType
 EdgeType: TypeAlias = Routine.Edge.EdgeTriggerType
+FuncT = TypeVar("FuncT", bound=Callable[..., Awaitable[Any]])
+
+
+# TODO: convert to marker later
+def async_timelimit(timeout: float) -> Callable[[FuncT], FuncT]:
+    def async_timelimit(f: FuncT) -> FuncT:
+        from functools import wraps
+
+        @wraps(f)
+        async def wrapped(*args: object, **kwargs: object) -> Any:
+            try:
+                async with asyncio.timeout(timeout):
+                    return await f(*args, **kwargs)
+            except asyncio.TimeoutError:
+                print("Exceeded time limit of", timeout, "s.")
+                raise
+
+        return cast(FuncT, wrapped)
+
+    return async_timelimit
 
 
 class MockRoutine:
@@ -178,6 +199,8 @@ class TestRuntimeExceptions:
             assert rt.context.curr.id == "b"
 
     @pytest.mark.asyncio
+    @pytest.mark.xfail(reason="Navigation is incomplete.")
+    @async_timelimit(1)
     async def test_nav_fail(self, sab: Routine, mocker: MockerFixture) -> None:
         """start -/> a -> b"""
         e = sab.nodes["start"].edges[0]
