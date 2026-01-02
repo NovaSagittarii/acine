@@ -110,6 +110,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
         # else:
         #     print("Text message received: {}".format(payload.decode("utf8")))
 
+        # 20ms is going to grief the goal of 60fps sending frames and forwarding inputs?
+        # asyncio.get_running_loop().slow_callback_duration = 0.020
+        # nvm it turns out PYTHONASYNCIODEBUG destroys performance
+
         if isBinary:
             packet = Packet.FromString(payload)
             match packet.WhichOneof("type"):
