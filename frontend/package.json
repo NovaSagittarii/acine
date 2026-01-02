@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:nostdin": "cross-env CI=true vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint --cache .",
     "format": "prettier . --write",
     "preview": "vite preview",
     "test": "vitest run"
