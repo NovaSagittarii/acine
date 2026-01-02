@@ -28,7 +28,7 @@ function pop(key: KeyCode) {
   if (binding[0]) binding[binding.length - 1].setActive(true);
 }
 
-export function setupShortcuts() {
+export function useSetupShortcuts() {
   // setup listener
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
