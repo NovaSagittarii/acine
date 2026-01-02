@@ -247,14 +247,14 @@ class AcineServerProtocol(WebSocketServerProtocol):
         match event_type:
             case "move":
                 pos: Point = packet.input_event.move
-                await self.ih.mouse_move(pos.x, pos.y)
+                await self.rt.controller.mouse_move(pos.x, pos.y)
             case "mouse_up" | "mouse_down":
                 if event_type == "mouse_up":
                     button = packet.input_event.mouse_up
-                    await self.ih.mouse_up()
+                    await self.rt.controller.mouse_up()
                 else:
                     button = packet.input_event.mouse_down
-                    await self.ih.mouse_down()
+                    await self.rt.controller.mouse_down()
                 match button:
                     case InputEvent.MouseButton.MOUSE_BUTTON_LEFT:
                         pass
