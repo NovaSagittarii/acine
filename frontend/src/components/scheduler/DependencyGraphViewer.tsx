@@ -69,7 +69,7 @@ export default function RoutineViewer() {
           }) as GraphEdge,
       ),
     );
-  }, [routine, dnodes]);
+  }, [dnodes]);
 
   useEffect(() => {
     if (follow) {

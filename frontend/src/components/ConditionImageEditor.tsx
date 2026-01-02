@@ -78,7 +78,7 @@ export default function ConditionImageEditor() {
       }
       if (changed) forceUpdate();
     }
-  }, [condition, currFrameId]);
+  }, [condition, currFrameId, forceUpdate]);
 
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
