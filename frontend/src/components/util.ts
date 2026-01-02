@@ -16,3 +16,12 @@ export function exportGenerator<T, C>(
       ({ name: x, method: generatorClass[x] }) as GeneratorDescription<T, C>,
   );
 }
+
+/**
+ * Reverse mapper function. Used for proto enum unmapping.
+ * https://stackoverflow.com/a/66232780
+ * https://stackoverflow.com/a/58448218
+ */
+export function getKey<V, T extends Record<any, V>>(map: T, val: V) {
+  return Object.keys(map).find((key) => map[key] === val);
+}

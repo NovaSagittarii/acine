@@ -39,19 +39,24 @@ export default function EditableRoutineProperty<T, K extends keyof T>({
   return (
     object &&
     property && (
-      <EditableText
-        onChange={(s) => {
-          (object[property] as string) = s;
-          callback();
-        }}
-        className={className}
-      >
-        {object[property] ? (
-          (object[property] as string)
-        ) : (
-          <div className='opacity-50'>{'<unset>'}</div>
-        )}
-      </EditableText>
+      <div className='group relative'>
+        <EditableText
+          onChange={(s) => {
+            (object[property] as string) = s;
+            callback();
+          }}
+          className={className}
+        >
+          {object[property] ? (
+            (object[property] as string)
+          ) : (
+            <div className='opacity-50'>{'<unset>'}</div>
+          )}
+        </EditableText>
+        <div className='absolute top-0 left-1 translate-y-[0%] group-hover:translate-y-[-50%] text-xs opacity-10 group-hover:opacity-50 transition-all pointer-events-none'>
+          {property}
+        </div>
+      </div>
     )
   );
 }

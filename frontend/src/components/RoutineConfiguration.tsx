@@ -4,6 +4,7 @@ import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import useForceUpdate from './useForceUpdate';
 import { $timeSpent } from '../activity';
 import { formatDuration } from '../client/util';
+import LogsDisplay from './LogsDisplay';
 
 export default function RoutineConfiguration() {
   const forceUpdate = useForceUpdate();
@@ -11,7 +12,7 @@ export default function RoutineConfiguration() {
   const timeSpent = useStore($timeSpent);
 
   return (
-    <div className='flex flex-col gap-4 p-4'>
+    <div className='flex flex-col gap-1 p-4 w-full h-full'>
       <div className='font-semibold text-2xl'>Routine Configuration</div>
       <div className='text-xs text-right'>{routine.id}</div>
       <EditableRoutineProperty
@@ -37,6 +38,7 @@ export default function RoutineConfiguration() {
         className='font-mono'
       />
       Time Spent: {formatDuration(timeSpent)}
+      <LogsDisplay />
     </div>
   );
 }

@@ -150,6 +150,11 @@ export function getImageUrl(imageId: string) {
   return `${httpUrl}/data/${$routine.get().id}/img/${imageId}`;
 }
 
+export function getArchiveUrl(imageId: string) {
+  if (!$routine.get().id) throw new Error('Expected a set `routine.id`.');
+  return `${httpUrl}/data/${$routine.get().id}/archive/${imageId}`;
+}
+
 /**
  * - (if `!id`) request the current frame
  * - (if `id`) request a specific frame

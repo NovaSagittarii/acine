@@ -236,14 +236,17 @@ function RoutineEditor() {
               pull
             </div>
           </div>
-          {activeTab === ActiveTab.CONFIG && <RoutineConfiguration />}
-          {activeTab === ActiveTab.STATE && <StateList />}
-          {activeTab === ActiveTab.NODE && <NodeList />}
-          {activeTab === ActiveTab.GRAPH && <RoutineViewer />}
-          {activeTab === ActiveTab.DGRAPH && <DependencyGraphViewer />}
-          {activeTab === ActiveTab.CRON && (
-            <ScheduleViewer routine={$routine.get()} />
-          )}
+          {/* min-h-0 ?? https://stackoverflow.com/a/76670135 */}
+          <div className='flex h-full w-full grow min-h-0'>
+            {activeTab === ActiveTab.CONFIG && <RoutineConfiguration />}
+            {activeTab === ActiveTab.STATE && <StateList />}
+            {activeTab === ActiveTab.NODE && <NodeList />}
+            {activeTab === ActiveTab.GRAPH && <RoutineViewer />}
+            {activeTab === ActiveTab.DGRAPH && <DependencyGraphViewer />}
+            {activeTab === ActiveTab.CRON && (
+              <ScheduleViewer routine={$routine.get()} />
+            )}
+          </div>
         </div>
       </div>
       <ConditionImageEditor />
