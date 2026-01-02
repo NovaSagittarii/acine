@@ -1,5 +1,5 @@
 import { InputReplay, Routine_Condition } from 'acine-proto-dist';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { $replayInputSource } from '@/state';
 
@@ -7,6 +7,7 @@ import Button from './ui/Button';
 import { open } from '../client/input_stream';
 import { acquireOffset } from '../App.state';
 import Checkbox from './ui/Checkbox';
+import { $currentEdge } from './Edge.state';
 
 interface ReplayEditorProps {
   replay: InputReplay;
@@ -17,6 +18,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
   const [isPlaying, setPlaying] = useState<boolean>(false); // for replay
   const [stream, setStream] = useState<null | ReturnType<typeof open>>(null);
   const replayInputSource = useStore($replayInputSource);
+  const currentEdge = useStore($currentEdge);
 
   const [offset, setOffset] =
     useState<Awaited<ReturnType<typeof acquireOffset>>>(undefined);
@@ -31,9 +33,13 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
       };
     }
   }, [stream, isRecording]);
+  const active = useMemo(
+    () => currentEdge?.precondition === condition,
+    [currentEdge, condition],
+  );
 
   return (
-    <div className='flex flex-col'>
+    <div className={`flex flex-col ${active && 'bg-blue-100 drop-shadow-sm'}`}>
       <div className='flex flex-row justify-evenly'>
         <div className='flex flex-row'>
           {replay.duration} <div className='opacity-50'>ms: duration</div>
@@ -54,6 +60,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
           <>
             <Button
               className='p-1! w-full bg-black text-white'
+              hotkey={active && 'KeyR'}
               onClick={async () => {
                 if (condition) setOffset(await acquireOffset(condition));
                 setRecording(true);
@@ -65,6 +72,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
             {!isPlaying ? (
               <Button
                 className='p-1! w-full bg-black text-white'
+                hotkey={active && 'KeyP'}
                 onClick={async () => {
                   let dx, dy;
                   if (condition && replay.relative && replay.offset) {
@@ -87,6 +95,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
             ) : (
               <Button
                 className='p-1! w-full bg-red-500 text-white'
+                hotkey={active && 'KeyP'}
                 onClick={() => replayInputSource.stop()}
               >
                 Stop

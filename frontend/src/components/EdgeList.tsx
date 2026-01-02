@@ -7,6 +7,7 @@ import { $routine, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
 import { choices, getEdgeDisplay, getEdgeIcon } from './Edge.util';
+import { $currentEdge } from './Edge.state';
 
 interface EdgeListProps {
   node: Routine_Node;
@@ -44,6 +45,8 @@ export default function EdgeList({
               </div>
             }
             open={expand}
+            onOpen={() => $currentEdge.set(edge)}
+            onClose={() => $currentEdge.set(null)}
           >
             <Edge edge={edge} />
             <CloseButton

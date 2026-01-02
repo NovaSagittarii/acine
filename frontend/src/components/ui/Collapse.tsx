@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { MouseEvent as ReactMouseEvent, useState } from 'react';
 import Section from './Section';
 
 interface CollapseProps {
@@ -8,6 +8,9 @@ interface CollapseProps {
 
   /** whether to keep it automatically open; by default is closed */
   open?: boolean;
+
+  onOpen?: (event: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClose?: (event: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 /**
@@ -18,6 +21,8 @@ export default function Collapse({
   label,
   children,
   open = false,
+  onOpen,
+  onClose,
 }: CollapseProps) {
   const [isOpen, setOpen] = useState(open);
   const [ref, setRef] = useState<HTMLElement | null>(null);
@@ -31,9 +36,10 @@ export default function Collapse({
         `rounded-sm border border-transparent ${!isOpen && 'hover:border-amber-500'} ` +
         className
       }
-      onClick={() => {
+      onClick={(event) => {
         if (!isOpen) {
           setOpen(true);
+          if (onOpen) onOpen(event);
           ref?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }}
@@ -42,7 +48,12 @@ export default function Collapse({
       <Section.h3 className={`flex-col ${!isOpen && 'border-0'}`}>
         <div
           className='group flex items-center'
-          onClick={() => setOpen((o) => !o)}
+          onClick={(event) => {
+            setOpen((o) => !o);
+            if (!isOpen) {
+              if (onOpen) onOpen(event);
+            } else if (onClose) onClose(event);
+          }}
         >
           {label}
           <div

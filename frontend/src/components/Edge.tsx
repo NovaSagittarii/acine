@@ -19,6 +19,7 @@ import { choices } from './Node.util';
 import { getEdgePrefix } from './Edge.util';
 import { runtimeQueueEdge } from '../App.state';
 import SelectTab from './ui/SelectTab';
+import { $currentEdge } from './Edge.state';
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
@@ -47,6 +48,7 @@ export default function Edge({
   return (
     <div
       className={`flex flex-col gap-1 p-1 rounded-sm border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
+      onClick={() => $currentEdge.set(edge)}
     >
       <div className='flex gap-4 w-full items-center'>
         <div>

@@ -5,7 +5,7 @@ interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void | Promise<void>;
-  hotkey?: KeyCode | undefined;
+  hotkey?: KeyCode | undefined | false;
 }
 
 export default function Button({
@@ -27,7 +27,7 @@ export default function Button({
         setDown(false);
       }
     };
-    useShortcut('Backquote', onKeyDown, onKeyUp);
+    if (hotkey) useShortcut(hotkey, onKeyDown, onKeyUp);
     return <></>;
   }
   return (
