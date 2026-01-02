@@ -16,6 +16,7 @@ from windows_capture import (  # type: ignore
     WindowsCapture,
 )
 
+from acine.input_handler import get_title_bar_height
 from acine.runtime.check_image import ImageBmpType
 
 
@@ -30,6 +31,7 @@ class GameCapture:  # thanks joshua
 
         self.window_name = window_name or None  # prefer None over empty string ""
         self.init()
+        self.title_bar_height = get_title_bar_height(window_name) if window_name else 0
         self.get_png_frame_lock = Lock()
         self.capture_callback_semaphore = Semaphore(0)
         self.dimensions: "tuple[int, int]" = (0, 0)
@@ -80,7 +82,12 @@ class GameCapture:  # thanks joshua
 
             # print("got frame")
             # frame.save_as_image("./yooo.png")
-            self.data = frame.frame_buffer.copy()[:, :, :3]  # discard alpha
+            self.data = frame.frame_buffer.copy()[self.title_bar_height :, :, :3]
+            # discard title bar
+            #   to normalize screenshots, bar height is dependent on Resolution Scaling
+            #   it doesn't seem you're able to click on the title bar anyways (?)
+            # discard alpha
+
             self.dimensions = (frame.width, frame.height)
             self.capture_callback_semaphore.release()
 
