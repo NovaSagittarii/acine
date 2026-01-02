@@ -14,6 +14,7 @@ import { $frames, $routine, $sourceDimensions } from '@/state';
 import { $condition } from './ConditionImageEditor.state';
 import { getImageUrl, runtimeConditionQuery } from '../App.state';
 import useForceUpdate from './useForceUpdate';
+import useShortcut from './useShortcut';
 
 const METHOD_TYPES_DISPLAY = [
   ['unset (ccorr)', Method.METHOD_UNSPECIFIED],
@@ -37,6 +38,11 @@ export default function ConditionImageEditor() {
     setOpen(false);
     $condition.set(null);
   };
+  function EscapeShortcut() {
+    /** NOTE: this is getting repeated loaded/unloaded, some circular dep here? */
+    useShortcut('Escape', (_event) => close());
+    return <></>;
+  }
 
   const [src, setSrc] = useState<string>('');
   const [currFrameId, setCurrFrameId] = useState<string>(
@@ -111,6 +117,7 @@ export default function ConditionImageEditor() {
   return (
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
+        {open && <EscapeShortcut />}
         <div className='flex flex-col m-12 grow bg-white pointer-events-auto'>
           <SelectAuto
             value={condition.frameId || undefined}

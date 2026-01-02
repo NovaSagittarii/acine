@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react';
+import useShortcut, { KeyCode } from '../useShortcut';
 
 interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void | Promise<void>;
-  hotkey?: string;
+  hotkey?: KeyCode | undefined;
 }
 
 export default function Button({
   children,
   className = '',
-  hotkey,
+  hotkey = undefined,
   onClick = () => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
-  useEffect(() => {
+  function Shortcut() {
     const onKeyDown = (ev: KeyboardEvent) => {
       if (ev.code === hotkey && !isDown.valueOf()) {
         setDown(true);
@@ -26,13 +27,9 @@ export default function Button({
         setDown(false);
       }
     };
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('keyup', onKeyUp);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.removeEventListener('keyup', onKeyUp);
-    };
-  }, [hotkey, onClick]);
+    useShortcut('Backquote', onKeyDown, onKeyUp);
+    return <></>;
+  }
   return (
     <div
       onClick={() => void onClick()}
@@ -42,6 +39,7 @@ export default function Button({
         className
       }
     >
+      {hotkey && <Shortcut />}
       {children}
       {hotkey && `[${hotkey}]`}
     </div>
