@@ -37,6 +37,17 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
     () => currentEdge?.precondition === condition,
     [currentEdge, condition],
   );
+  const [progress, setProgress] = useState(-1);
+  useEffect(() => {
+    if (isPlaying) {
+      const interval = setInterval(
+        () => setProgress(replayInputSource.progress()),
+        16,
+      );
+      return () => clearInterval(interval);
+    } else setProgress(0);
+    return () => {};
+  }, [isPlaying]);
 
   return (
     <div className={`flex flex-col ${active && 'bg-blue-100 drop-shadow-sm'}`}>
@@ -55,7 +66,11 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
           <div className='opacity-50'>: relative</div>
         </div>
       </div>
-      <div className='py-2 px-4 flex flex-row gap-4 font-sans'>
+      <div className='relative py-2 px-4 flex flex-row gap-4 font-sans'>
+        <div
+          className='absolute bottom-0 left-0 h-1 bg-blue-500'
+          style={{ width: Math.max(0, progress * 100) + '%' }}
+        />
         {!isRecording ? (
           <>
             <Button

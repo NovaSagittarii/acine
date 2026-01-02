@@ -11,6 +11,8 @@ export default class InputSource {
   private active: boolean = false;
   private onEvent: (event: InputEvent, dx: number, dy: number) => void;
   private onEnd: () => void = () => {};
+  private startTime: number = 0;
+  private endTime: number = 1;
   constructor(callback: (event: InputEvent) => void = () => {}) {
     this.onEvent = callback;
   }
@@ -24,7 +26,11 @@ export default class InputSource {
   public play(replay: InputReplay, dx: number = 0, dy: number = 0) {
     this.stop();
     this.active = true;
-    const t0 = Date.now();
+    const t0 = (this.startTime = Date.now());
+    this.endTime =
+      t0 +
+      replay.events[replay.events.length - 1].timestamp -
+      replay.events[0].timestamp;
     let i = 0;
     const next = () => {
       if (!this.active) return;
@@ -53,6 +59,17 @@ export default class InputSource {
     this.active = false;
     if (this.timeout !== null) clearTimeout(this.timeout);
     this.onEnd();
+  }
+
+  /**
+   * @returns current progress in the range [0.0, 1.0]. -1 if not playing
+   */
+  public progress(): number {
+    if (!this.active) return -1;
+    return Math.min(
+      1,
+      (Date.now() - this.startTime) / (this.endTime - this.startTime),
+    );
   }
 
   /**
