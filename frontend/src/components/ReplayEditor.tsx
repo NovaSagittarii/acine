@@ -1,7 +1,7 @@
 import { InputReplay, Routine_Condition } from 'acine-proto-dist';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '@nanostores/react';
-import { $replayInputSource } from '@/state';
+import { replayInputSource } from '@/state';
 
 import Button from './ui/Button';
 import { open } from '../client/input_stream';
@@ -17,7 +17,6 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
   const [isRecording, setRecording] = useState<boolean>(false);
   const [isPlaying, setPlaying] = useState<boolean>(false); // for replay
   const [stream, setStream] = useState<null | ReturnType<typeof open>>(null);
-  const replayInputSource = useStore($replayInputSource);
   const currentEdge = useStore($currentEdge);
 
   const [offset, setOffset] =

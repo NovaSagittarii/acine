@@ -11,7 +11,7 @@ import {
   $sourceDimensions, // used in useStore (function scope)
   loadRoutine,
   saveRoutine, // used in global scope
-  $replayInputSource,
+  replayInputSource,
   $loadedRoutine,
   $backendConfiguration,
   $runtimeContext,
@@ -121,7 +121,6 @@ function RoutineEditor() {
     return () => clearInterval(int);
   }, []);
 
-  const replayInputSource = useStore($replayInputSource);
   const selectedState = useStore($selectedState);
   const dimensions = useStore($sourceDimensions);
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.CONFIG);

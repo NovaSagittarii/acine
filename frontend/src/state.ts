@@ -129,7 +129,7 @@ export const $selectedNode = atom<Routine_Node | null>(null);
  *
  * forwarding replay events => client websocket => backend
  */
-export const $replayInputSource = atom<InputSource>(new InputSource());
+export const replayInputSource = new InputSource();
 
 /**
  * current runtime context, includes current node and return stack
