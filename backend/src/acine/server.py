@@ -189,7 +189,9 @@ class AcineServerProtocol(WebSocketServerProtocol):
             on_change_curr=self.on_change_curr,
             on_change_return=self.on_change_return,
             on_change_edge=self.on_change_edge,
-            enable_logs=True,
+            # NOTE: this is only for testing, this won't persist since
+            # runtimedata is not set (so it gets reset repeatedly)
+            # enable_logs=True,
         )
         if old_context:
             self.rt.restore_context(old_context)
