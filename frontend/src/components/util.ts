@@ -17,11 +17,14 @@ export function exportGenerator<T, C>(
   );
 }
 
+// https://stackoverflow.com/a/50159864
+type Enum<E> = Record<keyof E, number | string> & { [k: number]: string };
+
 /**
  * Reverse mapper function. Used for proto enum unmapping.
  * https://stackoverflow.com/a/66232780
  * https://stackoverflow.com/a/58448218
  */
-export function getKey<V, T extends Record<any, V>>(map: T, val: V) {
-  return Object.keys(map).find((key) => map[key] === val);
+export function getKey<T extends Enum<T>>(map: T, val: T[keyof T]) {
+  return (Object.keys(map) as Array<keyof T>).find((key) => map[key] === val);
 }

@@ -32,7 +32,7 @@ function Log({ event }: { event: Event }) {
               className='w-auto h-auto max-h-24 max-w-24'
             />
           )}
-          {getKey(Action_Phase as {}, phase)}
+          {getKey(Action_Phase, phase)}
         </div>
       ))}
       <div className='sticky bottom-0 z-1 bg-white border-b border-black'>
@@ -43,7 +43,7 @@ function Log({ event }: { event: Event }) {
           </div>
           <div className='font-mono text-sm opacity-50 flex gap-4'>
             <div>{action && `take_edge=${action.id}`}</div>
-            <div>{action && getKey(Action_Result as {}, action.result)}</div>
+            <div>{action && getKey(Action_Result, action.result)}</div>
           </div>
         </div>
       </div>
