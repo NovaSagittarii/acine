@@ -35,15 +35,19 @@ export function setupShortcuts() {
       if (event.defaultPrevented) return;
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
-      if (binding && binding[0]) binding[binding.length - 1].onKeyDown(event);
-      if (event.code !== 'Tab') event.preventDefault();
+      if (binding && binding[0]) {
+        binding[binding.length - 1].onKeyDown(event);
+        event.preventDefault();
+      }
     };
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
-      if (binding && binding[0]) binding[binding.length - 1].onKeyUp(event);
-      if (event.code !== 'Tab') event.preventDefault();
+      if (binding && binding[0]) {
+        binding[binding.length - 1].onKeyUp(event);
+        event.preventDefault();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
