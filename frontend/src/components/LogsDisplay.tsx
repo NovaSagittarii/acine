@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react';
 import { $logs } from '@/state';
-import { Event, Action_Phase } from 'acine-proto-dist';
+import { Event, Action_Phase, Action_Result } from 'acine-proto-dist';
 import { getArchiveUrl } from '../App.state';
 import { getKey } from './util';
 
@@ -38,9 +38,13 @@ function Log({ event }: { event: Event }) {
       <div className='sticky bottom-0 z-1 bg-white border-b border-black'>
         <div className='relative flex items-center w-full gap-4'>
           <div className='absolute top-1 right-1 text-xs font-mono'>
+            {debug?.comment && debug?.comment + '; '}
             {timeEnd?.toLocaleString()}
           </div>
-          <div className='text-sm opacity-50'>{debug?.comment}</div>
+          <div className='font-mono text-sm opacity-50 flex gap-4'>
+            <div>{action && `take_edge=${action.id}`}</div>
+            <div>{action && getKey(Action_Result as {}, action.result)}</div>
+          </div>
         </div>
       </div>
     </div>
