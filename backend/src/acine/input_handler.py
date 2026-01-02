@@ -89,8 +89,6 @@ class InputHandler:
         print(f"y-offset(titlebar)={self.y_offset}")
 
     async def init(self):
-        # scuffed way of doing it but it sorta works. NOTE: first move is slow
-        # TODO: proper initialization
         if self._init_completed:
             return
         self._init_completed = True
@@ -139,14 +137,12 @@ class InputHandler:
         await self.update_mouse()
 
     async def update_mouse(self) -> None:
-        await self.init()
         flags = "D NA" if self.is_mouse_down else "U NA"
         if self.win:
             await self.win.click(x=self.x, y=self.y, button="L", options=flags)
         # print(self.x, self.y, flags)
 
     async def close(self) -> None:
-        await self.init()
         if self.win and self.can_close:
             await self.win.close()
 
