@@ -5,13 +5,13 @@ interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void | Promise<void>;
-  hotkey?: KeyCode | undefined | false;
+  hotkey?: KeyCode | null | false;
 }
 
 export default function Button({
   children,
   className = '',
-  hotkey = undefined,
+  hotkey = null,
   onClick = () => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
@@ -27,7 +27,7 @@ export default function Button({
         setDown(false);
       }
     };
-    if (hotkey) useShortcut(hotkey, onKeyDown, onKeyUp);
+    useShortcut(hotkey, onKeyDown, onKeyUp);
     return <></>;
   }
   return (

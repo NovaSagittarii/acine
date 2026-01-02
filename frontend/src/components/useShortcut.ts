@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 
 interface Binding {
   onKeyDown: (event: KeyboardEvent) => void;
@@ -66,21 +66,25 @@ export function useSetupShortcuts() {
  * @returns whether the keybind is active or not (useState), and teardown
  */
 export default function useShortcut(
-  key: KeyCode,
+  key: KeyCode | null | false,
   onKeyDown: (event: KeyboardEvent) => void,
   onKeyUp: (event: KeyboardEvent) => void = () => {},
 ): [boolean, () => void] {
   const [isActive, setActive] = useState(true);
-  let popped = false;
-  const _pop = () => {
-    if (popped) return;
-    popped = true;
-    pop(key);
-  };
+  const [isPopped, setPopped] = useState(false);
+  const _pop = useMemo(
+    () => () => {
+      if (!key) return;
+      if (isPopped) return;
+      setPopped(true);
+      pop(key);
+    },
+    [isPopped, setPopped, key],
+  );
   useEffect(() => {
-    push(key, onKeyDown, onKeyUp, setActive);
+    if (key) push(key, onKeyDown, onKeyUp, setActive);
     return _pop;
-  }, []);
+  }, [_pop, key, onKeyDown, onKeyUp]);
   return [isActive, _pop];
 }
 
