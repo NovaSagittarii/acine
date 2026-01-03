@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import useShortcut, { KeyCode } from '../useShortcut';
 
+interface ModifierKeys {
+  shiftKey?: boolean;
+  altKey?: boolean;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+}
+
 interface ButtonProps {
   children: React.ReactNode;
   className?: string;
-  onClick?: () => void | Promise<void>;
+  onClick?: (modifiers: ModifierKeys) => void | Promise<void>;
   hotkey?: KeyCode | null | false;
 }
 
@@ -12,14 +19,15 @@ export default function Button({
   children,
   className = '',
   hotkey = null,
-  onClick = () => {},
+  onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
   function Shortcut() {
     const onKeyDown = (ev: KeyboardEvent) => {
       if (ev.code === hotkey && !isDown.valueOf()) {
         setDown(true);
-        void onClick();
+        const { shiftKey, altKey, ctrlKey, metaKey } = ev;
+        void onClick({ shiftKey, altKey, ctrlKey, metaKey });
       }
     };
     const onKeyUp = (ev: KeyboardEvent) => {
@@ -32,7 +40,9 @@ export default function Button({
   }
   return (
     <div
-      onClick={() => void onClick()}
+      onClick={({ shiftKey, altKey, ctrlKey, metaKey }) =>
+        void onClick({ shiftKey, altKey, ctrlKey, metaKey })
+      }
       className={
         'p-3 rounded-lg text-center transition-colors select-none ' +
         `border-4 ${!isDown ? 'border-transparent' : 'border-sky-500'} hover:border-blue-500 ` +
@@ -51,7 +61,9 @@ export function CloseButton({
 }: Pick<ButtonProps, 'onClick'>) {
   return (
     <div
-      onClick={() => void onClick()}
+      onClick={({ shiftKey, altKey, ctrlKey, metaKey }) =>
+        void onClick({ shiftKey, altKey, ctrlKey, metaKey })
+      }
       className={
         'm-4 w-8 h-8 flex items-center justify-center absolute top-0 right-0 ' +
         'font-mono text-red-500 border border-red-500 rounded-sm ' +
