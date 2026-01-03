@@ -28,11 +28,22 @@ function pop(key: KeyCode) {
   if (binding[0]) binding[binding.length - 1].setActive(true);
 }
 
+// returns True if this is on input/textarea element
+function checkSuppressBinding(event: KeyboardEvent): boolean {
+  if (
+    (['INPUT', 'TEXTAREA'] as any[]).includes((event.target as any).tagName)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function useSetupShortcuts() {
   // setup listener
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
+      if (checkSuppressBinding(event)) return;
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
       if (binding && binding[0]) {
@@ -42,6 +53,7 @@ export function useSetupShortcuts() {
     };
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
+      if (checkSuppressBinding(event)) return;
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
       if (binding && binding[0]) {
