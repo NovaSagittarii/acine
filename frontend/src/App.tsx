@@ -48,7 +48,11 @@ enum ActiveTab {
  */
 let saveCurrentFrame = () => '';
 
-function RoutineEditor() {
+/**
+ * Requests server for a copy of the screen, please keep this separate as this
+ * gets rerendered about 60 times a second.
+ */
+function ScreenCopy() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [dState, setDState] = useState(''); // debug state
   const [dSend, setDSend] = useState(0);
@@ -107,6 +111,67 @@ function RoutineEditor() {
     setDSend(Date.now());
   }, [imageUrl]);
 
+  const selectedState = useStore($selectedState);
+  const dimensions = useStore($sourceDimensions);
+  const expanded = false;
+  return (
+    <div
+      className={
+        `${expanded ? 'w-full' : 'w-1/3'} max-w-fit transition-all ` +
+        'border-r-4 border-blue-500/10 hover:border-blue-500 ' +
+        'bg-blue-50 hover:bg-transparent'
+      }
+    >
+      <div className='h-full p-4 flex flex-col gap-4'>
+        <Button
+          className='bg-red-400'
+          shortcut='Backquote'
+          onClick={() => {
+            const frameId = saveCurrentFrame();
+            if (!frameId) {
+              console.warn('tried to capture nonexistant frame');
+              return;
+            }
+            selectedState?.samples.push(frameId);
+            $routine.set($routine.get());
+          }}
+        >
+          CAPTURE
+        </Button>
+        {/* <div className='flex gap-4'>
+              <Button className='bg-blue-200 w-full'>Click</Button>
+              <Button className='bg-blue-200 w-full'>Click (Region)</Button>
+              <Button className='bg-blue-200 w-full'>Drag</Button>
+            </div> */}
+        <Window
+          websocket={ws}
+          replaySource={replayInputSource}
+          dimensions={dimensions}
+          imageUrl={imageUrl}
+        />
+        <div className='font-mono flex-col'>
+          <div>
+            {dState}
+            {` latency=${(dRecv / 1e3).toFixed(3)}s`}
+            {` ${(1e3 / dRecv).toFixed(1).padStart(5, '0')}fps`}
+          </div>
+          <div>
+            {runtimeContext?.currentNode?.name}
+            {runtimeContext.currentEdge &&
+              ' => ' +
+                $routine.get().nodes[runtimeContext.currentEdge?.to]?.name}
+            {runtimeContext.currentEdge &&
+              ' via ' + getEdgeDisplay(runtimeContext.currentEdge)}
+            {runtimeContext.targetNode &&
+              ' ==> ' + runtimeContext.targetNode.name}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RoutineEditor() {
   useEffect(() => {
     // a simple way to handle activity tracking
     let routineId: string | undefined = undefined;
@@ -122,10 +187,7 @@ function RoutineEditor() {
     return () => clearInterval(int);
   }, []);
 
-  const selectedState = useStore($selectedState);
-  const dimensions = useStore($sourceDimensions);
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.CONFIG);
-  const expanded = false;
 
   return (
     <>
@@ -133,59 +195,7 @@ function RoutineEditor() {
         <div className='absolute bottom-0 flex flex-col gap-1 items-begin justify-center w-fit p-1 z-50 bg-white opacity-100 hover:opacity-10 transition-opacity'>
           <BindingsDisplay />
         </div>
-        <div
-          className={
-            `${expanded ? 'w-full' : 'w-1/3'} max-w-fit transition-all ` +
-            'border-r-4 border-blue-500/10 hover:border-blue-500 ' +
-            'bg-blue-50 hover:bg-transparent'
-          }
-        >
-          <div className='h-full p-4 flex flex-col gap-4'>
-            <Button
-              className='bg-red-400'
-              shortcut='Backquote'
-              onClick={() => {
-                const frameId = saveCurrentFrame();
-                if (!frameId) {
-                  console.warn('tried to capture nonexistant frame');
-                  return;
-                }
-                selectedState?.samples.push(frameId);
-                $routine.set($routine.get());
-              }}
-            >
-              CAPTURE
-            </Button>
-            {/* <div className='flex gap-4'>
-              <Button className='bg-blue-200 w-full'>Click</Button>
-              <Button className='bg-blue-200 w-full'>Click (Region)</Button>
-              <Button className='bg-blue-200 w-full'>Drag</Button>
-            </div> */}
-            <Window
-              websocket={ws}
-              replaySource={replayInputSource}
-              dimensions={dimensions}
-              imageUrl={imageUrl}
-            />
-            <div className='font-mono flex-col'>
-              <div>
-                {dState}
-                {` latency=${(dRecv / 1e3).toFixed(3)}s`}
-                {` ${(1e3 / dRecv).toFixed(1).padStart(5, '0')}fps`}
-              </div>
-              <div>
-                {runtimeContext?.currentNode?.name}
-                {runtimeContext.currentEdge &&
-                  ' => ' +
-                    $routine.get().nodes[runtimeContext.currentEdge?.to]?.name}
-                {runtimeContext.currentEdge &&
-                  ' via ' + getEdgeDisplay(runtimeContext.currentEdge)}
-                {runtimeContext.targetNode &&
-                  ' ==> ' + runtimeContext.targetNode.name}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ScreenCopy />
         <div className='w-2/3 h-full flex flex-col grow'>
           <div className='w-full flex flex-row gap-2'>
             {new Array(ActiveTab.length).fill(0).map((_, index) => (
