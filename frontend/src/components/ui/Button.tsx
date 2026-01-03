@@ -35,7 +35,12 @@ export default function Button({
         setDown(false);
       }
     };
-    useShortcut(shortcut, onKeyDown, onKeyUp);
+    useShortcut(
+      typeof children === 'string' ? children : 'Press button',
+      shortcut,
+      onKeyDown,
+      onKeyUp,
+    );
     return <></>;
   }
   return (

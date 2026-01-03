@@ -40,7 +40,7 @@ export default function ConditionImageEditor() {
   };
   function EscapeShortcut() {
     /** NOTE: this is getting repeated loaded/unloaded, some circular dep here? */
-    useShortcut('Escape', (_event) => close());
+    useShortcut('Close ConditionImageEditor', 'Escape', (_event) => close());
     return <></>;
   }
 

@@ -1,13 +1,22 @@
+import { atom } from 'nanostores';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 
+export const $bindings = atom<Record<string, Binding | undefined>>({});
+
 interface Binding {
+  /** Description of the shortcut (used in indicator text). */
+  label: string;
+  /** Callback called when key is down. */
   onKeyDown: (event: KeyboardEvent) => void;
+  /** Callback called when key is up. */
   onKeyUp: (event: KeyboardEvent) => void;
+  /** Callback to call to update active state (push/pop). */
   setActive: Dispatch<SetStateAction<boolean>>;
 }
 
 const bindings: Record<string, Array<Binding>> = {};
 function push(
+  label: string,
   key: KeyCode,
   onKeyDown: (event: KeyboardEvent) => void,
   onKeyUp: (event: KeyboardEvent) => void,
@@ -17,7 +26,8 @@ function push(
   if (!bindings[key]) bindings[key] = [];
   const binding = bindings[key];
   if (binding.length) binding[binding.length - 1].setActive(false);
-  binding.push({ onKeyDown, onKeyUp, setActive });
+  binding.push({ label, onKeyDown, onKeyUp, setActive });
+  $bindings.set({ ...$bindings.get(), [key]: binding[binding.length - 1] });
 }
 function pop(key: KeyCode) {
   // console.log("pop", key);
@@ -26,6 +36,10 @@ function pop(key: KeyCode) {
   console.assert(binding[0], `Invalid pop on ${key}, binding is empty.`);
   binding.pop()?.setActive(false);
   if (binding[0]) binding[binding.length - 1].setActive(true);
+  $bindings.set({
+    ...$bindings.get(),
+    [key]: binding[0] && binding[binding.length - 1],
+  });
 }
 
 // returns True if this is on input/textarea element
@@ -78,6 +92,7 @@ export function useSetupShortcuts() {
  * @returns whether the keybind is active or not (useState), and teardown
  */
 export default function useShortcut(
+  label: string,
   key: KeyCode | null | false,
   onKeyDown: (event: KeyboardEvent) => void,
   onKeyUp: (event: KeyboardEvent) => void = () => {},
@@ -94,9 +109,9 @@ export default function useShortcut(
     [isPopped, setPopped, key],
   );
   useEffect(() => {
-    if (key) push(key, onKeyDown, onKeyUp, setActive);
+    if (key) push(label, key, onKeyDown, onKeyUp, setActive);
     return _pop;
-  }, [_pop, key, onKeyDown, onKeyUp]);
+  }, [_pop, label, key, onKeyDown, onKeyUp]);
   return [isActive, _pop];
 }
 

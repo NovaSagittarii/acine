@@ -27,6 +27,7 @@ import { getEdgeDisplay } from './components/Edge.util';
 import { increment } from './activity';
 import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer';
 import ScheduleViewer from './components/scheduler/ScheduleViewer';
+import BindingsDisplay from './components/BindingsDisplay';
 
 enum ActiveTab {
   CONFIG,
@@ -129,6 +130,9 @@ function RoutineEditor() {
   return (
     <>
       <div className='w-full h-full flex gap-0 rounded-sm'>
+        <div className='absolute bottom-0 flex flex-col gap-1 items-begin justify-center w-fit p-1 z-50 bg-white opacity-100 hover:opacity-10 transition-opacity'>
+          <BindingsDisplay />
+        </div>
         <div
           className={
             `${expanded ? 'w-full' : 'w-1/3'} max-w-fit transition-all ` +
