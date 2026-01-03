@@ -1,19 +1,24 @@
-import { InputReplay, Routine_Condition } from 'acine-proto-dist';
+import { InputReplay, Routine_Condition, Routine_Edge } from 'acine-proto-dist';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { replayInputSource } from '@/state';
 
 import Button from './ui/Button';
 import { open } from '../client/input_stream';
-import { acquireOffset } from '../App.state';
+import { acquireOffset, runtimeSetCurr } from '../App.state';
 import Checkbox from './ui/Checkbox';
 import { $currentEdge } from './Edge.state';
 
 interface ReplayEditorProps {
   replay: InputReplay;
   condition?: Routine_Condition; // for offset calculation if relative replay
+  edge?: Routine_Edge;
 }
-export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
+export default function ReplayEditor({
+  condition,
+  replay,
+  edge,
+}: ReplayEditorProps) {
   const [isRecording, setRecording] = useState<boolean>(false);
   const [isPlaying, setPlaying] = useState<boolean>(false); // for replay
   const [stream, setStream] = useState<null | ReturnType<typeof open>>(null);
@@ -87,7 +92,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
               <Button
                 className='p-1! w-full bg-black text-white'
                 hotkey={active && 'KeyP'}
-                onClick={async () => {
+                onClick={async ({ shiftKey }) => {
                   let dx, dy;
                   if (condition && replay.relative && replay.offset) {
                     const offset = await acquireOffset(condition);
@@ -99,7 +104,10 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
                       console.log({ x, y }, { px, py }, { dx, dy });
                     }
                   }
-                  replayInputSource.setEndCallback(() => setPlaying(false));
+                  replayInputSource.setEndCallback(() => {
+                    setPlaying(false);
+                    if (shiftKey && edge && edge.to) runtimeSetCurr(edge.to);
+                  });
                   replayInputSource.play(replay, dx, dy);
                   setPlaying(true);
                 }}
@@ -126,6 +134,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
           <>
             <Button
               className='p-1! w-full bg-red-500 text-white'
+              hotkey='Escape'
               onClick={() => {
                 setRecording(false);
                 if (stream) {
@@ -137,7 +146,8 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
             </Button>
             <Button
               className='p-1! w-full bg-black text-white'
-              onClick={async () => {
+              hotkey='Enter'
+              onClick={async ({ shiftKey }) => {
                 setRecording(false);
                 if (stream) {
                   stream.close({ noHover: true });
@@ -151,6 +161,7 @@ export default function ReplayEditor({ condition, replay }: ReplayEditorProps) {
                     };
                   }
                   console.log(replay.events);
+                  if (shiftKey && edge && edge.to) runtimeSetCurr(edge.to);
                 } else console.error("InputStream wasn't initialized.");
               }}
             >
