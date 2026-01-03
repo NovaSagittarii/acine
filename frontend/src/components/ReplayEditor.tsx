@@ -79,7 +79,7 @@ export default function ReplayEditor({
           <>
             <Button
               className='p-1! w-full bg-black text-white'
-              hotkey={active && 'KeyR'}
+              shortcut={active && 'KeyR'}
               onClick={async () => {
                 if (condition) setOffset(await acquireOffset(condition));
                 setRecording(true);
@@ -91,7 +91,7 @@ export default function ReplayEditor({
             {!isPlaying ? (
               <Button
                 className='p-1! w-full bg-black text-white'
-                hotkey={active && 'KeyP'}
+                shortcut={active && 'KeyP'}
                 onClick={async ({ shiftKey }) => {
                   let dx, dy;
                   if (condition && replay.relative && replay.offset) {
@@ -117,7 +117,7 @@ export default function ReplayEditor({
             ) : (
               <Button
                 className='p-1! w-full bg-red-500 text-white'
-                hotkey={active && 'KeyP'}
+                shortcut={active && 'KeyP'}
                 onClick={() => replayInputSource.stop()}
               >
                 Stop
@@ -134,7 +134,7 @@ export default function ReplayEditor({
           <>
             <Button
               className='p-1! w-full bg-red-500 text-white'
-              hotkey='Escape'
+              shortcut='Escape'
               onClick={() => {
                 setRecording(false);
                 if (stream) {
@@ -146,7 +146,7 @@ export default function ReplayEditor({
             </Button>
             <Button
               className='p-1! w-full bg-black text-white'
-              hotkey='Enter'
+              shortcut='Enter'
               onClick={async ({ shiftKey }) => {
                 setRecording(false);
                 if (stream) {

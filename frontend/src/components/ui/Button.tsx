@@ -12,30 +12,30 @@ interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   onClick?: (modifiers: ModifierKeys) => void | Promise<void>;
-  hotkey?: KeyCode | null | false;
+  shortcut?: KeyCode | null | false;
 }
 
 export default function Button({
   children,
   className = '',
-  hotkey = null,
+  shortcut = null,
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
   function Shortcut() {
     const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.code === hotkey && !isDown.valueOf()) {
+      if (ev.code === shortcut && !isDown.valueOf()) {
         setDown(true);
         const { shiftKey, altKey, ctrlKey, metaKey } = ev;
         void onClick({ shiftKey, altKey, ctrlKey, metaKey });
       }
     };
     const onKeyUp = (ev: KeyboardEvent) => {
-      if (ev.code === hotkey) {
+      if (ev.code === shortcut) {
         setDown(false);
       }
     };
-    useShortcut(hotkey, onKeyDown, onKeyUp);
+    useShortcut(shortcut, onKeyDown, onKeyUp);
     return <></>;
   }
   return (
@@ -49,9 +49,9 @@ export default function Button({
         className
       }
     >
-      {hotkey && <Shortcut />}
+      {shortcut && <Shortcut />}
       {children}
-      {hotkey && `[${hotkey}]`}
+      {shortcut && `[${shortcut}]`}
     </div>
   );
 }
