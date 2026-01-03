@@ -31,6 +31,8 @@ budget issue tracker
   - [x] implement replay offset (on dynamic check)
   - [ ] implement text match
   - [x] repeat action N times (replay + subroutine)
+  - [ ] pan search for precondition (x, y, xy drag search)
+    - add preaction to Routine.Edge (currently always precondition)
 - v0.1.4 Automation Features (generalized)
   - [ ] implement multi-node interrupt (event listener)
 - v0.2.0 Routine Manager
@@ -42,6 +44,7 @@ budget issue tracker
   - [x] implement dependency (implicit)
   - [x] implement scheduling groups
   - [ ] implement scheduler (multicore EDF, Postorder DFS)
+    - [ ] implement deadline
   - [x] implement action duration logging
   - [x] implement scheduled action
   - [ ] implement dependency (implicit) with navigation listen
@@ -62,13 +65,14 @@ budget issue tracker
   - [ ] variable subroutine success mode (resolve/reject/recover return nodes)
   - [ ] failure modes
     - [x] cannot reach
-    - [ ] reach but timeout
+    - [ ] path exists but timeout
   - [ ] scheduled retry/backoff
   - [x] temporary deletion of failed edge
 - v1.0.0 Quality of Life
   - [x] node/edge preset
   - [x] variable display scaling support
   - [ ] hotkeys on buttons
+    - partial support, might run into issues with stack based hotkeys later.
   - [ ] metrics (high-level version of duration logging)
   - [x] memory-only 7z access
     - https://pypi.org/project/py7zr/
