@@ -78,7 +78,7 @@ export default function ConditionImageEditor() {
       }
       if (changed) forceUpdate();
     }
-  }, [condition, currFrameId, forceUpdate]);
+  }, [condition, currFrameId]); // adding dep forceUpdate makes it spam reload
 
   // auto select
   // Can migrate to direct useRef (or similar) in React 19
