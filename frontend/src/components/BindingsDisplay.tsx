@@ -12,7 +12,7 @@ export default function BindingsDisplay() {
           if (!v) return <></>;
           const { label } = v;
           return (
-            <div className='flex gap-2 text-xs'>
+            <div className='flex gap-2 text-xs' key={k}>
               <div className='font-mono min-w-4 min-h-4 border border-black rounded-sm'>
                 {k}
               </div>
