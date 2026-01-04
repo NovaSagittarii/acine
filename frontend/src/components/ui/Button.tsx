@@ -13,17 +13,19 @@ interface ButtonProps {
   className?: string;
   onClick?: (modifiers: ModifierKeys) => void | Promise<void>;
   shortcut?: KeyCode | null | false;
+  shortcutLabel?: Exclude<string, ''> | undefined;
 }
 
 export default function Button({
   children,
   className = '',
   shortcut = null,
+  shortcutLabel,
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
   useShortcut(
-    typeof children === 'string' ? children : 'Press button',
+    shortcutLabel || (typeof children === 'string' ? children : 'Press button'),
     shortcut,
     (ev: KeyboardEvent) => {
       if (ev.code === shortcut && !isDown.valueOf()) {
