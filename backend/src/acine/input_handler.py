@@ -102,6 +102,9 @@ class InputHandler:
             self.win = await ahk.win_wait(
                 title, timeout=600, detect_hidden_windows=True
             )
+            if isinstance(self.win, list):
+                self.win = self.win[0]
+                # TODO: ask for specific window in the future (?)
             await self.win.minimize()
             await self.win.restore()
             await self.win.activate()  # min/res/act used to ensure mouse works
