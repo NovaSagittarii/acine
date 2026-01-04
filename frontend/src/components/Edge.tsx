@@ -20,6 +20,7 @@ import { getEdgePrefix } from './Edge.util';
 import { runtimeQueueEdge } from '../App.state';
 import SelectTab from './ui/SelectTab';
 import { $currentEdge } from './Edge.state';
+import Button from './ui/Button';
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
@@ -43,6 +44,7 @@ export default function Edge({
   showDependencies = false,
 }: EdgeProps) {
   const routine = useStore($routine);
+  const currentEdge = useStore($currentEdge);
   const forceUpdate = useForceUpdate();
 
   return (
@@ -68,12 +70,14 @@ export default function Edge({
           callback={forceUpdate}
           // className='w-full'
         />
-        <div
-          className='text-xs hover:bg-red-100'
+        <Button
+          className='text-xs'
+          shortcut={currentEdge === edge && 'Enter'}
+          shortcutLabel={`exec ${edge.description}`}
           onClick={() => void runtimeQueueEdge(edge.id)}
         >
           exec
-        </div>
+        </Button>
       </div>
       <Collapse
         label={
