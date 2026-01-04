@@ -46,7 +46,9 @@ export default function EdgeList({
             }
             open={expand}
             onOpen={() => $currentEdge.set(edge)}
-            onClose={() => $currentEdge.set(null)}
+            onClose={() =>
+              edge === $currentEdge.get() && $currentEdge.set(null)
+            }
           >
             <Edge edge={edge} />
             <CloseButton
