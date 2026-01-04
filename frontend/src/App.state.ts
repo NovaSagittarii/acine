@@ -119,14 +119,14 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
         }
       }
       c.currentEdge = context.currentEdge; // if null, no longer processing edge
-      $runtimeContext.set(c);
+      $runtimeContext.set({ ...c });
       break;
     }
     case 'setStack': {
       const { setStack: context } = packet.type;
       const c = $runtimeContext.get();
       if (context.stackEdges) c.stackEdges = context.stackEdges;
-      $runtimeContext.set(c);
+      $runtimeContext.set({ ...c });
       break;
     }
     case 'sampleCondition':
