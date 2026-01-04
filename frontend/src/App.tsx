@@ -356,8 +356,36 @@ function RoutineSelector() {
 
 export default function App() {
   const loadedRoutine = useStore($loadedRoutine);
+
+  const [isOpen, setOpen] = useState(false);
+  const [isClosed, setClosed] = useState(false);
+  useEffect(() => {
+    const open = () => setOpen(true);
+    const close = () => setClosed(true);
+    ws.addEventListener('open', open);
+    ws.addEventListener('close', close);
+    return () => {
+      ws.removeEventListener('open', open);
+      ws.removeEventListener('close', close);
+    };
+  });
   return (
     <div className='w-screen h-screen'>
+      <div className='absolute w-full h-full flex justify-center items-center pointer-events-none font-bold text-red-500 text-lg'>
+        {!isOpen && isClosed ? ( // closed without opening
+          <>
+            {'WebSocket connection to <'}
+            <div className='font-mono'>{ws.url}</div>
+            {'> failed.'}
+          </>
+        ) : !isOpen ? ( // haven't opened but not closed
+          'Connecting to server...'
+        ) : (
+          isClosed &&
+          // opened and closed
+          'Disconnected from server.'
+        )}
+      </div>
       {loadedRoutine ? <RoutineEditor /> : <RoutineSelector />}
     </div>
   );
