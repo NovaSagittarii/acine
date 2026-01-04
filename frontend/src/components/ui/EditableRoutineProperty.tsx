@@ -1,3 +1,4 @@
+import Annotation from './Annotation';
 import EditableText from './EditableText';
 
 interface EditableRoutinePropertyProps<T, K extends keyof T> {
@@ -39,7 +40,7 @@ export default function EditableRoutineProperty<T, K extends keyof T>({
   return (
     object &&
     property && (
-      <div className='group relative'>
+      <Annotation label={property}>
         <EditableText
           onChange={(s) => {
             (object[property] as string) = s;
@@ -53,10 +54,7 @@ export default function EditableRoutineProperty<T, K extends keyof T>({
             <div className='opacity-50'>{'<unset>'}</div>
           )}
         </EditableText>
-        <div className='absolute top-0 left-1 translate-y-[0%] group-hover:translate-y-[-50%] text-xs opacity-10 group-hover:opacity-50 transition-all pointer-events-none'>
-          {property}
-        </div>
-      </div>
+      </Annotation>
     )
   );
 }

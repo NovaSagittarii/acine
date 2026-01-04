@@ -53,9 +53,10 @@ export default function Edge({
       onClick={() => $currentEdge.set(edge)}
     >
       <div className='flex gap-4 w-full items-center'>
-        <div>
+        <div className='flex'>
           to →
           <Select
+            label={'destination'}
             value={edge.to}
             values={Object.values(routine.nodes).map((n) => [n.name, n.id])}
             onChange={(v) => {

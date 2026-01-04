@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Annotation from './Annotation';
 
 interface SelectProps<T> {
   className?: string;
@@ -7,6 +8,9 @@ interface SelectProps<T> {
 
   /** list of options; an option consists of [display, value] */
   values: [string, T][];
+
+  /** Usage hint */
+  label?: string;
 
   /** calls onChange with the [value] of the selected item  */
   onChange: (newValue: T) => void;
@@ -23,6 +27,7 @@ interface SelectProps<T> {
 export default function Select<T>({
   value,
   values,
+  label,
   onChange,
   className = '',
   autofocus = false,
@@ -42,29 +47,31 @@ export default function Select<T>({
   }, [ref, autofocus]);
 
   return (
-    <select
-      className={
-        'hover:bg-black/5 hover:cursor-text transition-colors ' + className
-      }
-      onChange={(ev) => {
-        const index = +ev.target.value; // unset placeholder
-        setSelectedIndex(index);
-        onChange(values[index][1]);
-      }}
-      value={selectedIndex.toString()}
-      ref={ref}
-    >
-      {selectedIndex === -1 && (
-        <option value='-1' disabled>
-          {'<unset>'}
-        </option>
-      )}
-      {values.map(([s, _v], i) => (
-        <option value={i.toString()} key={i}>
-          {s}
-        </option>
-      ))}
-    </select>
+    <Annotation label={label}>
+      <select
+        className={
+          'hover:bg-black/5 hover:cursor-text transition-colors ' + className
+        }
+        onChange={(ev) => {
+          const index = +ev.target.value; // unset placeholder
+          setSelectedIndex(index);
+          onChange(values[index][1]);
+        }}
+        value={selectedIndex.toString()}
+        ref={ref}
+      >
+        {selectedIndex === -1 && (
+          <option value='-1' disabled>
+            {'<unset>'}
+          </option>
+        )}
+        {values.map(([s, _v], i) => (
+          <option value={i.toString()} key={i}>
+            {s}
+          </option>
+        ))}
+      </select>
+    </Annotation>
   );
 }
 
