@@ -3,11 +3,12 @@ import { Routine_Node } from 'acine-proto-dist';
 
 import { CloseButton } from '@/ui/Button';
 import Edge from '@/components/Edge';
-import { $routine, $selectedNode } from '@/state';
+import { $routine, $runtimeContext, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
 import { choices, getEdgeDisplay, getEdgeIcon } from './Edge.util';
 import { $currentEdge } from './Edge.state';
+import { KeyCode } from './useShortcut';
 
 interface EdgeListProps {
   node: Routine_Node;
@@ -27,6 +28,7 @@ export default function EdgeList({
 }: EdgeListProps) {
   const routine = useStore($routine);
   const selectedNode = useStore($selectedNode);
+  const runtimeContext = useStore($runtimeContext);
   const forceUpdate = useForceUpdate();
   return (
     <div className='w-full max-h-full pb-4 overflow-hidden flex flex-col gap-4'>
@@ -34,6 +36,24 @@ export default function EdgeList({
         {node.edges.length === 0 && 'no edges (type=RETURN)'}
         {node.edges.map((edge, index) => (
           <Collapse
+            shortcut={
+              runtimeContext?.currentNode?.id === node.id &&
+              (
+                [
+                  'Digit1',
+                  'Digit2',
+                  'Digit3',
+                  'Digit4',
+                  'Digit5',
+                  'Digit6',
+                  'Digit7',
+                  'Digit8',
+                  'Digit9',
+                  'Digit0',
+                ] as KeyCode[]
+              )[index]
+            }
+            shortcutLabel={`edge "${routine.nodes[edge.to]?.name}"`}
             className='relative'
             key={index}
             label={
