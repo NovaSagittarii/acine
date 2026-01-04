@@ -194,7 +194,8 @@ def create_testenv() -> None:
                     threshold=0.99,
                     match_limit=1,
                     method=Routine.Condition.Image.METHOD_TM_SQDIFF_NORMED,
-                    regions=[Rect(left=508, right=623, top=310, bottom=328)],
+                    regions=[Rect(left=508, right=623, top=300, bottom=318)],
+                    # the bar that gets filled
                 )
             )
         )
