@@ -1,5 +1,6 @@
-import { MouseEvent as ReactMouseEvent, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Section from './Section';
+import useShortcut, { KeyCode } from '../useShortcut';
 
 interface CollapseProps {
   className?: string;
@@ -9,8 +10,11 @@ interface CollapseProps {
   /** whether to keep it automatically open; by default is closed */
   open?: boolean;
 
-  onOpen?: (event: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
-  onClose?: (event: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
+  shortcut?: KeyCode | undefined | false;
+  shortcutLabel?: string | undefined;
+
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 /**
@@ -20,12 +24,25 @@ export default function Collapse({
   className = '',
   label,
   children,
+  shortcut,
+  shortcutLabel,
   open = false,
-  onOpen,
-  onClose,
+  onOpen = () => {},
+  onClose = () => {},
 }: CollapseProps) {
   const [isOpen, setOpen] = useState(open);
   const [ref, setRef] = useState<HTMLElement | null>(null);
+  useShortcut(
+    (!isOpen ? 'Open ' : 'Close ') + shortcutLabel ||
+      label?.toString() ||
+      'Toggle Collapse',
+    shortcut || null,
+    () => setOpen((o) => !o),
+  );
+  useEffect(() => {
+    if (isOpen) onOpen();
+    else onClose();
+  }, [isOpen]);
   return (
     <div
       className={
@@ -36,10 +53,9 @@ export default function Collapse({
         `rounded-sm border border-transparent ${!isOpen && 'hover:border-amber-500'} ` +
         className
       }
-      onClick={(event) => {
+      onClick={() => {
         if (!isOpen) {
           setOpen(true);
-          if (onOpen) onOpen(event);
           ref?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }}
@@ -48,12 +64,7 @@ export default function Collapse({
       <Section.h3 className={`flex-col ${!isOpen && 'border-0'}`}>
         <div
           className='group flex items-center'
-          onClick={(event) => {
-            setOpen((o) => !o);
-            if (!isOpen) {
-              if (onOpen) onOpen(event);
-            } else if (onClose) onClose(event);
-          }}
+          onClick={() => setOpen((o) => !o)}
         >
           {label}
           <div
