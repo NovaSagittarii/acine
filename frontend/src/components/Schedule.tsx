@@ -31,6 +31,7 @@ export default function Schedule({ schedule }: ScheduleProps) {
         label='count'
       />
       <Select
+        label={'Requirement Type'}
         value={schedule.requirement}
         values={REQUIREMENT_TYPE_DISPLAY}
         onChange={(v) => {
@@ -39,6 +40,7 @@ export default function Schedule({ schedule }: ScheduleProps) {
       />
       <div>
         <Select
+          label={'Group'}
           value={schedule.schedulingGroupId}
           values={Object.values(routine.sgroups).map((sg) => [sg.name, sg.id])}
           onChange={(v) => (schedule.schedulingGroupId = v)}

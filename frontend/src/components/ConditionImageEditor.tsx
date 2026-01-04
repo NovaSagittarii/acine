@@ -139,6 +139,7 @@ export default function ConditionImageEditor() {
               Query
             </Button>
             <Select
+              label={'Template match method'}
               value={condition.method}
               values={METHOD_TYPES_DISPLAY}
               onChange={(t) => {
