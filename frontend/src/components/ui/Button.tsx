@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useShortcut, { KeyCode } from '../useShortcut';
 
 interface ModifierKeys {
@@ -54,8 +54,10 @@ export default function Button({
           : '') + className
       }
     >
-      {children}
-      {shortcut && `[${shortcut}]`}
+      <div className='flex justify-center items-center'>
+        {children}
+        {shortcut && <span className='text-xs font-mono p-1'>{shortcut}</span>}
+      </div>
     </div>
   );
 }
