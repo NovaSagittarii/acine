@@ -109,7 +109,9 @@ class InputHandler:
             print(await self.win.title, self.win)
             print(await self.win.get_position())
             self.can_close = True
-            self.y_offset = get_title_bar_height(await self.win.get_title())
+            # y_offset is implicitly handled via removing the title bar ??
+            # somehow half is needed... i dont know why
+            self.y_offset = get_title_bar_height(await self.win.get_title()) // 2
         else:
             # target desktop
             raise NotImplementedError("Targeting desktop is not implemented.")
