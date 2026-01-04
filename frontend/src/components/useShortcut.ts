@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 export const $bindings = atom<Record<string, Binding | undefined>>({});
 
@@ -89,30 +89,23 @@ export function useSetupShortcuts() {
  * @param key which key to listen on
  * @param onKeyDown what to call when keydown is triggered
  * @param onKeyUp what to call when keyup is triggered
- * @returns whether the keybind is active or not (useState), and teardown
+ * @returns whether the keybind is active or not (useState)
  */
 export default function useShortcut(
   label: string,
   key: KeyCode | null | false,
   onKeyDown: (event: KeyboardEvent) => void,
   onKeyUp: (event: KeyboardEvent) => void = () => {},
-): [boolean, () => void] {
+): boolean {
   const [isActive, setActive] = useState(true);
-  const [isPopped, setPopped] = useState(false);
-  const _pop = useMemo(
-    () => () => {
-      if (!key) return;
-      if (isPopped) return;
-      setPopped(true);
-      pop(key);
-    },
-    [isPopped, setPopped, key],
-  );
   useEffect(() => {
-    if (key) push(label, key, onKeyDown, onKeyUp, setActive);
-    return _pop;
-  }, [_pop, label, key, onKeyDown, onKeyUp]);
-  return [isActive, _pop];
+    if (key) {
+      push(label, key, onKeyDown, onKeyUp, setActive);
+      return () => pop(key);
+    }
+    return () => {};
+  }, [label, key, onKeyDown, onKeyUp]);
+  return isActive;
 }
 
 /**

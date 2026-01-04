@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useShortcut, { KeyCode } from '../useShortcut';
 
 interface ModifierKeys {
@@ -22,27 +22,22 @@ export default function Button({
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
-  function Shortcut() {
-    const onKeyDown = (ev: KeyboardEvent) => {
+  useShortcut(
+    typeof children === 'string' ? children : 'Press button',
+    shortcut,
+    (ev: KeyboardEvent) => {
       if (ev.code === shortcut && !isDown.valueOf()) {
         setDown(true);
         const { shiftKey, altKey, ctrlKey, metaKey } = ev;
         void onClick({ shiftKey, altKey, ctrlKey, metaKey });
       }
-    };
-    const onKeyUp = (ev: KeyboardEvent) => {
+    },
+    (ev: KeyboardEvent) => {
       if (ev.code === shortcut) {
         setDown(false);
       }
-    };
-    useShortcut(
-      typeof children === 'string' ? children : 'Press button',
-      shortcut,
-      onKeyDown,
-      onKeyUp,
-    );
-    return <></>;
-  }
+    },
+  );
   return (
     <div
       onClick={({ shiftKey, altKey, ctrlKey, metaKey }) =>
@@ -54,7 +49,6 @@ export default function Button({
         className
       }
     >
-      {shortcut && <Shortcut />}
       {children}
       {shortcut && `[${shortcut}]`}
     </div>
