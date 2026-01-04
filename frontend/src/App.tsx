@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ws, getFrame, persistFrame } from './App.state';
 
@@ -28,6 +28,7 @@ import { increment } from './activity';
 import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer';
 import ScheduleViewer from './components/scheduler/ScheduleViewer';
 import BindingsDisplay from './components/BindingsDisplay';
+import { average } from './math';
 
 enum ActiveTab {
   CONFIG,
@@ -56,7 +57,7 @@ function ScreenCopy() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [dState, setDState] = useState(''); // debug state
   const [dSend, setDSend] = useState(0);
-  const [dRecv, setDRecv] = useState(0);
+  const [latencies, setLatencies] = useState<Array<number>>([]);
   const runtimeContext = useStore($runtimeContext);
 
   const listen = useCallback(
@@ -73,7 +74,7 @@ function ScreenCopy() {
           const { data, state, width, height } = frame;
           $sourceDimensions.set([width, height]);
           setDState(state);
-          setDRecv(Date.now() - dSend);
+          setLatencies([...latencies, Date.now() - dSend].splice(-150));
           const blob = new Blob([data as BlobPart]);
           const imageUrl = URL.createObjectURL(blob);
           saveCurrentFrame = () => {
@@ -110,6 +111,8 @@ function ScreenCopy() {
     getFrame();
     setDSend(Date.now());
   }, [imageUrl]);
+
+  const averageLatency = useMemo(() => average(latencies), [latencies]);
 
   const selectedState = useStore($selectedState);
   const dimensions = useStore($sourceDimensions);
@@ -152,8 +155,22 @@ function ScreenCopy() {
         <div className='font-mono flex-col'>
           <div>
             {dState}
-            {` latency=${(dRecv / 1e3).toFixed(3)}s`}
-            {` ${(1e3 / dRecv).toFixed(1).padStart(5, '0')}fps`}
+            {` render_latency=${(averageLatency / 1e3).toFixed(3)}s`}
+            <div className='absolute top-0 left-0 flex w-[150px] h-[50px] justify-end items-end bg-slate-100 opacity-100 hover:opacity-10 transition-opacity'>
+              {latencies.map((x, index) => (
+                <div
+                  className='w-px'
+                  key={index}
+                  style={{
+                    height: Math.min(x, 50) + 'px',
+                    background: `rgb(${Math.min(255, x >= 50 ? x : 0)},0,0)`,
+                  }}
+                ></div>
+              ))}
+              <div className='absolute right-0 bottom-0 text-xs font-mono text-white'>
+                {` ${(1e3 / averageLatency).toFixed(1)}FPS`}
+              </div>
+            </div>
           </div>
           <div>
             {runtimeContext?.currentNode?.name}
