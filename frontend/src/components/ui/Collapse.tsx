@@ -40,8 +40,10 @@ export default function Collapse({
     () => setOpen((o) => !o),
   );
   useEffect(() => {
-    if (isOpen) onOpen();
-    else onClose();
+    if (isOpen) {
+      onOpen();
+      ref?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else onClose();
   }, [isOpen]);
   return (
     <div
@@ -54,10 +56,7 @@ export default function Collapse({
         className
       }
       onClick={() => {
-        if (!isOpen) {
-          setOpen(true);
-          ref?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        if (!isOpen) setOpen(true);
       }}
       ref={setRef}
     >
