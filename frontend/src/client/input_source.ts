@@ -29,8 +29,10 @@ export default class InputSource {
     const t0 = (this.startTime = Date.now());
     this.endTime =
       t0 +
-      replay.events[replay.events.length - 1].timestamp -
-      replay.events[0].timestamp;
+      (replay.events[0]
+        ? replay.events[replay.events.length - 1].timestamp -
+          replay.events[0].timestamp
+        : 0);
     let i = 0;
     const next = () => {
       if (!this.active) return;

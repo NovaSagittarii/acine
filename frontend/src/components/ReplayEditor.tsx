@@ -78,6 +78,7 @@ export default function ReplayEditor({
         {!isRecording ? (
           <>
             <Button
+              key='record'
               className='p-1! w-full bg-black text-white'
               shortcut={active && 'KeyR'}
               onClick={async () => {
@@ -90,6 +91,7 @@ export default function ReplayEditor({
             </Button>
             {!isPlaying ? (
               <Button
+                key='playback'
                 className='p-1! w-full bg-black text-white'
                 shortcut={active && 'KeyP'}
                 onClick={async ({ shiftKey }) => {
@@ -108,14 +110,15 @@ export default function ReplayEditor({
                     setPlaying(false);
                     if (shiftKey && edge && edge.to) runtimeSetCurr(edge.to);
                   });
+                  setPlaying(true); // it's possible endCallback is immediate
                   replayInputSource.play(replay, dx, dy);
-                  setPlaying(true);
                 }}
               >
                 Playback
               </Button>
             ) : (
               <Button
+                key='stop playback'
                 className='p-1! w-full bg-red-500 text-white'
                 shortcut={active && 'KeyP'}
                 onClick={() => replayInputSource.stop()}
@@ -133,6 +136,7 @@ export default function ReplayEditor({
         ) : (
           <>
             <Button
+              key='cancel record'
               className='p-1! w-full bg-red-500 text-white'
               shortcut='Escape'
               onClick={() => {
@@ -145,6 +149,7 @@ export default function ReplayEditor({
               Cancel
             </Button>
             <Button
+              key='save recording'
               className='p-1! w-full bg-black text-white'
               shortcut='Enter'
               onClick={async ({ shiftKey }) => {

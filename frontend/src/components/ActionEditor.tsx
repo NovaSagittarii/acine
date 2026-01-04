@@ -77,6 +77,7 @@ export default function ActionEditor({ edge }: ActionEditorProps) {
         )}
         {edge.action?.$case === 'replay' && (
           <ReplayEditor
+            edge={edge}
             replay={edge.action.replay}
             condition={edge.precondition}
           />

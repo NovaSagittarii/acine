@@ -51,6 +51,7 @@ export default function Edge({
     <div
       className={`flex flex-col gap-1 p-1 rounded-sm border ${selected ? 'border-amber-800' : 'border-black'} bg-white/80`}
       onClick={() => $currentEdge.set(edge)}
+      key={edge.id}
     >
       <div className='flex gap-4 w-full items-center'>
         <div className='flex'>
