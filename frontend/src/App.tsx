@@ -357,7 +357,7 @@ function RoutineSelector() {
 export default function App() {
   const loadedRoutine = useStore($loadedRoutine);
 
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setOpen] = useState(ws.readyState === WebSocket.OPEN);
   const [isClosed, setClosed] = useState(false);
   useEffect(() => {
     const open = () => setOpen(true);
