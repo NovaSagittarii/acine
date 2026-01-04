@@ -9,8 +9,8 @@ import {
   $routine,
   $selectedState,
   $sourceDimensions, // used in useStore (function scope)
-  loadRoutine,
-  saveRoutine, // used in global scope
+  // loadRoutine,
+  // saveRoutine, // used in global scope
   replayInputSource,
   $loadedRoutine,
   $backendConfiguration,
@@ -29,6 +29,7 @@ import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer'
 import ScheduleViewer from './components/scheduler/ScheduleViewer';
 import BindingsDisplay from './components/BindingsDisplay';
 import { average } from './math';
+import { KeyCode } from './components/useShortcut';
 
 enum ActiveTab {
   CONFIG,
@@ -216,27 +217,31 @@ function RoutineEditor() {
         <div className='w-2/3 h-full flex flex-col grow'>
           <div className='w-full flex flex-row gap-2'>
             {new Array(ActiveTab.length).fill(0).map((_, index) => (
-              <div
+              <Button
                 key={index}
                 onClick={() => setActiveTab(index)}
                 className={`hover:bg-amber-100 ${activeTab.valueOf() === index && 'font-bold'}`}
+                variant='minimal'
+                shortcut={
+                  (['F1', 'F2', 'F3', 'F4', 'F5', 'F6'] as KeyCode[])[index]
+                }
               >
                 {['config', 'states', 'nodes', 'graph', 'deps', 'cron'][index]}
-              </div>
+              </Button>
             ))}
-            <div className='hover:bg-amber-100' onClick={saveRoutine}>
+            {/* <div className='hover:bg-amber-100' onClick={saveRoutine}>
               save
             </div>
             <div className='hover:bg-amber-100' onClick={() => loadRoutine(ws)}>
               load
-            </div>
+            </div> */}
             <div
               className='hover:bg-amber-100'
               onClick={() => console.info($routine.get())}
             >
               log
             </div>
-            <div
+            <Button
               className='hover:bg-amber-100'
               onClick={() => {
                 const routine = $routine.get();
@@ -250,10 +255,12 @@ function RoutineEditor() {
                 console.log(pkt);
                 ws.send(pb.Packet.encode(pkt).finish());
               }}
+              variant='minimal'
+              shortcut={'F8'}
             >
               push
-            </div>
-            <div
+            </Button>
+            <Button
               className='hover:bg-amber-100'
               onClick={() => {
                 const pkt = pb.Packet.create({
@@ -262,9 +269,11 @@ function RoutineEditor() {
                 console.log(pkt);
                 ws.send(pb.Packet.encode(pkt).finish());
               }}
+              variant='minimal'
+              shortcut={'F9'}
             >
               pull
-            </div>
+            </Button>
           </div>
           {/* min-h-0 ?? https://stackoverflow.com/a/76670135 */}
           <div className='flex h-full w-full grow min-h-0'>
