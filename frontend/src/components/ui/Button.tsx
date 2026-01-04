@@ -14,6 +14,7 @@ interface ButtonProps {
   onClick?: (modifiers: ModifierKeys) => void | Promise<void>;
   shortcut?: KeyCode | null | false;
   shortcutLabel?: Exclude<string, ''> | undefined;
+  variant?: 'standard' | 'minimal';
 }
 
 export default function Button({
@@ -21,6 +22,7 @@ export default function Button({
   className = '',
   shortcut = null,
   shortcutLabel,
+  variant = 'standard',
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
@@ -46,9 +48,10 @@ export default function Button({
         void onClick({ shiftKey, altKey, ctrlKey, metaKey })
       }
       className={
-        'p-3 rounded-lg text-center transition-colors select-none ' +
-        `border-4 ${!isDown ? 'border-transparent' : 'border-sky-500'} hover:border-blue-500 ` +
-        className
+        (variant === 'standard'
+          ? 'p-3 rounded-lg text-center transition-colors select-none ' +
+            `border-4 ${!isDown ? 'border-transparent' : 'border-sky-500'} hover:border-blue-500 `
+          : '') + className
       }
     >
       {children}
