@@ -152,6 +152,17 @@ class AcineServerProtocol(WebSocketServerProtocol):
                 case "sample_current":
                     await self.on_sample_condition(packet, True)
 
+    def abort_task(f):
+        """abort current task (goto/queue_edge) before running"""
+
+        async def wrapped(self: AcineServerProtocol, *args, **kwargs):
+            if self.current_task:
+                # abort previous goto (if still running)
+                self.current_task.cancel()
+            await f(self, *args, **kwargs)
+
+        return wrapped
+
     async def prepare_routine(self, routine: Routine) -> None:
         """
         Updates input_handler/game_capture and FS prefix based on the routine.
@@ -164,6 +175,7 @@ class AcineServerProtocol(WebSocketServerProtocol):
         self.gc = GameCapture(routine.window_name)
         self.fs.set_prefix([routine.id])
 
+    @abort_task
     async def load_routine(self, routine: Routine) -> None:
         """
         Reloads the runtime with an updated routine.
@@ -174,9 +186,6 @@ class AcineServerProtocol(WebSocketServerProtocol):
         if self.rt:
             # save and restore old position (if exists)
             old_context = deepcopy(self.rt.get_context())
-
-            if self.current_task:
-                self.current_task.cancel()
 
             if self.rt.routine.window_name != routine.window_name:
                 # if window_name is different, recreate gc/ih
@@ -294,25 +303,20 @@ class AcineServerProtocol(WebSocketServerProtocol):
         )
         self.sendMessage(response.SerializeToString(), isBinary=True)
 
+    @abort_task
     async def on_set_curr(self, packet: Packet) -> None:
         """(from client) request to set curr"""
         target_node = packet.set_curr.current_node
         if self.rt and target_node.id in self.rt.nodes:
-            if self.current_task:
-                # abort previous goto (if still running)
-                self.current_task.cancel()
-
             # for debug purposes, it's easier to just set state
             # on_queue_edge (click edge) can be used to test navigation
             self.rt.set_curr(target_node)
 
+    @abort_task
     async def on_goto(self, packet: Packet) -> None:
         """(from client) request to navigate goto a node"""
         target_node = packet.goto.current_node
         if self.rt and target_node.id in self.rt.nodes:
-            if self.current_task:
-                # abort previous goto (if still running)
-                self.current_task.cancel()
 
             async def run_goto(rt: Runtime) -> None:
                 try:
@@ -328,12 +332,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
             self.current_task = asyncio.create_task(run_goto(self.rt))
             await self.current_task
 
+    @abort_task
     async def on_queue_edge(self, packet: Packet) -> None:
         target_edge = packet.queue_edge.current_edge
         if self.rt and target_edge.id in self.rt.edges:
-            if self.current_task:
-                # abort previous goto (if still running)
-                self.current_task.cancel()
 
             async def run_goto(rt: Runtime) -> None:
                 try:
