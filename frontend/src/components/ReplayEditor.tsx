@@ -8,6 +8,7 @@ import { open } from '../client/input_stream';
 import { acquireOffset, runtimeSetCurr } from '../App.state';
 import Checkbox from './ui/Checkbox';
 import { $currentEdge } from './Edge.state';
+import useShortcut from './useShortcut';
 
 interface ReplayEditorProps {
   replay: InputReplay;
@@ -41,6 +42,15 @@ export default function ReplayEditor({
     () => currentEdge?.precondition === condition,
     [currentEdge, condition],
   );
+
+  const [isAutomove, setAutomove] = useState(false);
+  useShortcut(
+    'Move to destination on playback done',
+    'ShiftLeft',
+    () => setAutomove(true),
+    () => setAutomove(false),
+  );
+
   const [progress, setProgress] = useState(-1);
   useEffect(() => {
     if (isPlaying) {
@@ -94,7 +104,7 @@ export default function ReplayEditor({
                 key='playback'
                 className='p-1! w-full bg-black text-white'
                 shortcut={active && 'KeyP'}
-                onClick={async ({ shiftKey }) => {
+                onClick={async () => {
                   let dx, dy;
                   if (condition && replay.relative && replay.offset) {
                     const offset = await acquireOffset(condition);
@@ -108,13 +118,13 @@ export default function ReplayEditor({
                   }
                   replayInputSource.setEndCallback(() => {
                     setPlaying(false);
-                    if (shiftKey && edge && edge.to) runtimeSetCurr(edge.to);
+                    if (isAutomove && edge && edge.to) runtimeSetCurr(edge.to);
                   });
                   setPlaying(true); // it's possible endCallback is immediate
                   replayInputSource.play(replay, dx, dy);
                 }}
               >
-                Playback
+                {!isAutomove ? 'Playback' : 'Play then move'}
               </Button>
             ) : (
               <Button
@@ -152,7 +162,7 @@ export default function ReplayEditor({
               key='save recording'
               className='p-1! w-full bg-black text-white'
               shortcut='Enter'
-              onClick={async ({ shiftKey }) => {
+              onClick={async () => {
                 setRecording(false);
                 if (stream) {
                   stream.close({ noHover: true });
@@ -166,11 +176,11 @@ export default function ReplayEditor({
                     };
                   }
                   console.log(replay.events);
-                  if (shiftKey && edge && edge.to) runtimeSetCurr(edge.to);
+                  if (isAutomove && edge && edge.to) runtimeSetCurr(edge.to);
                 } else console.error("InputStream wasn't initialized.");
               }}
             >
-              Save Recording
+              {!isAutomove ? 'Save Recording' : 'Save then move'}
             </Button>
           </>
         )}
