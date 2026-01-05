@@ -96,9 +96,10 @@ function EdgePresets({
   forceUpdate: ReturnType<typeof useForceUpdate>;
 }) {
   const [isAltDown, setAltDown] = useState(false);
+  const currentEdge = useStore($currentEdge);
   useShortcut(
     '+edge presets',
-    'AltLeft',
+    !currentEdge && 'AltLeft',
     () => setAltDown(true),
     () => setAltDown(false),
   );
