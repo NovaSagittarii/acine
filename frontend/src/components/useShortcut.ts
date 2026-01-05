@@ -12,6 +12,8 @@ interface Binding {
   onKeyUp: (event: KeyboardEvent) => void;
   /** Callback to call to update active state (push/pop). */
   setActive: Dispatch<SetStateAction<boolean>>;
+  /** whether to hide on the shortcut bindings display or not */
+  hidden: boolean;
 }
 
 const bindings: Record<string, Array<Binding>> = {};
@@ -21,12 +23,13 @@ function push(
   onKeyDown: (event: KeyboardEvent) => void,
   onKeyUp: (event: KeyboardEvent) => void,
   setActive: Dispatch<SetStateAction<boolean>>,
+  hidden: boolean,
 ) {
   // console.log("push", key);
   if (!bindings[key]) bindings[key] = [];
   const binding = bindings[key];
   if (binding.length) binding[binding.length - 1].setActive(false);
-  binding.push({ label, onKeyDown, onKeyUp, setActive });
+  binding.push({ label, onKeyDown, onKeyUp, setActive, hidden });
   $bindings.set({ ...$bindings.get(), [key]: binding[binding.length - 1] });
 }
 function pop(key: KeyCode) {
@@ -96,11 +99,12 @@ export default function useShortcut(
   key: KeyCode | null | false,
   onKeyDown: (event: KeyboardEvent) => void,
   onKeyUp: (event: KeyboardEvent) => void = () => {},
+  hidden: boolean = false,
 ): boolean {
   const [isActive, setActive] = useState(true);
   useEffect(() => {
     if (key) {
-      push(label, key, onKeyDown, onKeyUp, setActive);
+      push(label, key, onKeyDown, onKeyUp, setActive, hidden);
       return () => pop(key);
     }
     return () => {};

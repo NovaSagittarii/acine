@@ -14,6 +14,7 @@ interface ButtonProps {
   onClick?: (modifiers: ModifierKeys) => void | Promise<void>;
   shortcut?: KeyCode | null | false;
   shortcutLabel?: Exclude<string, ''> | undefined;
+  hideShortcut?: boolean;
   variant?: 'standard' | 'minimal';
 }
 
@@ -22,6 +23,7 @@ export default function Button({
   className = '',
   shortcut = null,
   shortcutLabel,
+  hideShortcut = false,
   variant = 'standard',
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
@@ -41,6 +43,7 @@ export default function Button({
         setDown(false);
       }
     },
+    hideShortcut,
   );
   return (
     <div

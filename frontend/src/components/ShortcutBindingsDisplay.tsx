@@ -6,7 +6,7 @@ export default function ShortcutBindingsDisplay() {
   return (
     <>
       {Object.entries(bindings)
-        .filter(([_k, v]) => v)
+        .filter(([_k, v]) => v && !v.hidden)
         .sort()
         .map(([k, v]) => {
           if (!v) return <></>;
