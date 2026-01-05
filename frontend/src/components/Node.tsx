@@ -9,7 +9,7 @@ import { Selectable } from './types';
 import EdgeList from './EdgeList';
 import useForceUpdate from './useForceUpdate';
 import { useEffect } from 'react';
-import Condition from './Condition';
+import Condition, { ConditionDescription } from './Condition';
 import Collapse from './ui/Collapse';
 import { runtimeGoto, runtimeSetCurr } from '../App.state';
 import SelectTab from './ui/SelectTab';
@@ -100,10 +100,14 @@ function Node({
       {node.defaultCondition && (
         <Collapse
           label={
-            'defaultCondition ' +
-            (node.defaultCondition.condition?.$case || 'true')
+            <div className='flex gap-2'>
+              defaultCondition
+              <ConditionDescription condition={node.defaultCondition} />
+            </div>
           }
           open={expand}
+          shortcut={'KeyD'}
+          shortcutLabel={'default condition'}
         >
           <Condition condition={node.defaultCondition} />
         </Collapse>

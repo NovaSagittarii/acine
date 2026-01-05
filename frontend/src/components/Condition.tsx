@@ -139,3 +139,19 @@ export default function Condition({
     </div>
   );
 }
+
+export function ConditionDescription({
+  condition,
+}: {
+  condition: Routine_Condition;
+}) {
+  if (!condition.condition) return <span>true</span>;
+  const { $case } = condition.condition;
+  switch ($case) {
+    case 'image':
+      const { image } = condition.condition;
+      return <span>image {image.regions.length}</span>;
+    default:
+      return <span>{$case}</span>;
+  }
+}
