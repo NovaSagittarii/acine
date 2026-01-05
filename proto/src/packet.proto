@@ -67,4 +67,6 @@ message BackendConfiguration {
   // any properties frontend needs to interact with backend
 
   repeated ac.Routine routines = 1;  // client picks one to load
+
+  repeated string start_commands = 2;  // start command candidates
 }

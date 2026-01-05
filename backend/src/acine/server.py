@@ -24,6 +24,7 @@ from autobahn.websocket.types import ConnectionRequest  # type: ignore
 
 from acine import instance_manager
 from acine.capture import GameCapture
+from acine.environ import get_start_command_candidates
 from acine.input_handler import InputHandler
 from acine.instance_manager import write_runtime_data
 from acine.persist import PrefixedFilesystem
@@ -438,6 +439,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
         self.sendMessage(Packet(runtime=data).SerializeToString(), isBinary=True)
 
     async def on_get_configuration(self, packet: Packet) -> None:
-        packet.get_configuration.Clear()
-        packet.get_configuration.routines.extend(instance_manager.get_routines())
+        config = packet.get_configuration
+        config.Clear()
+        config.routines.extend(instance_manager.get_routines())
+        config.start_commands.extend(get_start_command_candidates())
         self.sendMessage(packet.SerializeToString(), isBinary=True)

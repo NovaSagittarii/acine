@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react';
-import { $routine, $sourceDimensions } from '@/state';
+import { $backendConfiguration, $routine, $sourceDimensions } from '@/state';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import useForceUpdate from './useForceUpdate';
 import { $timeSpent } from '../activity';
@@ -7,10 +7,12 @@ import { formatDuration } from '../client/util';
 import LogsDisplay from './LogsDisplay';
 import Annotation from './ui/Annotation';
 import Button from './ui/Button';
+import { SelectAuto } from './ui/Select';
 
 export default function RoutineConfiguration() {
   const forceUpdate = useForceUpdate();
   const routine = useStore($routine);
+  const backendConfiguration = useStore($backendConfiguration);
   const timeSpent = useStore($timeSpent);
 
   return (
@@ -35,6 +37,17 @@ export default function RoutineConfiguration() {
             callback={forceUpdate}
             className='font-mono'
           />
+          <Annotation label='startCommand presets'>
+            <SelectAuto
+              className='pl-4'
+              value={routine.launchConfig.startCommand}
+              values={backendConfiguration.startCommands}
+              onChange={(x) => {
+                routine.launchConfig!.startCommand = x;
+                forceUpdate();
+              }}
+            />
+          </Annotation>
           <EditableRoutineProperty
             object={routine.launchConfig}
             property={'windowName'}
