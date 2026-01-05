@@ -8,7 +8,7 @@ import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import Condition from './Condition';
 import useForceUpdate from './useForceUpdate';
 import { useStore } from '@nanostores/react';
-import { $routine } from '@/state';
+import { $routine, $runtimeContext } from '@/state';
 import Select from './ui/Select';
 import ActionEditor from './ActionEditor';
 import Collapse from './ui/Collapse';
@@ -17,10 +17,11 @@ import { ScheduleList } from './Schedule';
 import Node from './Node';
 import { choices } from './Node.util';
 import { getEdgePrefix } from './Edge.util';
-import { runtimeQueueEdge } from '../App.state';
+import { runtimeQueueEdge, runtimeSetCurr } from '../App.state';
 import SelectTab from './ui/SelectTab';
 import { $currentEdge } from './Edge.state';
 import Button from './ui/Button';
+import { useMemo } from 'react';
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
@@ -45,7 +46,13 @@ export default function Edge({
 }: EdgeProps) {
   const routine = useStore($routine);
   const currentEdge = useStore($currentEdge);
+  const runtimeContext = useStore($runtimeContext);
   const forceUpdate = useForceUpdate();
+
+  const isExec = useMemo(
+    () => runtimeContext.currentEdge?.id === edge.id,
+    [runtimeContext],
+  );
 
   return (
     <div
@@ -73,12 +80,16 @@ export default function Edge({
           // className='w-full'
         />
         <Button
-          className='text-xs'
+          className={'text-xs ' + (isExec && 'text-red-500 font-bold')}
           shortcut={currentEdge === edge && 'Enter'}
-          shortcutLabel={`exec ${edge.description}`}
-          onClick={() => void runtimeQueueEdge(edge.id)}
+          shortcutLabel={!isExec ? `exec ${edge.description}` : `Abort`}
+          onClick={() =>
+            !isExec
+              ? void runtimeQueueEdge(edge.id)
+              : void runtimeSetCurr(runtimeContext.currentNode!.id)
+          }
         >
-          exec
+          {!isExec ? 'exec' : 'abort'}
         </Button>
       </div>
       <Collapse
