@@ -120,7 +120,11 @@ export default function RoutineViewer() {
           }}
         >
           {context.currentNode?.id && routine.nodes[context.currentNode.id] && (
-            <Node node={routine.nodes[context.currentNode.id]} tools expand />
+            <Node
+              node={routine.nodes[context.currentNode.id]}
+              tools
+              key={context.currentNode.id}
+            />
           )}
         </div>
       )}
