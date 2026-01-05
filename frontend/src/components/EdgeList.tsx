@@ -1,14 +1,15 @@
 import { useStore } from '@nanostores/react';
 import { Routine_Node } from 'acine-proto-dist';
 
-import { CloseButton } from '@/ui/Button';
+import Button, { CloseButton } from '@/ui/Button';
 import Edge from '@/components/Edge';
 import { $routine, $runtimeContext, $selectedNode } from '@/state';
 import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
 import { choices, getEdgeDisplay, getEdgeIcon } from './Edge.util';
 import { $currentEdge } from './Edge.state';
-import { KeyCode } from './useShortcut';
+import useShortcut, { FKeys, KeyCode } from './useShortcut';
+import { useState } from 'react';
 
 interface EdgeListProps {
   node: Routine_Node;
@@ -81,25 +82,46 @@ export default function EdgeList({
         ))}
       </div>
       {(tools || selectedNode === node) && (
-        <div className='w-full flex flex-col'>
-          <div className='text-lg font-semibold'>Edge Presets</div>
-          <div className='w-full flex flex-wrap gap-2'>
-            {choices.map(({ name, method }, index) => (
-              <div
-                key={index}
-                className='hover:bg-red-100'
-                onClick={() => {
-                  const newEdge = method();
-                  node.edges.push(newEdge);
-                  forceUpdate();
-                }}
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-        </div>
+        <EdgePresets forceUpdate={forceUpdate} node={node} />
       )}
+    </div>
+  );
+}
+
+function EdgePresets({
+  forceUpdate,
+  node,
+}: {
+  node: Routine_Node;
+  forceUpdate: ReturnType<typeof useForceUpdate>;
+}) {
+  const [isAltDown, setAltDown] = useState(false);
+  useShortcut(
+    '+edge presets',
+    'AltLeft',
+    () => setAltDown(true),
+    () => setAltDown(false),
+  );
+  return (
+    <div className='w-full flex flex-col'>
+      <div className='text-lg font-semibold'>Edge Presets</div>
+      <div className='w-full flex flex-wrap gap-2'>
+        {choices.map(({ name, method }, index) => (
+          <Button
+            variant='minimal'
+            key={index}
+            shortcut={isAltDown && FKeys[index]}
+            className='hover:bg-red-100'
+            onClick={() => {
+              const newEdge = method();
+              node.edges.push(newEdge);
+              forceUpdate();
+            }}
+          >
+            {name}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
