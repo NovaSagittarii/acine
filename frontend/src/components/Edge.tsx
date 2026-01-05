@@ -49,6 +49,7 @@ export default function Edge({
   const runtimeContext = useStore($runtimeContext);
   const forceUpdate = useForceUpdate();
 
+  const isCurrent = useMemo(() => currentEdge === edge, [currentEdge, edge]);
   const isExec = useMemo(
     () => runtimeContext.currentEdge?.id === edge.id,
     [runtimeContext],
@@ -81,7 +82,7 @@ export default function Edge({
         />
         <Button
           className={'text-xs ' + (isExec && 'text-red-500 font-bold')}
-          shortcut={currentEdge === edge && 'Enter'}
+          shortcut={isCurrent && 'Enter'}
           shortcutLabel={!isExec ? `exec ${edge.description}` : `Abort`}
           onClick={() =>
             !isExec
@@ -97,6 +98,8 @@ export default function Edge({
           'destination node ' +
           (edge.to ? routine.nodes[edge.to]?.description : 'create options')
         }
+        shortcut={isCurrent && 'KeyZ'}
+        shortcutLabel='destination node'
       >
         {edge.to ? (
           routine.nodes[edge.to] ? (
@@ -161,6 +164,8 @@ export default function Edge({
         label={
           'precondition ' + (edge.precondition?.condition?.$case || 'true')
         }
+        shortcut={isCurrent && 'BracketLeft'}
+        shortcutLabel='precondition'
       >
         <Condition condition={edge.precondition!} allowAuto />
       </Collapse>
@@ -168,6 +173,8 @@ export default function Edge({
         label={
           'postcondition ' + (edge.postcondition?.condition?.$case || 'true')
         }
+        shortcut={isCurrent && 'BracketRight'}
+        shortcutLabel='postcondition'
       >
         <Condition condition={edge.postcondition!} allowAuto />
       </Collapse>
