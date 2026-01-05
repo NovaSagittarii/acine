@@ -57,22 +57,25 @@ class Controller(IController):
 
     async def mouse_move(self, x: int, y: int) -> None:
         p = Packet(input_event=InputEvent(move=Point(x=x, y=y)))
+        res = await self.ih.mouse_move(x, y)
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return await self.ih.mouse_move(x, y)
+        return res
 
     async def mouse_down(self) -> None:
         p = Packet(
             input_event=InputEvent(mouse_down=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
         )
+        res = await self.ih.mouse_down()
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return await self.ih.mouse_down()
+        return res
 
     async def mouse_up(self) -> None:
         p = Packet(
             input_event=InputEvent(mouse_up=InputEvent.MouseButton.MOUSE_BUTTON_LEFT)
         )
+        res = await self.ih.mouse_up()
         self.ws.sendMessage(p.SerializeToString(), isBinary=True)
-        return await self.ih.mouse_up()
+        return res
 
 
 class AcineServerProtocol(WebSocketServerProtocol):
