@@ -29,7 +29,7 @@ import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer'
 import ScheduleViewer from './components/scheduler/ScheduleViewer';
 import ShortcutBindingsDisplay from './components/ShortcutBindingsDisplay';
 import { average } from './math';
-import { FKeys, KeyCode } from './components/useShortcut';
+import { FKeys } from './components/useShortcut';
 
 enum ActiveTab {
   CONFIG,
