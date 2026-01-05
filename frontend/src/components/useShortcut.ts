@@ -112,6 +112,19 @@ export default function useShortcut(
   return isActive;
 }
 
+export const FKeys: KeyCode[] = [
+  'F1',
+  'F2',
+  'F3',
+  'F4',
+  'F5',
+  'F6',
+  'F7',
+  'F8',
+  'F9',
+  'F10',
+];
+
 /**
  * Common key codes
  * from https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values#code_values_on_windows

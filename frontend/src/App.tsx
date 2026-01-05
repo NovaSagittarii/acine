@@ -29,7 +29,7 @@ import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer'
 import ScheduleViewer from './components/scheduler/ScheduleViewer';
 import ShortcutBindingsDisplay from './components/ShortcutBindingsDisplay';
 import { average } from './math';
-import { KeyCode } from './components/useShortcut';
+import { FKeys, KeyCode } from './components/useShortcut';
 
 enum ActiveTab {
   CONFIG,
@@ -222,9 +222,7 @@ function RoutineEditor() {
                 onClick={() => setActiveTab(index)}
                 className={`hover:bg-amber-100 ${activeTab.valueOf() === index && 'font-bold'}`}
                 variant='minimal'
-                shortcut={
-                  (['F1', 'F2', 'F3', 'F4', 'F5', 'F6'] as KeyCode[])[index]
-                }
+                shortcut={FKeys[index]}
                 hideShortcut
               >
                 {['config', 'states', 'nodes', 'graph', 'deps', 'cron'][index]}
