@@ -67,9 +67,14 @@ export default function Button({
 
 export function CloseButton({
   onClick = () => {},
-}: Pick<ButtonProps, 'onClick'>) {
+  shortcut = null,
+  shortcutLabel = '',
+}: Pick<ButtonProps, 'onClick' | 'shortcut' | 'shortcutLabel'>) {
   return (
-    <div
+    <Button
+      variant='minimal'
+      shortcut={shortcut}
+      shortcutLabel={shortcutLabel}
       onClick={({ shiftKey, altKey, ctrlKey, metaKey }) =>
         void onClick({ shiftKey, altKey, ctrlKey, metaKey })
       }
@@ -81,6 +86,6 @@ export function CloseButton({
       }
     >
       x
-    </div>
+    </Button>
   );
 }

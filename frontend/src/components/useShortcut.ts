@@ -199,4 +199,5 @@ export type KeyCode =
   | 'F8'
   | 'F9'
   | 'F10'
+  | 'Delete'
   | 'Unidentified'; // trailing dummy value

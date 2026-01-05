@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react';
-import { Routine_Node } from 'acine-proto-dist';
+import { Routine_Edge, Routine_Node } from 'acine-proto-dist';
 
 import Button, { CloseButton } from '@/ui/Button';
 import Edge from '@/components/Edge';
@@ -72,11 +72,11 @@ export default function EdgeList({
             }
           >
             <Edge edge={edge} />
-            <CloseButton
-              onClick={() => {
-                node.edges.splice(index, 1);
-                forceUpdate();
-              }}
+            <DeleteEdgeButton
+              index={index}
+              node={node}
+              edge={edge}
+              forceUpdate={forceUpdate}
             />
           </Collapse>
         ))}
@@ -124,5 +124,29 @@ function EdgePresets({
         ))}
       </div>
     </div>
+  );
+}
+
+function DeleteEdgeButton({
+  node,
+  index,
+  edge,
+  forceUpdate,
+}: {
+  index: number;
+  node: Routine_Node;
+  edge: Routine_Edge;
+  forceUpdate: ReturnType<typeof useForceUpdate>;
+}) {
+  const currentEdge = useStore($currentEdge);
+  return (
+    <CloseButton
+      onClick={() => {
+        node.edges.splice(index, 1);
+        forceUpdate();
+      }}
+      shortcut={edge === currentEdge && 'Delete'}
+      shortcutLabel='Delete selected edge'
+    />
   );
 }
