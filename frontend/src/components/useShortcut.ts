@@ -108,7 +108,7 @@ export default function useShortcut(
       return () => pop(key);
     }
     return () => {};
-  }, [label, key, onKeyDown, onKeyUp]);
+  }, [label, key, onKeyDown, onKeyUp, hidden]);
   return isActive;
 }
 
