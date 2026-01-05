@@ -366,6 +366,7 @@ function RoutineSelector() {
 
 export default function App() {
   const loadedRoutine = useStore($loadedRoutine);
+  const config = useStore($backendConfiguration);
 
   const [isOpen, setOpen] = useState(ws.readyState === WebSocket.OPEN);
   const [isClosed, setClosed] = useState(false);
@@ -379,6 +380,11 @@ export default function App() {
       ws.removeEventListener('close', close);
     };
   });
+
+  useEffect(() => {
+    if (config.routines.length) setOpen(true);
+  }, [config]);
+
   return (
     <div className='w-screen h-screen'>
       <div className='absolute w-full h-full flex justify-center items-center pointer-events-none font-bold text-red-500 text-lg'>
