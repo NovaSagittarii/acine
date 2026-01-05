@@ -8,7 +8,7 @@ import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
 import { choices, getEdgeDisplay, getEdgeIcon } from './Edge.util';
 import { $currentEdge } from './Edge.state';
-import useShortcut, { FKeys, KeyCode } from './useShortcut';
+import useShortcut, { DigitKeys, FKeys } from './useShortcut';
 import { useState } from 'react';
 
 interface EdgeListProps {
@@ -38,21 +38,7 @@ export default function EdgeList({
         {node.edges.map((edge, index) => (
           <Collapse
             shortcut={
-              runtimeContext?.currentNode?.id === node.id &&
-              (
-                [
-                  'Digit1',
-                  'Digit2',
-                  'Digit3',
-                  'Digit4',
-                  'Digit5',
-                  'Digit6',
-                  'Digit7',
-                  'Digit8',
-                  'Digit9',
-                  'Digit0',
-                ] as KeyCode[]
-              )[index]
+              runtimeContext?.currentNode?.id === node.id && DigitKeys[index]
             }
             shortcutLabel={`edge "${routine.nodes[edge.to]?.name}"`}
             className='relative'

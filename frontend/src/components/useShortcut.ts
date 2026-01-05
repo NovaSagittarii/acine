@@ -125,6 +125,19 @@ export const FKeys: KeyCode[] = [
   'F10',
 ];
 
+export const DigitKeys: KeyCode[] = [
+  'Digit1',
+  'Digit2',
+  'Digit3',
+  'Digit4',
+  'Digit5',
+  'Digit6',
+  'Digit7',
+  'Digit8',
+  'Digit9',
+  'Digit0',
+];
+
 /**
  * Common key codes
  * from https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values#code_values_on_windows
