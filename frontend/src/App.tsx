@@ -27,7 +27,7 @@ import { getEdgeDisplay } from './components/Edge.util';
 import { increment } from './activity';
 import DependencyGraphViewer from './components/scheduler/DependencyGraphViewer';
 import ScheduleViewer from './components/scheduler/ScheduleViewer';
-import BindingsDisplay from './components/BindingsDisplay';
+import ShortcutBindingsDisplay from './components/ShortcutBindingsDisplay';
 import { average } from './math';
 import { KeyCode } from './components/useShortcut';
 
@@ -211,7 +211,7 @@ function RoutineEditor() {
     <>
       <div className='w-full h-full flex gap-0 rounded-sm'>
         <div className='absolute bottom-0 flex flex-col gap-1 items-begin justify-center w-fit p-1 z-50 bg-white opacity-100 hover:opacity-10 transition-opacity'>
-          <BindingsDisplay />
+          <ShortcutBindingsDisplay />
         </div>
         <ScreenCopy />
         <div className='w-2/3 h-full flex flex-col grow'>

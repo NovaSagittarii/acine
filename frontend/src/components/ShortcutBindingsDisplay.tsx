@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react';
 import { $bindings } from './useShortcut';
 
-export default function BindingsDisplay() {
+export default function ShortcutBindingsDisplay() {
   const bindings = useStore($bindings);
   return (
     <>
