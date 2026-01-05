@@ -225,6 +225,7 @@ function RoutineEditor() {
                 shortcut={
                   (['F1', 'F2', 'F3', 'F4', 'F5', 'F6'] as KeyCode[])[index]
                 }
+                hideShortcut
               >
                 {['config', 'states', 'nodes', 'graph', 'deps', 'cron'][index]}
               </Button>
@@ -257,6 +258,7 @@ function RoutineEditor() {
               }}
               variant='minimal'
               shortcut={'F8'}
+              hideShortcut
             >
               push
             </Button>
@@ -271,6 +273,7 @@ function RoutineEditor() {
               }}
               variant='minimal'
               shortcut={'F9'}
+              hideShortcut
             >
               pull
             </Button>
