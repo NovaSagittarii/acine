@@ -16,6 +16,7 @@ interface ButtonProps {
   shortcutLabel?: Exclude<string, ''> | undefined;
   hideShortcut?: boolean;
   variant?: 'standard' | 'minimal';
+  compact?: boolean; // disallow adding text on side? (expands box)
 }
 
 export default function Button({
@@ -25,6 +26,7 @@ export default function Button({
   shortcutLabel,
   hideShortcut = false,
   variant = 'standard',
+  compact = false,
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
@@ -57,9 +59,19 @@ export default function Button({
           : '') + className
       }
     >
-      <div className='flex justify-center items-center'>
+      <div className='flex justify-center items-center relative'>
         {children}
-        {shortcut && <span className='text-xs font-mono p-1'>{shortcut}</span>}
+        {shortcut && (
+          <span
+            className={
+              'text-xs font-mono p-1 ' +
+              (compact &&
+                'absolute right-0 top-0 translate-x-[50%] translate-y-[-30%]')
+            }
+          >
+            {shortcut}
+          </span>
+        )}
       </div>
     </div>
   );
