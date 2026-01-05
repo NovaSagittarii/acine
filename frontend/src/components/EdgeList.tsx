@@ -56,7 +56,7 @@ export default function EdgeList({
             }
             shortcutLabel={`edge "${routine.nodes[edge.to]?.name}"`}
             className='relative'
-            key={index}
+            key={edge.id} // don't keep a previous Collapse open when deleted
             label={
               <div className='flex items-center gap-2'>
                 <div className='font-mono text-blue-500 flex items-center justify-center text-xs w-4 h-4 border border-black/50 rounded-full'>
