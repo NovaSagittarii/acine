@@ -16,15 +16,20 @@ message Routine {
   // map<string, Edge> edges = 10;   // all edges?? useful for log access
   map<string, SchedulingGroup> sgroups = 7;
 
-  string start_command = 8;
-  /* Executes this command in `cmd.exe` to start target application.
-   * Run a script (like `start.bat`) if it's not a single command.
-   */
+  LaunchConfiguration launch_config = 8;
 
-  string window_name = 9;
-  /* Window name to look for after running `start_command`.
-   * TODO: handle "" window_name denoting entire desktop (see AHK)
-   */
+  message LaunchConfiguration {
+    string start_command = 1;
+    /* Executes this command in `cmd.exe` to start target application.
+     * Run a script (like `start.bat`) if it's not a single command.
+     */
+    string window_name = 2;
+    /* Window name to look for after running `start_command`.
+     * TODO: handle "" window_name denoting entire desktop (see AHK)
+     */
+    int32 width = 3;
+    int32 height = 4;
+  }
 
   // basically unused at the moment
   message State {

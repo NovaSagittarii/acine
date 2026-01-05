@@ -5,6 +5,7 @@ import useForceUpdate from './useForceUpdate';
 import { $timeSpent } from '../activity';
 import { formatDuration } from '../client/util';
 import LogsDisplay from './LogsDisplay';
+import Annotation from './ui/Annotation';
 
 export default function RoutineConfiguration() {
   const forceUpdate = useForceUpdate();
@@ -26,17 +27,20 @@ export default function RoutineConfiguration() {
         callback={forceUpdate}
       />
       <EditableRoutineProperty
-        object={routine}
+        object={routine.launchConfig!}
         property={'startCommand'}
         callback={forceUpdate}
         className='font-mono'
       />
       <EditableRoutineProperty
-        object={routine}
+        object={routine.launchConfig!}
         property={'windowName'}
         callback={forceUpdate}
         className='font-mono'
       />
+      <Annotation label='resolution'>
+        {routine.launchConfig?.width}x{routine.launchConfig?.height}
+      </Annotation>
       Time Spent: {formatDuration(timeSpent)}
       <LogsDisplay />
     </div>

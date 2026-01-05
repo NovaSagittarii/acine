@@ -171,11 +171,13 @@ class AcineServerProtocol(WebSocketServerProtocol):
         Updates input_handler/game_capture and FS prefix based on the routine.
         """
 
-        self.ih = InputHandler(routine.window_name, cmd=routine.start_command)
+        self.ih = InputHandler(
+            routine.launch_config.window_name, cmd=routine.launch_config.start_command
+        )
         await self.ih.init()
         if self.gc:
             self.gc.close()
-        self.gc = GameCapture(routine.window_name)
+        self.gc = GameCapture(routine.launch_config.window_name)
         self.fs.set_prefix([routine.id])
 
     @abort_task

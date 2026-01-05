@@ -17,8 +17,10 @@ from acine.scheduler.scheduler import Scheduler
 
 class RoutineInstance:
     def __init__(self, routine: Routine):
-        self.ih = InputHandler(routine.window_name, cmd=routine.start_command)
-        self.gc = GameCapture(routine.window_name)
+        self.ih = InputHandler(
+            routine.launch_config.window_name, cmd=routine.launch_config.start_command
+        )
+        self.gc = GameCapture(routine.launch_config.window_name)
         self.controller = BuiltinController(self.gc, self.ih)
         self.rt = Runtime(
             routine, self.controller, get_runtime_data(routine), enable_logs=True

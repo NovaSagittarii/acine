@@ -16,7 +16,7 @@ async def main() -> int:
             "routine",
             message="Which routine to run?",
             choices=[
-                f"{i} {r.name} [exec: {r.start_command}]"
+                f"{i} {r.name} [exec: {r.launch_config.start_command}]"
                 for i, r in enumerate(routines)
             ],
             carousel=True,

@@ -314,7 +314,7 @@ function RoutineSelector() {
                   createRoutine: {
                     name: 'Untitled Routine',
                     description: 'A newly created unconfigured routine.',
-                    windowName: 'TestEnv',
+                    launchConfig: { windowName: 'TestEnv' },
                   },
                 },
               });
@@ -345,13 +345,13 @@ function RoutineSelector() {
                 <div className='flex gap-4'>
                   startup
                   <div className='font-mono'>
-                    {routine.startCommand || '<unset>'}
+                    {routine.launchConfig?.startCommand || '<unset>'}
                   </div>
                 </div>
                 <div className='flex gap-4'>
                   window
                   <div className='font-mono'>
-                    {routine.windowName || '<unset>'}
+                    {routine.launchConfig?.windowName || '<unset>'}
                   </div>
                 </div>
               </div>
