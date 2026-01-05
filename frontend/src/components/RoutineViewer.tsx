@@ -112,7 +112,7 @@ export default function RoutineViewer() {
             // 'absolute right-0 ' +
             'flex flex-col w-full h-full overflow-y-auto transition-all ease-in ' +
             'bg-amber-50 hover:bg-white/50 ' +
-            'opacity-40 hover:opacity-100 ' +
+            // 'opacity-40 hover:opacity-100 ' +
             'border-l-4 border-amber-500/10 hover:border-amber-500'
           }
           style={{
