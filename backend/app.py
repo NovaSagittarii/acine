@@ -6,8 +6,10 @@ https://github.com/pallets/quart/?tab=readme-ov-file#quickstart
 """
 
 import io
+import os
 import re
 from pathlib import Path
+from typing import Final
 
 from quart import Quart, Response, send_file
 from quart_cors import cors
@@ -15,8 +17,12 @@ from quart_cors import cors
 from acine.persist import PATH as DATA_PATH
 from acine.persist import PrefixedFilesystem
 
+CORS: Final[str | re.Pattern] = os.environ.get(
+    "FS_CORS", re.compile("https?://localhost:(4173|5173)")
+)
+
 app = Quart(__name__)
-app = cors(app, allow_origin=re.compile("https?://localhost:(4173|5173)"))
+app = cors(app, allow_origin=CORS)
 # app = cors(app, allow_origin='*')  # if remote access
 
 

@@ -12,6 +12,7 @@
     "dev": "concurrently --kill-others -n \"FE,BE,+F,+B\" -c \"bgBlue.bold,bgMagenta.bold,bgBlue,bgMagenta\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:frontend:test\" \"npm run dev:backend:test\"",
     "dev+ad": "cross-env PYTHONASYNCIODEBUG=1 npm run dev",
     "dev:backend": "cd backend && call .\\.venv\\Scripts\\activate.bat && npx concurrently -k -n ws,http \"python -u main.py\" \"hypercorn app -b localhost:9001\"",
+    "dev:backend+host": "cd backend && call .\\.venv\\Scripts\\activate.bat && npx concurrently -k -n ws,http \"cross-env BACKEND_HOST=0.0.0.0 python -u main.py\" \"cross-env FS_CORS='*' hypercorn app -b 0.0.0.0:9001\"",
     "dev:backend:test": "cd backend && call .\\.venv\\Scripts\\activate.bat && ptw --ignore-patterns \".venv\" . -- --picked --testmon",
     "dev:frontend": "cd frontend && npm run dev:nostdin",
     "dev:frontend:test": "cd frontend && npx vitest --standalone",
@@ -24,8 +25,10 @@
     "test:proto": "cd proto && npm test",
     "main:build": "npm run build:web",
     "main:web": "cd frontend && npm run preview",
+    "main:web+host": "cd frontend && npm run preview -- --host",
     "background": "cd backend && python -m uv run background.py",
     "editor": "concurrently --kill-others-on-fail -n \"FE,BE\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run main:web\" \"npm run dev:backend\"",
+    "editor+host": "concurrently --kill-others-on-fail -n \"FE,BE\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run main:web+host\" \"npm run dev:backend+host\"",
     "start": "cd backend && python -m uv run service.py",
     "": ""
   },
