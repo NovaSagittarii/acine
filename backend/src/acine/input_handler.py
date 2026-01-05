@@ -121,6 +121,11 @@ class InputHandler:
             # self.title = None
             # self.win = ahk # ahk is not compatible with self.
 
+    async def resize(self, w: int, h: int) -> None:
+        if self.win:
+            pos = await self.win.get_position()
+            await self.win.move(x=pos.x, y=pos.y, width=w, height=h)
+
     async def mouse_move(self, x: int, y: int) -> None:
         self.x = x
         self.y = y

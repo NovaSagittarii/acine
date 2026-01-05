@@ -1,11 +1,12 @@
 import { useStore } from '@nanostores/react';
-import { $routine } from '@/state';
+import { $routine, $sourceDimensions } from '@/state';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import useForceUpdate from './useForceUpdate';
 import { $timeSpent } from '../activity';
 import { formatDuration } from '../client/util';
 import LogsDisplay from './LogsDisplay';
 import Annotation from './ui/Annotation';
+import Button from './ui/Button';
 
 export default function RoutineConfiguration() {
   const forceUpdate = useForceUpdate();
@@ -26,21 +27,38 @@ export default function RoutineConfiguration() {
         property={'description'}
         callback={forceUpdate}
       />
-      <EditableRoutineProperty
-        object={routine.launchConfig!}
-        property={'startCommand'}
-        callback={forceUpdate}
-        className='font-mono'
-      />
-      <EditableRoutineProperty
-        object={routine.launchConfig!}
-        property={'windowName'}
-        callback={forceUpdate}
-        className='font-mono'
-      />
-      <Annotation label='resolution'>
-        {routine.launchConfig?.width}x{routine.launchConfig?.height}
-      </Annotation>
+      {routine.launchConfig && (
+        <>
+          <EditableRoutineProperty
+            object={routine.launchConfig}
+            property={'startCommand'}
+            callback={forceUpdate}
+            className='font-mono'
+          />
+          <EditableRoutineProperty
+            object={routine.launchConfig}
+            property={'windowName'}
+            callback={forceUpdate}
+            className='font-mono'
+          />
+          <Annotation label='resolution'>
+            <div className='flex'>
+              {routine.launchConfig.width}x{routine.launchConfig.height}
+              <Button
+                variant='minimal'
+                className='hover:bg-amber-100'
+                onClick={() => {
+                  routine.launchConfig!.width = $sourceDimensions.get()[0];
+                  routine.launchConfig!.height = $sourceDimensions.get()[1];
+                  forceUpdate();
+                }}
+              >
+                set
+              </Button>
+            </div>
+          </Annotation>
+        </>
+      )}
       Time Spent: {formatDuration(timeSpent)}
       <LogsDisplay />
     </div>
