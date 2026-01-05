@@ -104,7 +104,8 @@ budget issue tracker
 - [ ] uvloop
 - [ ] server methods tests (E2E)
 - [x] mypy type checks
-
+- [ ] fix mumu screen freeze on display off
+  - https://www.nirsoft.net/utils/nircmd.html
 Currently the tasks below aren't being considered (even lower priority) after
 the project revision.
 
