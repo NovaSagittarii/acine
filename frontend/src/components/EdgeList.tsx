@@ -85,7 +85,7 @@ function EdgePresets({
   const currentEdge = useStore($currentEdge);
   useShortcut(
     '+edge presets',
-    !currentEdge && 'AltLeft',
+    !currentEdge && 'KeyE',
     () => setAltDown(true),
     () => setAltDown(false),
   );
@@ -95,6 +95,7 @@ function EdgePresets({
       <div className='w-full flex flex-wrap gap-2'>
         {choices.map(({ name, method }, index) => (
           <Button
+            compact
             variant='minimal'
             key={index}
             shortcut={isAltDown && FKeys[index]}
