@@ -47,7 +47,7 @@ class TestBasic:
                 adj[v] = []
             dep = Routine.Dependency(
                 requirement=Routine.REQUIREMENT_TYPE_COMPLETION,
-                explicit=True,
+                type=Routine.DEPENDENCY_TYPE_EXPLICIT,
                 requires=u,
                 count=1,
                 id=str(i),
@@ -138,7 +138,7 @@ class MockRuntime:
     def generate_dependency(u: str, id: str, kwargs: Any) -> Routine.Dependency:
         DEFAULT_KWARGS = {
             "requirement": Routine.REQUIREMENT_TYPE_COMPLETION,
-            "explicit": True,
+            "type": Routine.DEPENDENCY_TYPE_EXPLICIT,
             "count": 1,
         }
         kwargs = {**DEFAULT_KWARGS, **kwargs}

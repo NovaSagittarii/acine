@@ -1,7 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import useForceUpdate from './useForceUpdate';
-import { Routine_Dependency, Routine_RequirementType } from 'acine-proto-dist';
+import {
+  Routine_Dependency,
+  Routine_DependencyType,
+  Routine_RequirementType,
+} from 'acine-proto-dist';
 import Dependency from './Dependency';
 import { CloseButton } from './ui/Button';
 
@@ -30,7 +34,7 @@ export default function DependencyList({ dependencies }: DependencyListProps) {
           const newDependency = Routine_Dependency.create({
             id: uuidv4(),
             count: 1,
-            explicit: true,
+            type: Routine_DependencyType.DEPENDENCY_TYPE_EXPLICIT,
             requirement: Routine_RequirementType.REQUIREMENT_TYPE_COMPLETION,
             requires: undefined,
           });

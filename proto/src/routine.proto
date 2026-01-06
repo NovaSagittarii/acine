@@ -269,8 +269,8 @@ message Routine {
     string requires = 2;              // what is the dependency on? (edge id)
     int32 count = 3;                  // how many times it needs to happen
     RequirementType requirement = 4;  // what counts as meeting it?
-    bool explicit = 5;                // whether you MUST manually schedule it
-    // note: currently explicit==true (have not implemented implicit pass)
+    DependencyType type = 5;          // scheduling rules
+    // note: currently always explicit (have not implemented implicit)
   }
   enum RequirementType {
     /* During edge processing, the following occurs:
@@ -286,5 +286,18 @@ message Routine {
     REQUIREMENT_TYPE_CHECK_PASS = 3;   // requires precondition pass
     REQUIREMENT_TYPE_EXECUTE = 4;      // requires postcondition attempt
     REQUIREMENT_TYPE_COMPLETION = 5;   // requires postcondition pass
+  }
+  enum DependencyType {
+    DEPENDENCY_TYPE_UNSPECIFIED = 0;  // default: impicit
+    DEPENDENCY_TYPE_EXPLICIT = 1;     // one-to-one
+    // requires the explicit dependency to be scheduled NOW and run (no sharing)
+    DEPENDENCY_TYPE_IMPLICIT = 2;  // one-to-many (can be resolved in passing)
+    // unlike explicit dep, it's ok if a different scheduled version runs
+    DEPENDENCY_TYPE_STRICT_EXPLICIT = 3;  // one-to-one, nothing allowed between
+    // after running dependency, you must start the dependent task
+    // (no scheduling something in the middle).
+    // maybe useful to impose an order.
+    // maybe useful for subroutine specialization?
+    DEPENDENCY_TYPE_STRICT_IMPLICIT = 4;  // one-to-many, but must happen next
   }
 }
