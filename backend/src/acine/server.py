@@ -195,7 +195,9 @@ class AcineServerProtocol(WebSocketServerProtocol):
             # save and restore old position (if exists)
             old_context = deepcopy(self.rt.get_context())
 
-            if self.rt.routine.window_name != routine.window_name:
+            old_name = self.rt.routine.launch_config.window_name
+            new_name = routine.launch_config.window_name
+            if old_name != new_name:
                 # if window_name is different, recreate gc/ih
                 await self.prepare_routine(routine)
         else:
