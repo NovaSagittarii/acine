@@ -2,6 +2,7 @@ import { atom } from 'nanostores';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 export const $bindings = atom<Record<string, Binding | undefined>>({});
+const keydown = new Set<string>();
 
 interface Binding {
   /** Description of the shortcut (used in indicator text). */
@@ -9,7 +10,7 @@ interface Binding {
   /** Callback called when key is down. */
   onKeyDown: (event: KeyboardEvent) => void;
   /** Callback called when key is up. */
-  onKeyUp: (event: KeyboardEvent) => void;
+  onKeyUp: (event?: KeyboardEvent) => void;
   /** Callback to call to update active state (push/pop). */
   setActive: Dispatch<SetStateAction<boolean>>;
   /** whether to hide on the shortcut bindings display or not */
@@ -33,6 +34,7 @@ function pop(key: KeyCode) {
   const binding = bindings[key];
   console.assert(binding, `Invalid pop on ${key}, binding does not exist.`);
   console.assert(binding[0], `Invalid pop on ${key}, binding is empty.`);
+  if (keydown.has(key)) binding[binding.length - 1].onKeyUp(undefined);
   binding.pop()?.setActive(false);
   if (binding[0]) binding[binding.length - 1].setActive(true);
   $bindings.set({
@@ -57,6 +59,7 @@ export function useSetupShortcuts() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
       if (checkSuppressBinding(event)) return;
+      keydown.add(event.code);
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
       if (binding && binding[0]) {
@@ -67,6 +70,7 @@ export function useSetupShortcuts() {
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
       if (checkSuppressBinding(event)) return;
+      keydown.delete(event.code);
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
       if (binding && binding[0]) {
@@ -85,6 +89,10 @@ export function useSetupShortcuts() {
 
 /**
  * Pushes a callback onto the callback stack for the specific key.
+ *
+ * onKeyUp is called with undefined event when the component is deleted
+ * while the key is held down (used for shortcuts that apply while key is down)
+ *
  * @param key which key to listen on
  * @param onKeyDown what to call when keydown is triggered
  * @param onKeyUp what to call when keyup is triggered
@@ -94,7 +102,7 @@ export default function useShortcut(
   label: string,
   key: KeyCode | null | false,
   onKeyDown: (event: KeyboardEvent) => void,
-  onKeyUp: (event: KeyboardEvent) => void = () => {},
+  onKeyUp: (event?: KeyboardEvent) => void = () => {},
   hidden: boolean = false,
 ): boolean {
   const [isActive, setActive] = useState(true);
