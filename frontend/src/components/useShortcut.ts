@@ -18,12 +18,8 @@ interface Binding {
 
 const bindings: Record<string, Array<Binding>> = {};
 function push(
-  label: string,
   key: KeyCode,
-  onKeyDown: (event: KeyboardEvent) => void,
-  onKeyUp: (event: KeyboardEvent) => void,
-  setActive: Dispatch<SetStateAction<boolean>>,
-  hidden: boolean,
+  { label, onKeyDown, onKeyUp, setActive, hidden }: Binding,
 ) {
   // console.log("push", key);
   if (!bindings[key]) bindings[key] = [];
@@ -104,7 +100,7 @@ export default function useShortcut(
   const [isActive, setActive] = useState(true);
   useEffect(() => {
     if (key) {
-      push(label, key, onKeyDown, onKeyUp, setActive, hidden);
+      push(key, { label, onKeyDown, onKeyUp, setActive, hidden });
       return () => pop(key);
     }
     return () => {};
