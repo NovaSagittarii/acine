@@ -17,7 +17,9 @@ def get_start_command_candidates() -> List[str]:
                 end = nonnull.find("&lid=1&pid=1".encode()) + len("&lid=1&pid=1")
                 # making the assumption that lid=1&pid=1 never changes
                 url = nonnull[start:end].decode()
-                candidates.append(f"start {url}")
+                candidates.append(f'start "" "{url}"')
+                # WARNING: url contains ampersand and can break when run in cmd.exe
+                # see https://stackoverflow.com/a/44513397
     return candidates
 
 
