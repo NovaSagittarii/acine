@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import * as pb from 'acine-proto-dist';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ws, getFrame, persistFrame } from './App.state';
+import { ws, getFrame, persistFrame, pushRoutine } from './App.state';
 
 import {
   $frames,
@@ -136,8 +136,10 @@ function ScreenCopy() {
               console.warn('tried to capture nonexistant frame');
               return;
             }
-            selectedState?.samples.push(frameId);
+            const routine = $routine.get();
+            (selectedState ?? routine.states['default']).samples.push(frameId);
             $routine.set($routine.get());
+            pushRoutine();
           }}
         >
           CAPTURE
@@ -242,18 +244,7 @@ function RoutineEditor() {
             </div>
             <Button
               className='hover:bg-amber-100'
-              onClick={() => {
-                const routine = $routine.get();
-                if (!routine) throw new Error('invalid routine ' + routine); // eslint-disable-line @typescript-eslint/restrict-plus-operands
-                const pkt = pb.Packet.create({
-                  type: {
-                    $case: 'routine',
-                    routine: routine,
-                  },
-                });
-                console.log(pkt);
-                ws.send(pb.Packet.encode(pkt).finish());
-              }}
+              onClick={pushRoutine}
               variant='minimal'
               shortcut={'F8'}
               hideShortcut

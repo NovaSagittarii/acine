@@ -307,3 +307,21 @@ export async function acquireOffset(condition: pb.Routine_Condition) {
   }
   return undefined;
 }
+
+/**
+ * Sync server routine to client. Needed for backend processes to be up-to-date.
+ *
+ * NOTE: Not the most efficient but shouldn't be too expensive, for now.
+ */
+export async function pushRoutine() {
+  const routine = $routine.get();
+  if (!routine) throw new Error('invalid routine ' + routine); // eslint-disable-line @typescript-eslint/restrict-plus-operands
+  const pkt = pb.Packet.create({
+    type: {
+      $case: 'routine',
+      routine: routine,
+    },
+  });
+  console.log(pkt);
+  ws.send(pb.Packet.encode(pkt).finish());
+}
