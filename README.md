@@ -68,8 +68,8 @@ In windowed mode (useful if you want to still use the device), there are
 issues with Unity/UE-based games (they read from hardware mouse location,
 ignoring mouse events sent to window).
 
-| Platform                                                                                                       | OS                   | Windowed support                | Screenless support (i.e. laptop closed) |
-| -------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- | --------------------------------------- |
-| [crosvm](https://github.com/google/crosvm) / [Google Play Games beta](https://play.google.com/googleplaygames) | win32                | :white_check_mark:              | :white_check_mark:                      |
-| [Mumu Emulator](https://www.mumuplayer.com)                                                                    | win32                | :white_check_mark:              | :x: screen does not update              |
-| Unity/Unreal Engine                                                                                            | win32 (probably any) | :x: virtual mouse does not work | :grey_question:                         |
+| Platform                                                                                                       | OS                   | Windowed support                | Screenless support (i.e. laptop closed, screen off) |
+| -------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- | --------------------------------------------------- |
+| [crosvm](https://github.com/google/crosvm) / [Google Play Games beta](https://play.google.com/googleplaygames) | win32                | :white_check_mark:              | :white_check_mark:                                  |
+| [Mumu Emulator](https://www.mumuplayer.com)                                                                    | win32                | :white_check_mark:              | :warning: non-minimized active RDP session can work |
+| Unity / Unreal Engine                                                                                          | win32 (probably any) | :x: virtual mouse does not work | :grey_question:                                     |
