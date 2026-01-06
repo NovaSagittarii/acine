@@ -8,7 +8,7 @@ interface Binding {
   /** Description of the shortcut (used in indicator text). */
   label: string;
   /** Callback called when key is down. */
-  onKeyDown: (event: KeyboardEvent) => void;
+  onKeyDown: (event?: KeyboardEvent) => void;
   /** Callback called when key is up. */
   onKeyUp: (event?: KeyboardEvent) => void;
   /** Callback to call to update active state (push/pop). */
@@ -25,6 +25,7 @@ function push(
   // console.log("push", key);
   if (!bindings[key]) bindings[key] = [];
   const binding = bindings[key];
+  if (keydown.has(key)) onKeyDown(undefined);
   if (binding.length) binding[binding.length - 1].setActive(false);
   binding.push({ label, onKeyDown, onKeyUp, setActive, hidden });
   $bindings.set({ ...$bindings.get(), [key]: binding[binding.length - 1] });
@@ -101,7 +102,7 @@ export function useSetupShortcuts() {
 export default function useShortcut(
   label: string,
   key: KeyCode | null | false,
-  onKeyDown: (event: KeyboardEvent) => void,
+  onKeyDown: (event?: KeyboardEvent) => void,
   onKeyUp: (event?: KeyboardEvent) => void = () => {},
   hidden: boolean = false,
 ): boolean {
