@@ -50,6 +50,23 @@ def check_similarity(
     TM_CCOEFF is really bad on small gray squares for some reason
     TM_CCORR is less broken
     """
+    try:
+        return _check_similarity(
+            condition, img, ref_img, return_one=return_one, argpartition=argpartition
+        )
+    except cv2.error as e:
+        print(Warning(e))
+        return []
+
+
+def _check_similarity(
+    condition: Routine.Condition.Image,
+    img: ImageBmpType,
+    ref_img: ImageBmpType,
+    *,
+    return_one: bool = False,
+    argpartition: bool = False,
+) -> List[SimilarityResult]:
     if not condition.regions or condition.match_limit <= 0:
         return []
     if not condition.allow_regions:
