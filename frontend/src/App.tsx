@@ -290,7 +290,7 @@ function RoutineSelector() {
   const [isBusy, setBusy] = useState(false);
 
   return (
-    <div className='flex flex-col p-8 gap-2 overflow-y-auto'>
+    <div className='w-full flex flex-col p-8 gap-2 overflow-y-auto'>
       {isBusy ? (
         'Loading... probably (check console and server if it hangs).'
       ) : (
