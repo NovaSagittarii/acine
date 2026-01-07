@@ -177,8 +177,10 @@ class AcineServerProtocol(WebSocketServerProtocol):
         config = routine.launch_config
         self.ih = InputHandler(config.window_name, cmd=config.start_command)
         await self.ih.init()
-        if config.width and config.height:
-            await self.ih.resize(config.width, config.height)
+        if config.initial_position:
+            pos = config.initial_position
+            if pos.width and pos.height:
+                await self.ih.resize(pos.width, pos.height)
 
         if self.gc:
             self.gc.close()

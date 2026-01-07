@@ -27,9 +27,10 @@ message Routine {
     /* Window name to look for after running `start_command`.
      * TODO: handle "" window_name denoting entire desktop (see AHK)
      */
-    int32 width = 3;
-    int32 height = 4;
-    // TODO: convert to WindowPosition later
+    ac.WindowPosition initial_position = 3;
+    /* Where to position and resize the window upon opening.
+     * Zero/undefined values are ignored (defaults to current value).
+     */
   }
 
   // basically unused at the moment

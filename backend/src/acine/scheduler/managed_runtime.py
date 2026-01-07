@@ -24,6 +24,7 @@ class RoutineInstance:
         self.ih = InputHandler(
             routine.launch_config.window_name, cmd=routine.launch_config.start_command
         )
+        await self.ih.resize(routine.launch_config.width, routine.launch_config.height)
         self.gc = GameCapture(await self.ih.win.title)
         self.controller = BuiltinController(self.gc, self.ih)
         self.rt = Runtime(

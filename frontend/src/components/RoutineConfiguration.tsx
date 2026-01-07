@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react';
-import { $backendConfiguration, $routine, $sourceDimensions } from '@/state';
+import { $backendConfiguration, $routine } from '@/state';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import useForceUpdate from './useForceUpdate';
 import { $timeSpent } from '../activity';
@@ -57,15 +57,14 @@ export default function RoutineConfiguration() {
           />
           <Annotation label='resolution'>
             <div className='flex'>
-              {routine.launchConfig.width}x{routine.launchConfig.height}
+              {routine.launchConfig.initialPosition?.width}x
+              {routine.launchConfig.initialPosition?.height}
               <Button
                 variant='minimal'
                 className='hover:bg-amber-100'
                 onClick={async () => {
                   const pos = await getWindowSize();
-                  console.log($sourceDimensions.get(), pos);
-                  routine.launchConfig!.width = pos.width;
-                  routine.launchConfig!.height = pos.height;
+                  routine.launchConfig!.initialPosition = pos;
                   forceUpdate();
                 }}
               >
