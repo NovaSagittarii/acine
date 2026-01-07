@@ -60,6 +60,10 @@ Have an installation of Python and NodeJS.
    npm start            # run multischeduler
    ```
 
+   > [!CAUTION]
+   > Do not expose backend publicly, app runs arbitrary startCommand to
+   > launch application if window is not open.
+
 ## Compatibility Notes
 
 acine uses [AutoHotkey](https://www.autohotkey.com/) via the

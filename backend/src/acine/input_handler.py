@@ -98,6 +98,9 @@ class InputHandler:
         if title:
             if cmd and not await ahk.list_windows(title=title):
                 system(cmd)
+                # WARNING: yes, this is RCE. it's also kinda an
+                #          important feature for automation so...
+                #          maybe manual env-level restriction?
             self.title = title
             self.win = await ahk.win_wait(
                 title, timeout=600, detect_hidden_windows=True
