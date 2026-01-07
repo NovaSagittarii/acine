@@ -17,15 +17,18 @@ from acine.scheduler.scheduler import Scheduler
 
 class RoutineInstance:
     def __init__(self, routine: Routine):
+        self.routine = routine
+
+    async def init(self):
+        routine = self.routine
         self.ih = InputHandler(
             routine.launch_config.window_name, cmd=routine.launch_config.start_command
         )
-        self.gc = GameCapture(routine.launch_config.window_name)
+        self.gc = GameCapture(await self.ih.win.title)
         self.controller = BuiltinController(self.gc, self.ih)
         self.rt = Runtime(
             routine, self.controller, get_runtime_data(routine), enable_logs=True
         )
-        self.routine = routine
 
     def __enter__(self) -> RoutineInstance:
         self.time_opened = time.time()
@@ -111,6 +114,7 @@ class ManagedRuntime:
             return  # nothing ready to run
 
         with RoutineInstance(self.routine) as instance:
+            await instance.init()  # TODO: __aenter__/__aexit__ ??
             sri = BuiltinSchedulerRoutineInterface(self.routine, instance.rt)
             scheduler = Scheduler(sri)
             for sg in self.S.values():
