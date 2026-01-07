@@ -32,13 +32,13 @@ export default function Collapse({
 }: CollapseProps) {
   const [isOpen, setOpen] = useState(open);
   const [ref, setRef] = useState<HTMLElement | null>(null);
-  useShortcut(
-    (!isOpen ? 'Open ' : 'Close ') + shortcutLabel ||
+  useShortcut(shortcut || null, {
+    label:
+      (!isOpen ? 'Open ' : 'Close ') + shortcutLabel ||
       label?.toString() ||
       'Toggle Collapse',
-    shortcut || null,
-    () => setOpen((o) => !o),
-  );
+    onKeyDown: () => setOpen((o) => !o),
+  });
   useEffect(() => {
     if (isOpen) {
       onOpen();

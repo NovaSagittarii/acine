@@ -4,7 +4,22 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 export const $bindings = atom<Record<string, Binding | undefined>>({});
 const keydown = new Set<string>();
 
+export enum ShortcutType {
+  /**
+   * callbacks called on keydown and keyup.
+   * note that the key might be already down, then the event won't trigger
+   */
+  ON_PRESS = 1,
+  /**
+   * callbacks called on keydown and keyup and possibly on component render/destroy
+   * - if the key is down on render, keydown is called
+   * - if the key is down on destroy, keyup is called
+   */
+  WHILE_PRESSED = 2,
+}
+
 interface Binding {
+  type: ShortcutType;
   /** Description of the shortcut (used in indicator text). */
   label: string;
   /** Callback called when key is down. */
@@ -20,14 +35,16 @@ interface Binding {
 const bindings: Record<string, Array<Binding>> = {};
 function push(
   key: KeyCode,
-  { label, onKeyDown, onKeyUp, setActive, hidden }: Binding,
+  { type, label, onKeyDown, onKeyUp, setActive, hidden }: Binding,
 ) {
   // console.log("push", key);
   if (!bindings[key]) bindings[key] = [];
   const binding = bindings[key];
-  if (keydown.has(key)) onKeyDown(undefined);
+  if (type === ShortcutType.WHILE_PRESSED && keydown.has(key)) {
+    onKeyDown(undefined);
+  }
   if (binding.length) binding[binding.length - 1].setActive(false);
-  binding.push({ label, onKeyDown, onKeyUp, setActive, hidden });
+  binding.push({ type, label, onKeyDown, onKeyUp, setActive, hidden });
   $bindings.set({ ...$bindings.get(), [key]: binding[binding.length - 1] });
 }
 function pop(key: KeyCode) {
@@ -35,8 +52,11 @@ function pop(key: KeyCode) {
   const binding = bindings[key];
   console.assert(binding, `Invalid pop on ${key}, binding does not exist.`);
   console.assert(binding[0], `Invalid pop on ${key}, binding is empty.`);
-  if (keydown.has(key)) binding[binding.length - 1].onKeyUp(undefined);
-  binding.pop()?.setActive(false);
+  const removed = binding.pop()!;
+  if (removed.type === ShortcutType.WHILE_PRESSED && keydown.has(key)) {
+    removed.onKeyUp(undefined);
+  }
+  removed?.setActive(false);
   if (binding[0]) binding[binding.length - 1].setActive(true);
   $bindings.set({
     ...$bindings.get(),
@@ -100,16 +120,19 @@ export function useSetupShortcuts() {
  * @returns whether the keybind is active or not (useState)
  */
 export default function useShortcut(
-  label: string,
   key: KeyCode | null | false,
-  onKeyDown: (event?: KeyboardEvent) => void,
-  onKeyUp: (event?: KeyboardEvent) => void = () => {},
-  hidden: boolean = false,
+  {
+    label, // required for accessibility
+    type = ShortcutType.ON_PRESS,
+    onKeyDown = () => {},
+    onKeyUp = () => {},
+    hidden = false,
+  }: Pick<Binding, 'label'> & Partial<Omit<Binding, 'label'>>,
 ): boolean {
   const [isActive, setActive] = useState(true);
   useEffect(() => {
     if (key) {
-      push(key, { label, onKeyDown, onKeyUp, setActive, hidden });
+      push(key, { type, label, onKeyDown, onKeyUp, setActive, hidden });
       return () => pop(key);
     }
     return () => {};

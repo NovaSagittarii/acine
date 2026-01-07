@@ -30,23 +30,24 @@ export default function Button({
   onClick = (_modifiers: ModifierKeys) => {},
 }: ButtonProps) {
   const [isDown, setDown] = useState(false);
-  useShortcut(
-    shortcutLabel || (typeof children === 'string' ? children : 'Press button'),
-    shortcut,
-    (ev: KeyboardEvent) => {
-      if (ev.code === shortcut && !isDown.valueOf()) {
+  useShortcut(shortcut, {
+    label:
+      shortcutLabel ||
+      (typeof children === 'string' ? children : 'Press button'),
+    onKeyDown: (ev?: KeyboardEvent) => {
+      if (ev && ev.code === shortcut && !isDown.valueOf()) {
         setDown(true);
         const { shiftKey, altKey, ctrlKey, metaKey } = ev;
         void onClick({ shiftKey, altKey, ctrlKey, metaKey });
       }
     },
-    (ev: KeyboardEvent) => {
-      if (ev.code === shortcut) {
+    onKeyUp: (ev?: KeyboardEvent) => {
+      if (ev && ev.code === shortcut) {
         setDown(false);
       }
     },
-    hideShortcut,
-  );
+    hidden: hideShortcut,
+  });
   return (
     <div
       onClick={({ shiftKey, altKey, ctrlKey, metaKey }) =>

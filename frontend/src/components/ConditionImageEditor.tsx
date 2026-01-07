@@ -38,11 +38,10 @@ export default function ConditionImageEditor() {
     setOpen(false);
     $condition.set(null);
   };
-  function EscapeShortcut() {
-    /** NOTE: this is getting repeated loaded/unloaded, some circular dep here? */
-    useShortcut('Close ConditionImageEditor', 'Escape', (_event) => close());
-    return <></>;
-  }
+  useShortcut(open && 'Escape', {
+    label: 'Close ConditionImageEditor',
+    onKeyDown: close,
+  });
 
   const [src, setSrc] = useState<string>('');
   const [currFrameId, setCurrFrameId] = useState<string>(
@@ -117,7 +116,6 @@ export default function ConditionImageEditor() {
   return (
     condition && (
       <Modal isOpen={open} onClose={() => close()}>
-        {open && <EscapeShortcut />}
         <div className='flex flex-col m-12 grow bg-white pointer-events-auto'>
           <SelectAuto
             value={condition.frameId || undefined}

@@ -8,7 +8,7 @@ import { open } from '../client/input_stream';
 import { acquireOffset, runtimeSetCurr } from '../App.state';
 import Checkbox from './ui/Checkbox';
 import { $currentEdge } from './Edge.state';
-import useShortcut from './useShortcut';
+import useShortcut, { ShortcutType } from './useShortcut';
 
 interface ReplayEditorProps {
   replay: InputReplay;
@@ -44,12 +44,12 @@ export default function ReplayEditor({
   );
 
   const [isAutomove, setAutomove] = useState(false);
-  useShortcut(
-    'Move to destination on playback done',
-    'ShiftLeft',
-    () => setAutomove(true),
-    () => setAutomove(false),
-  );
+  useShortcut('ShiftLeft', {
+    label: 'Move to destination on playback done',
+    type: ShortcutType.WHILE_PRESSED,
+    onKeyDown: () => setAutomove(true),
+    onKeyUp: () => setAutomove(false),
+  });
 
   const [progress, setProgress] = useState(-1);
   useEffect(() => {

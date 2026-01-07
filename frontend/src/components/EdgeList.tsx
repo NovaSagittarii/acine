@@ -8,7 +8,7 @@ import useForceUpdate from './useForceUpdate';
 import Collapse from './ui/Collapse';
 import { choices, getEdgeDisplay, getEdgeIcon } from './Edge.util';
 import { $currentEdge } from './Edge.state';
-import useShortcut, { DigitKeys, FKeys } from './useShortcut';
+import useShortcut, { DigitKeys, FKeys, ShortcutType } from './useShortcut';
 import { useState } from 'react';
 
 interface EdgeListProps {
@@ -83,12 +83,12 @@ function EdgePresets({
 }) {
   const [isAltDown, setAltDown] = useState(false);
   const currentEdge = useStore($currentEdge);
-  useShortcut(
-    '+edge presets',
-    !currentEdge && 'KeyE',
-    () => setAltDown(true),
-    () => setAltDown(false),
-  );
+  useShortcut(!currentEdge && 'KeyE', {
+    label: '+edge presets',
+    type: ShortcutType.WHILE_PRESSED,
+    onKeyDown: () => setAltDown(true),
+    onKeyUp: () => setAltDown(false),
+  });
   return (
     <div className='w-full flex flex-col'>
       <div className='text-lg font-semibold'>Edge Presets</div>
