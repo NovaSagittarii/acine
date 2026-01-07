@@ -124,6 +124,17 @@ class TestGoto:
         assert runtime.context.curr.id == target, "should reach target"
 
     @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
+    @pytest.mark.parametrize("target", ("n1", "n3", "n9"))
+    async def test_branching(self, runtime: Runtime, target: str) -> None:
+        nodes = runtime.routine.nodes
+        nodes["n3"].edges.extend(nodes["n2"].edges)
+        nodes["n5"].edges.extend(nodes["n3"].edges)
+        nodes["n8"].edges.extend(nodes["n5"].edges)
+        assert runtime.context.curr.id == "start", "Runtime initializes to start."
+        await runtime.goto(target)
+        assert runtime.context.curr.id == target, "should reach target"
+
+    @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
     async def test_inactive_interrupt(self, runtime: Runtime) -> None:
         """inactive interrupts shouldn't block"""
         edges = runtime.routine.nodes["n3"].edges
