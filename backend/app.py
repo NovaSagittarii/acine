@@ -9,7 +9,7 @@ import io
 import os
 import re
 from pathlib import Path
-from typing import Final
+from typing import Awaitable, Callable, Final, Tuple, Type
 
 from quart import Quart, Response, send_file
 from quart_cors import cors
@@ -26,12 +26,34 @@ app = cors(app, allow_origin=CORS)
 # app = cors(app, allow_origin='*')  # if remote access
 
 
+type Endpoint = Callable[..., Awaitable[Response]]
+
+
+def except_handler(
+    error: Tuple[Type[Exception], ...] | Type[Exception], response: Response
+) -> Callable[[Endpoint], Endpoint]:
+    def decorator(func: Endpoint) -> Endpoint:
+        async def wrapper(*args: object, **kwargs: object) -> Response:
+            try:
+                return await func(*args, **kwargs)
+            except error:
+                return response
+
+        # need to rename function? https://stackoverflow.com/a/42254713
+        wrapper.__name__ = func.__name__
+        return wrapper
+
+    return decorator
+
+
 @app.route("/data/<routine_id>/img/<img_id>")
+@except_handler(FileNotFoundError, Response(status=404))
 async def read_img(routine_id: str, img_id: str) -> Response:
     return await send_file(Path(DATA_PATH, routine_id, "img", f"{img_id}.png"))
 
 
 @app.route("/data/<routine_id>/archive/<img_id>")
+@except_handler(FileNotFoundError, Response(status=404))
 async def read_img_archive(routine_id: str, img_id: str) -> Response:
     data = await PrefixedFilesystem([routine_id]).read_archive([f"{img_id}.bmp"])
     return await send_file(io.BytesIO(data), mimetype="image/bmp", cache_timeout=300)
