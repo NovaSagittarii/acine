@@ -99,11 +99,25 @@ export function useSetupShortcuts() {
         event.preventDefault();
       }
     };
+    const onBlur = () => {
+      // document lost focus, thus the key is no longer held
+      // such as when tabbing out (when returning, the keyup is not triggered)
+      for (const key in bindings) {
+        for (const { type, onKeyUp } of bindings[key]) {
+          if (type === ShortcutType.WHILE_PRESSED && keydown.has(key)) {
+            onKeyUp(undefined);
+          }
+        }
+      }
+      keydown.clear();
+    };
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
     };
   });
 }
