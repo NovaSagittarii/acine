@@ -26,6 +26,7 @@ message Packet {
     ac.Routine load_routine = 14;             // menu: Open
     BackendConfiguration get_configuration = 15;  // menu: lists all routines
     ac.RuntimeData runtime = 16;                  // sync runtime exec log
+    ac.WindowPosition get_window_size = 17;       // rpc: request window size
   }
 }
 

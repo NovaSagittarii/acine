@@ -129,6 +129,7 @@ ws.onmessage = async (data: MessageEvent<Blob>) => {
       $runtimeContext.set({ ...c });
       break;
     }
+    case 'getWindowSize':
     case 'sampleCondition':
     case 'sampleCurrent': {
       const cb = wsListeners[packet.id];
@@ -324,4 +325,27 @@ export async function pushRoutine() {
   });
   console.log(pkt);
   ws.send(pb.Packet.encode(pkt).finish());
+}
+
+/**
+ * @returns current window size (without trimming applied)
+ */
+export async function getWindowSize() {
+  return new Promise<pb.WindowPosition>((resolve) => {
+    const id = Math.floor(Math.random() * -(1 << 31));
+    wsListeners[id] = (packet: pb.Packet) => {
+      if (packet.type?.$case === 'getWindowSize') {
+        resolve(packet.type.getWindowSize);
+        delete wsListeners[id];
+      } else {
+        console.warn(`unexpected response for id ${id}`, packet);
+      }
+    };
+    const packet = pb.Packet.create({
+      id,
+      type: { $case: 'getWindowSize', getWindowSize: {} },
+    });
+    console.log(packet);
+    ws.send(pb.Packet.encode(packet).finish());
+  });
 }

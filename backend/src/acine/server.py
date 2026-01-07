@@ -155,6 +155,8 @@ class AcineServerProtocol(WebSocketServerProtocol):
                     await self.on_sample_condition(packet, False)
                 case "sample_current":
                     await self.on_sample_condition(packet, True)
+                case "get_window_size":
+                    await self.get_window_size(packet)
 
     def abort_task(f):
         """abort current task (goto/queue_edge) before running"""
@@ -451,4 +453,12 @@ class AcineServerProtocol(WebSocketServerProtocol):
         config.Clear()
         config.routines.extend(instance_manager.get_routines())
         config.start_commands.extend(get_start_command_candidates())
+        self.sendMessage(packet.SerializeToString(), isBinary=True)
+
+    async def get_window_size(self, packet: Packet) -> None:
+        pos = await self.ih.win.get_position()
+        packet.get_window_size.x = pos.x
+        packet.get_window_size.y = pos.y
+        packet.get_window_size.width = pos.width
+        packet.get_window_size.height = pos.height
         self.sendMessage(packet.SerializeToString(), isBinary=True)

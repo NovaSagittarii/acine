@@ -8,6 +8,7 @@ import LogsDisplay from './LogsDisplay';
 import Annotation from './ui/Annotation';
 import Button from './ui/Button';
 import { SelectAuto } from './ui/Select';
+import { getWindowSize } from '../App.state';
 
 export default function RoutineConfiguration() {
   const forceUpdate = useForceUpdate();
@@ -60,9 +61,11 @@ export default function RoutineConfiguration() {
               <Button
                 variant='minimal'
                 className='hover:bg-amber-100'
-                onClick={() => {
-                  routine.launchConfig!.width = $sourceDimensions.get()[0];
-                  routine.launchConfig!.height = $sourceDimensions.get()[1];
+                onClick={async () => {
+                  const pos = await getWindowSize();
+                  console.log($sourceDimensions.get(), pos);
+                  routine.launchConfig!.width = pos.width;
+                  routine.launchConfig!.height = pos.height;
                   forceUpdate();
                 }}
               >
