@@ -180,7 +180,9 @@ class AcineServerProtocol(WebSocketServerProtocol):
 
         if self.gc:
             self.gc.close()
-        self.gc = GameCapture(config.window_name)
+        # InputHandler uses ahk which grabs title by prefix
+        # GameCapture uses win32api which needs exact match, take title from ahk
+        self.gc = GameCapture(await self.ih.win.title)
         self.fs.set_prefix([routine.id])
 
     @abort_task
