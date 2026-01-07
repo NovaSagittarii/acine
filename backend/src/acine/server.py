@@ -336,7 +336,11 @@ class AcineServerProtocol(WebSocketServerProtocol):
                         try:
                             await rt.goto(target_node.id)
                             break
-                        except BaseException:
+                        # goto raises ValueError or AcineNoPath...
+                        # maybe just propagate to client ??
+                        # except BaseException:
+                        #     pass
+                        finally:
                             pass
                 except asyncio.CancelledError:
                     pass
