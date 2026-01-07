@@ -123,6 +123,17 @@ class TestGoto:
         await runtime.goto(target)
         assert runtime.context.curr.id == target, "should reach target"
 
+    @pytest.mark.parametrize("runtime", (chain(10),), indirect=True, ids=["chain"])
+    async def test_inactive_interrupt(self, runtime: Runtime) -> None:
+        """inactive interrupts shouldn't block"""
+        edges = runtime.routine.nodes["n3"].edges
+        edges.append(edges[0])  # normal copy (lower priority)
+        edges[1].precondition.timeout = 30000
+        edges[0].precondition.MergeFrom(Routine.Condition(fail=True, timeout=60000))
+        edges[0].trigger = Routine.Edge.EDGE_TRIGGER_TYPE_INTERRUPT
+        await runtime.goto("n9")
+        assert runtime.context.curr.id == "n9", "should reach target"
+
 
 @pytest.mark.asyncio
 @pytest.mark.asyncio_time_limit(time_limit=2)
