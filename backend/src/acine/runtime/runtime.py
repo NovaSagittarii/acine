@@ -343,7 +343,9 @@ class Runtime:
                         for e in self.nodes[self.context.curr.id].edges
                         if is_edge_ready(self.data, e)
                         or e.trigger == e.EDGE_TRIGGER_TYPE_INTERRUPT  # interrupt
-                    ]
+                    ],
+                    key=lambda t: t[:-1],
+                    # Routine.Edge doesn't support '<' operation so remove it
                 )
                 # remove useless edges... though navigation should be fully connected?
                 sorted_edges = [
