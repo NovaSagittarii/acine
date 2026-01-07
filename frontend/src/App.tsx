@@ -377,7 +377,7 @@ export default function App() {
   }, [config]);
 
   return (
-    <div className='w-screen h-screen'>
+    <div className='w-screen h-screen flex'>
       <div className='absolute w-full h-full flex justify-center items-center pointer-events-none font-bold text-red-500 text-lg'>
         {!isOpen && isClosed ? ( // closed without opening
           <>
