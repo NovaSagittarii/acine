@@ -82,8 +82,10 @@ function EdgePresets({
   forceUpdate: ReturnType<typeof useForceUpdate>;
 }) {
   const [isAltDown, setAltDown] = useState(false);
-  const currentEdge = useStore($currentEdge);
-  useShortcut(!currentEdge && 'KeyE', {
+  // const currentEdge = useStore($currentEdge);
+  // currentEdge is a bit inconsistent (edge mightve been deleted sometimes)
+  // or some other event results in desync...
+  useShortcut('KeyE', {
     label: '+edge presets',
     type: ShortcutType.WHILE_PRESSED,
     onKeyDown: () => setAltDown(true),
