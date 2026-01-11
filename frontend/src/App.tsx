@@ -60,6 +60,7 @@ function ScreenCopy() {
   const [dSend, setDSend] = useState(0);
   const [latencies, setLatencies] = useState<Array<number>>([]);
   const runtimeContext = useStore($runtimeContext);
+  const [frameCount, setFrameCount] = useState(0);
 
   const listen = useCallback(
     async (ev: MessageEvent<Blob>) => {
@@ -76,6 +77,7 @@ function ScreenCopy() {
           $sourceDimensions.set([width, height]);
           setDState(state);
           setLatencies([...latencies, Date.now() - dSend].splice(-150));
+          setFrameCount((x) => x + 1);
           const blob = new Blob([data as BlobPart]);
           const imageUrl = URL.createObjectURL(blob);
           saveCurrentFrame = () => {
@@ -96,7 +98,7 @@ function ScreenCopy() {
         }
       }
     },
-    [dSend],
+    [dSend, setFrameCount],
   );
 
   useEffect(() => {
@@ -162,7 +164,7 @@ function ScreenCopy() {
             <div className='absolute top-0 left-0 flex w-[150px] h-[50px] justify-end items-end bg-slate-100 opacity-100 hover:opacity-10 transition-opacity'>
               {latencies.map((x, index) => (
                 <div
-                  className='w-px'
+                  className={`w-px ${(index + frameCount) % 30 === 0 && 'border-b-4 border-white'}`}
                   key={index}
                   style={{
                     height: Math.min(x, 50) + 'px',
