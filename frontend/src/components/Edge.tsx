@@ -22,6 +22,7 @@ import SelectTab from './ui/SelectTab';
 import { $currentEdge } from './Edge.state';
 import Button from './ui/Button';
 import { useMemo } from 'react';
+import useShortcut from './useShortcut';
 
 interface EdgeProps extends Selectable {
   edge: Routine_Edge;
@@ -54,6 +55,14 @@ export default function Edge({
     () => runtimeContext.currentEdge?.id === edge.id,
     [runtimeContext],
   );
+
+  useShortcut(isCurrent && 'KeyO', {
+    label: 'set self loop',
+    onKeyDown: () => {
+      edge.to = edge.u;
+      forceUpdate();
+    },
+  });
 
   return (
     <div

@@ -104,6 +104,7 @@ function EdgePresets({
             className='hover:bg-red-100'
             onClick={() => {
               const newEdge = method();
+              newEdge.u = node.id;
               node.edges.push(newEdge);
               forceUpdate();
             }}
