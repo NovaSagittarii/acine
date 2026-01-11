@@ -7,7 +7,7 @@ const keydown = new Set<string>();
 type OptionalShortcut = KeyCode | null | false;
 export interface ShortcutUserProps {
   shortcut?: OptionalShortcut;
-  shortcutLabel?: Exclude<string, ''> | undefined;
+  shortcutLabel?: Exclude<string, ''>;
 }
 
 export enum ShortcutType {
@@ -73,7 +73,9 @@ function pop(key: KeyCode) {
 // returns True if this is on input/textarea element
 function checkSuppressBinding(event: KeyboardEvent): boolean {
   if (
-    (['INPUT', 'TEXTAREA'] as any[]).includes((event.target as any).tagName)
+    (['INPUT', 'TEXTAREA', 'SELECT'] as any[]).includes(
+      (event.target as any).tagName,
+    )
   ) {
     return true;
   }
@@ -85,7 +87,12 @@ export function useSetupShortcuts() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
-      if (checkSuppressBinding(event)) return;
+      if (checkSuppressBinding(event)) {
+        // on escape, unfocus the input element
+        // @ts-ignore event.target is an input/textarea/select element
+        if (event.key === 'Escape') event.target.blur();
+        return;
+      }
       keydown.add(event.code);
       // console.log(event.code, bindings);
       const binding = bindings[event.code];
