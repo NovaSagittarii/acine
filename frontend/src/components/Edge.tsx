@@ -6,7 +6,7 @@ import {
 import { Selectable } from './types';
 import EditableRoutineProperty from './ui/EditableRoutineProperty';
 import Condition from './Condition';
-import useForceUpdate from './useForceUpdate';
+import useForceUpdate, { ExtendsForceUpdateScope } from './useForceUpdate';
 import { useStore } from '@nanostores/react';
 import { $routine, $runtimeContext } from '@/state';
 import Select from './ui/Select';
@@ -23,7 +23,7 @@ import { $currentEdge } from './Edge.state';
 import Button from './ui/Button';
 import { useMemo } from 'react';
 
-interface EdgeProps extends Selectable {
+interface EdgeProps extends Selectable, ExtendsForceUpdateScope {
   edge: Routine_Edge;
 
   /**
@@ -36,8 +36,6 @@ interface EdgeProps extends Selectable {
    * don't collapse dependencies
    */
   showDependencies?: boolean;
-
-  overrideForceUpdate?: ReturnType<typeof useForceUpdate>;
 }
 
 export default function Edge({
@@ -50,11 +48,7 @@ export default function Edge({
   const routine = useStore($routine);
   const currentEdge = useStore($currentEdge);
   const runtimeContext = useStore($runtimeContext);
-
-  // written this way so initial useForceUpdate is always called (rules of hooks)
-  // see https://legacy.reactjs.org/docs/hooks-rules.html#explanation
-  let forceUpdate = useForceUpdate();
-  if (overrideForceUpdate) forceUpdate = overrideForceUpdate;
+  const forceUpdate = useForceUpdate(overrideForceUpdate);
 
   const isCurrent = useMemo(() => currentEdge === edge, [currentEdge, edge]);
   const isExec = useMemo(
