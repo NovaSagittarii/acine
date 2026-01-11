@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
 import Section from './Section';
-import useShortcut, { KeyCode } from '../useShortcut';
+import useShortcut, { ShortcutUserProps } from '../useShortcut';
 
-interface CollapseProps {
+interface CollapseProps extends ShortcutUserProps {
   className?: string;
   label: React.ReactNode;
   children: React.ReactNode;
 
   /** whether to keep it automatically open; by default is closed */
   open?: boolean;
-
-  shortcut?: KeyCode | undefined | false;
-  shortcutLabel?: string | undefined;
 
   onOpen?: () => void;
   onClose?: () => void;

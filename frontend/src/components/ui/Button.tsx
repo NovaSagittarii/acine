@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import useShortcut, { KeyCode } from '../useShortcut';
+import useShortcut, { ShortcutUserProps } from '../useShortcut';
 
 interface ModifierKeys {
   shiftKey?: boolean;
@@ -8,12 +8,10 @@ interface ModifierKeys {
   metaKey?: boolean;
 }
 
-interface ButtonProps {
+interface ButtonProps extends ShortcutUserProps {
   children: React.ReactNode;
   className?: string;
   onClick?: (modifiers: ModifierKeys) => void | Promise<void>;
-  shortcut?: KeyCode | null | false;
-  shortcutLabel?: Exclude<string, ''> | undefined;
   hideShortcut?: boolean;
   variant?: 'standard' | 'minimal';
   compact?: boolean; // disallow adding text on side? (expands box)

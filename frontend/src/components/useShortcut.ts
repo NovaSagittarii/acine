@@ -4,6 +4,12 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 export const $bindings = atom<Record<string, Binding | undefined>>({});
 const keydown = new Set<string>();
 
+type OptionalShortcut = KeyCode | null | false;
+export interface ShortcutUserProps {
+  shortcut?: OptionalShortcut;
+  shortcutLabel?: Exclude<string, ''> | undefined;
+}
+
 export enum ShortcutType {
   /**
    * callbacks called on keydown and keyup.
@@ -134,7 +140,7 @@ export function useSetupShortcuts() {
  * @returns whether the keybind is active or not (useState)
  */
 export default function useShortcut(
-  key: KeyCode | null | false,
+  key: OptionalShortcut,
   {
     label, // required for accessibility
     type = ShortcutType.ON_PRESS,
