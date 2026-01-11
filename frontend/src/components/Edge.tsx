@@ -36,6 +36,8 @@ interface EdgeProps extends Selectable {
    * don't collapse dependencies
    */
   showDependencies?: boolean;
+
+  overrideForceUpdate?: ReturnType<typeof useForceUpdate>;
 }
 
 export default function Edge({
@@ -43,11 +45,16 @@ export default function Edge({
   selected = false,
   fixedType = false,
   showDependencies = false,
+  overrideForceUpdate,
 }: EdgeProps) {
   const routine = useStore($routine);
   const currentEdge = useStore($currentEdge);
   const runtimeContext = useStore($runtimeContext);
-  const forceUpdate = useForceUpdate();
+
+  // written this way so initial useForceUpdate is always called (rules of hooks)
+  // see https://legacy.reactjs.org/docs/hooks-rules.html#explanation
+  let forceUpdate = useForceUpdate();
+  if (overrideForceUpdate) forceUpdate = overrideForceUpdate;
 
   const isCurrent = useMemo(() => currentEdge === edge, [currentEdge, edge]);
   const isExec = useMemo(
@@ -70,6 +77,7 @@ export default function Edge({
             values={Object.values(routine.nodes).map((n) => [n.name, n.id])}
             onChange={(v) => {
               edge.to = v;
+              forceUpdate();
             }}
           />
         </div>

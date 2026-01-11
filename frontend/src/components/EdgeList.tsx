@@ -57,7 +57,7 @@ export default function EdgeList({
               edge === $currentEdge.get() && $currentEdge.set(null)
             }
           >
-            <Edge edge={edge} />
+            <Edge edge={edge} overrideForceUpdate={forceUpdate} />
             <DeleteEdgeButton
               index={index}
               node={node}

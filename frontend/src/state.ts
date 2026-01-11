@@ -70,6 +70,14 @@ export function saveRoutine() {
 export function loadRoutine(ws: WebSocket) {
   const r = Routine.fromJSON(JSON.parse($routineBase64.get()));
 
+  // fix any missing from labels
+  // TODO: switch to source/target, edgelist?, server-client consistency?
+  for (const node of Object.values(r.nodes)) {
+    for (const edge of node.edges) {
+      edge.u = node.id;
+    }
+  }
+
   prepareRoutineFrames(ws, r);
 
   $routine.set(r);
