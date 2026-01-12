@@ -15,7 +15,7 @@
     "dev:backend+host": "cd backend && call .\\.venv\\Scripts\\activate.bat && npx concurrently -k -n ws,http \"cross-env BACKEND_HOST=0.0.0.0 python -u main.py\" \"cross-env FS_CORS='*' hypercorn app -b 0.0.0.0:9001\"",
     "dev:backend:test": "cd backend && call .\\.venv\\Scripts\\activate.bat && ptw --ignore-patterns \".venv\" . -- --picked --testmon",
     "dev:frontend": "cd frontend && npm run dev:nostdin",
-    "dev:frontend:test": "cd frontend && npx vitest --standalone",
+    "dev:frontend:test": "cd frontend && npx vitest --standalone --watch",
     "dev:testenv": "cd testenv && pythonw main.py",
     "lint": "cd frontend && npm run lint",
     "coverage": "cd backend && call .\\.venv\\Scripts\\activate.bat && pytest --cov=. --cov-report=html && http-server htmlcov",
