@@ -86,12 +86,10 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
   }
 
   let font: object;
-  p5.preload = () => {
+  p5.setup = () => {
     font = p5.loadFont(
       'http://themes.googleusercontent.com/licensed/font?kit=nlKOmF1wqcz6D96Jy0PsIA',
     );
-  };
-  p5.setup = () => {
     p5.createCanvas(400, 400, p5.WEBGL);
     p5.ortho();
     p5.textFont(font);
@@ -129,8 +127,9 @@ function sketch(p5: P5CanvasInstance<MySketchProps>) {
   };
 
   let zoom = 1;
-  p5.mouseWheel = (event: { delta: number }) => {
-    if (event.delta > 0) {
+  p5.mouseWheel = (event?: WheelEvent) => {
+    if (!event) return;
+    if (event?.deltaY > 0) {
       zoom /= 1.4;
     } else {
       zoom *= 1.4;
