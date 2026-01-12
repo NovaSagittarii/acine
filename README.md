@@ -19,6 +19,12 @@ Have an installation of Python and NodeJS.
 > nvm use 20.10.0 # or lts
 > ```
 
+> Installing [Task](https://taskfile.dev/docs/installation#winget)
+>
+> ```sh
+> winget install Task.Task
+> ```
+
 1. Install dependencies
 
    ```sh
