@@ -1,0 +1,45 @@
+version: "3"
+
+vars:
+  NPX: '{{.NPX | default "npx"}}'
+  NPM: '{{.NPM | default "pnpm"}}'
+
+includes:
+  proto:
+    taskfile: ../proto
+    dir: ../proto
+
+tasks:
+  prepare: # this is the same in proto/dist/ts btw
+    deps: [proto:ts:build]
+    cmds:
+      - "{{.NPM}} i"
+      - touch node_modules/.installed
+    sources:
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+    status:
+      - test -f node_modules/.installed
+  dev:
+    deps: [prepare]
+    cmd: "{{.NPX}} vite"
+  build:
+    deps: [prepare]
+    cmds:
+      - "{{.NPX}} tsc -b"
+      - "{{.NPX}} vite build"
+    sources:
+      - "*.ts"
+      - "*.tsx"
+    generates:
+      - dist
+  lint:
+    deps: [prepare]
+    cmd: "{{.NPX}} eslint --cache ."
+  preview:
+    deps: [build]
+    cmd: "{{.NPX}} vite preview"
+  test:
+    deps: [prepare]
+    cmd: "{{.NPX}} vitest run"
