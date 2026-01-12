@@ -1,0 +1,29 @@
+version: "3"
+
+includes:
+  proto:
+    taskfile: ../proto
+    dir: ../proto
+
+tasks:
+  prepare:
+    deps: [proto:py:build]
+    cmd: uv sync
+    sources:
+      - pyproject.toml
+  dev:
+    deps: [dev:ws, dev:http]
+  dev:ws:
+    deps: [prepare]
+    cmd: uv run main.py
+  dev:http:
+    deps: [prepare]
+    cmd: uv run hypercorn app -b localhost:9001
+  build:
+    deps: []
+    cmds: []
+    sources: []
+    generates: []
+  test:
+    deps: [prepare]
+    cmd: uv run pytest
