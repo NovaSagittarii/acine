@@ -2,6 +2,7 @@
 !package.json
 !pnpm-lock.yaml
 !.gitignore
+!.npmignore
 !index.ts
 !*.spec.ts
 !Taskfile.yaml
