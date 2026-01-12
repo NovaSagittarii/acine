@@ -14,23 +14,25 @@ includes:
 
 tasks:
   prepare:
-    deps: ['proto:py:build']
+    deps: ["proto:py:build"]
     cmd: uv sync
     sources:
       - pyproject.toml
   dev:
-    deps: ['dev:ws', 'dev:http']
+    deps: ["dev:ws", "dev:http"]
   dev:ws:
     deps: [prepare]
     cmd: uv run main.py
     env:
       BACKEND_HOST: "{{ .BACKEND_WS_HOST }}"
       BACKEND_PORT: "{{ .BACKEND_WS_PORT }}"
+      PYTHONUNBUFFERED: 1
   dev:http:
     deps: [prepare]
     cmd: "uv run hypercorn app -b {{ .BACKEND_HTTP_HOST }}:{{ .BACKEND_HTTP_PORT }}"
     env:
       FS_CORS: "{{ .BACKEND_HTTP_CORS }}"
+      PYTHONUNBUFFERED: 1
   build:
     deps: []
     cmds: []
