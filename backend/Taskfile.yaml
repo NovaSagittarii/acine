@@ -1,5 +1,12 @@
 version: "3"
 
+vars:
+  BACKEND_WS_HOST: localhost
+  BACKEND_WS_PORT: "9000"
+  BACKEND_HTTP_HOST: localhost
+  BACKEND_HTTP_PORT: "9001"
+  BACKEND_HTTP_CORS: null
+
 includes:
   proto:
     taskfile: ../proto
@@ -16,9 +23,14 @@ tasks:
   dev:ws:
     deps: [prepare]
     cmd: uv run main.py
+    env:
+      BACKEND_HOST: "{{ .BACKEND_WS_HOST }}"
+      BACKEND_PORT: "{{ .BACKEND_WS_PORT }}"
   dev:http:
     deps: [prepare]
-    cmd: uv run hypercorn app -b localhost:9001
+    cmd: "uv run hypercorn app -b {{ .BACKEND_HTTP_HOST }}:{{ .BACKEND_HTTP_PORT }}"
+    env:
+      FS_CORS: "{{ .BACKEND_HTTP_CORS }}"
   build:
     deps: []
     cmds: []

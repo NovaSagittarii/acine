@@ -40,3 +40,19 @@ tasks:
   dev:
     desc: Run in development mode.
     deps: [backend:dev, frontend:dev]
+  preview:
+    desc: Run in production mode (will re-build if there are changes).
+    deps:
+      - task: backend:dev:ws
+        vars:
+          BACKEND_WS_HOST: '{{ .BACKEND_WS_HOST | default "localhost"}}'
+          BACKEND_WS_PORT: '{{ .BACKEND_WS_PORT | default "9000"}}'
+      - task: backend:dev:http
+        vars:
+          BACKEND_HTTP_HOST: '{{ .BACKEND_HTTP_HOST | default "localhost"}}'
+          BACKEND_HTTP_PORT: '{{ .BACKEND_HTTP_PORT | default "9001"}}'
+          BACKEND_HTTP_CORS: '{{ .BACKEND_HTTP_CORS | default "*"}}'
+      - task: frontend:preview
+        vars:
+          WEB_HOST: '{{ .WEB_HOST | default "localhost"}}'
+          WEB_PORT: '{{ .WEB_PORT | default "4173"}}'

@@ -3,6 +3,8 @@ version: "3"
 vars:
   NPX: '{{.NPX | default "npx"}}'
   NPM: '{{.NPM | default "pnpm"}}'
+  WEB_HOST: localhost
+  WEB_PORT: 4173
 
 includes:
   proto:
@@ -24,6 +26,8 @@ tasks:
   dev:
     deps: [prepare]
     cmd: "{{.NPX}} vite"
+    env:
+      CI: true
   build:
     deps: [prepare]
     cmds:
@@ -40,7 +44,9 @@ tasks:
     cmd: "{{.NPX}} eslint --cache ."
   preview:
     deps: [build]
-    cmd: "{{.NPX}} vite preview"
+    cmd: "{{.NPX}} vite preview -- --host {{ .WEB_HOST }}:{{ .WEB_PORT }}"
+    env:
+      CI: true
   test:
     deps: [prepare]
     cmd: "{{.NPX}} vitest run"
