@@ -1,0 +1,24 @@
+version: "3"
+
+vars:
+  ENV: [py, ts]
+
+includes:
+  ts:
+    taskfile: ./dist/ts
+    dir: ./dist/ts
+  py:
+    taskfile: ./dist/py
+    dir: ./dist/py
+
+tasks:
+  build:
+    deps:
+      - for:
+          var: ENV
+        task: "{{.ITEM}}:build"
+  test:
+    deps:
+      - for:
+          var: ENV
+        task: "{{.ITEM}}:test"

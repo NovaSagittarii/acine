@@ -1,0 +1,42 @@
+version: "3"
+
+tasks:
+  prepare:
+    cmds:
+      - uv sync
+      - touch .venv/.installed
+    sources:
+      - pyproject.toml
+      - protoc-shim.bat
+    status:
+      - test -f .venv/.installed
+  build:
+    deps: [prepare]
+    cmds:
+      - >-
+        {{if eq OS "windows"}}.venv\\Scripts\\activate.bat
+        {{else}}.venv/bin/activate{{end}}
+      - >-
+        protol
+        --create-package
+        --in-place
+        -o acine_proto_dist
+        protoc
+        --protoc-path protoc-shim.bat
+        -p ../../src
+        --python_out=acine_proto_dist
+        --grpc_python_out=acine_proto_dist
+        --mypy_out=acine_proto_dist
+        ../../src/*.proto
+    sources:
+      - "../../src/**/*.proto"
+    generates:
+      - "**/*.py"
+      - "**/*.pyi"
+  test:
+    deps: [build]
+    cmds:
+      - >-
+        {{if eq OS "windows"}}.venv\\Scripts\\activate.bat
+        {{else}}.venv/bin/activate{{end}}
+      - pytest

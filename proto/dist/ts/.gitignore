@@ -4,3 +4,4 @@
 !.gitignore
 !index.ts
 !*.spec.ts
+!Taskfile.yaml
