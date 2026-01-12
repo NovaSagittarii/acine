@@ -10,13 +10,10 @@ tasks:
   prepare:
     cmds:
       - "{{.NPM}} i"
-      - touch node_modules/.installed
     sources:
       - package.json
       - package-lock.json
       - pnpm-lock.yaml
-    status:
-      - test -f node_modules/.installed
   build:
     deps: [prepare]
     cmds:
