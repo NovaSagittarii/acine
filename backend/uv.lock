@@ -41,6 +41,12 @@ dependencies = [
     { name = "windows-capture" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "acine" },
+    { name = "acine-proto-dist" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "acine-proto-dist", editable = "../proto/dist/py" },
@@ -70,6 +76,12 @@ requires-dist = [
     { name = "types-pywin32", specifier = ">=311.0.0.20250822" },
     { name = "uuid-utils", specifier = ">=0.11.0" },
     { name = "windows-capture", specifier = "~=1.5.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acine", editable = "." },
+    { name = "acine-proto-dist", editable = "../proto/dist/py" },
 ]
 
 [[package]]

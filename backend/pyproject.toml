@@ -47,7 +47,14 @@ asyncio_default_fixture_loop_scope = "function"
 timeout = 10
 
 [tool.uv.sources]
+acine = { workspace = true }
 acine-proto-dist = { path = "../proto/dist/py", editable = true }
 
 [mypy]
 check_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "acine",
+    "acine-proto-dist",
+]
