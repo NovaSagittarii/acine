@@ -7,6 +7,16 @@ import uuid
 from copy import deepcopy
 from typing import List, Optional
 
+from acine import instance_manager
+from acine.capture import GameCapture
+from acine.environ import get_start_command_candidates
+from acine.input_handler import InputHandler
+from acine.instance_manager import write_runtime_data
+from acine.persist import PrefixedFilesystem
+from acine.runtime.check_image import SimilarityResult, check_similarity
+from acine.runtime.runtime import IController, ImageBmpType, Runtime
+from acine.runtime.util import get_frame
+
 # import acine_proto_dist as pb
 from acine_proto_dist.frame_pb2 import Frame
 from acine_proto_dist.input_event_pb2 import InputEvent
@@ -21,16 +31,6 @@ from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import RuntimeState
 from autobahn.asyncio.websocket import WebSocketServerProtocol  # type: ignore
 from autobahn.websocket.types import ConnectionRequest  # type: ignore
-
-from acine import instance_manager
-from acine.capture import GameCapture
-from acine.environ import get_start_command_candidates
-from acine.input_handler import InputHandler
-from acine.instance_manager import write_runtime_data
-from acine.persist import PrefixedFilesystem
-from acine.runtime.check_image import SimilarityResult, check_similarity
-from acine.runtime.runtime import IController, ImageBmpType, Runtime
-from acine.runtime.util import get_frame
 
 # from .classifier import predict
 

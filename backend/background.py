@@ -3,7 +3,6 @@ import datetime
 import time
 
 import inquirer  # type: ignore
-
 from acine.instance_manager import get_routines
 from acine.power.win32 import sleep
 from acine.scheduler.managed_runtime import ManagedRuntime

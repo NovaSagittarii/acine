@@ -46,11 +46,10 @@ import os
 import cv2
 import numpy as np
 import ydf  # type: ignore
+from acine.persist import fs_read_sync as fs_read
 from acine_proto_dist.frame_pb2 import Frame
 from acine_proto_dist.routine_pb2 import Routine
 from numpy import ndarray
-
-from acine.persist import fs_read_sync as fs_read
 
 DIMENSIONS = (10, 10)
 rt = Routine.FromString(fs_read(["rt.pb"]))

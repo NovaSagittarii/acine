@@ -8,9 +8,6 @@ import os
 from typing import Final, List
 from uuid import uuid4
 
-from acine_proto_dist.routine_pb2 import Routine
-from acine_proto_dist.runtime_pb2 import RuntimeData
-
 from acine.persist import (
     PrefixedFilesystem,
     fs_read_sync,
@@ -18,6 +15,8 @@ from acine.persist import (
     mkdir,
     resolve,
 )
+from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import RuntimeData
 
 TESTENV_PATH: Final[str] = os.path.realpath(
     os.path.join(

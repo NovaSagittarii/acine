@@ -8,11 +8,10 @@ from typing import TYPE_CHECKING, Any, cast
 import cv2
 import numpy as np
 import pytest
+from acine.runtime.check_image import ImageBmpType, SimilarityResult, check_similarity
 from acine_proto_dist.position_pb2 import Rect
 from acine_proto_dist.routine_pb2 import Routine
 from pytest_mock import MockerFixture
-
-from acine.runtime.check_image import ImageBmpType, SimilarityResult, check_similarity
 
 if TYPE_CHECKING:
     # https://stackoverflow.com/a/79654693

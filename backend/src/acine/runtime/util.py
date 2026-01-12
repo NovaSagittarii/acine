@@ -10,7 +10,6 @@ from functools import lru_cache
 from typing import Generic, TypeVar
 
 import cv2
-
 from acine.persist import resolve
 from acine.runtime.check_image import ImageBmpType
 

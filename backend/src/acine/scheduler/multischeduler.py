@@ -2,9 +2,8 @@ import datetime
 import time
 from typing import List
 
-from acine_proto_dist.routine_pb2 import Routine
-
 from acine.scheduler.managed_runtime import ManagedRuntime
+from acine_proto_dist.routine_pb2 import Routine
 
 
 class Multischeduler:

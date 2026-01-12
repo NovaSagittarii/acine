@@ -17,11 +17,6 @@ from typing import Callable, Final, List, Optional
 
 import cv2
 import networkx as nx
-from acine_proto_dist.input_event_pb2 import InputReplay
-from acine_proto_dist.routine_pb2 import Routine
-from acine_proto_dist.runtime_pb2 import Level, RuntimeData, RuntimeState
-from uuid_utils import uuid7
-
 from acine.instance_manager import get_pfs
 from acine.logging import (
     ActionLogger,
@@ -43,6 +38,10 @@ from acine.runtime.exceptions import (
 )
 from acine.runtime.util import get_frame, now, sleep
 from acine.scheduler.typing import ExecResult
+from acine_proto_dist.input_event_pb2 import InputReplay
+from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import Level, RuntimeData, RuntimeState
+from uuid_utils import uuid7
 
 # timeout in milliseconds that overrides when the timeout is unset
 DEFAULT_TIMEOUT: Final[int] = 30000

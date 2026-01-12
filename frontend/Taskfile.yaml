@@ -13,7 +13,7 @@ includes:
 
 tasks:
   prepare: # this is the same in proto/dist/ts btw
-    deps: [proto:ts:build]
+    deps: ['proto:ts:build']
     cmds:
       - "{{.NPM}} i"
       - touch node_modules/.installed

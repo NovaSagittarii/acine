@@ -3,8 +3,6 @@ from __future__ import annotations
 from typing import Any, Awaitable, Callable, TypeAlias, TypeVar
 
 import pytest
-from pytest_mock import MockerFixture
-
 from acine.runtime.exceptions import (
     AcineNoPath,
     SubroutineExecutionError,
@@ -17,6 +15,7 @@ from acine.runtime.runtime import (
     Routine,
     Runtime,
 )
+from pytest_mock import MockerFixture
 
 NodeType: TypeAlias = Routine.Node.NodeType
 EdgeType: TypeAlias = Routine.Edge.EdgeTriggerType

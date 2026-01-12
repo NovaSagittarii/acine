@@ -9,15 +9,14 @@ from asyncio import Lock, Semaphore, sleep
 from typing import Optional
 
 import cv2
+from acine.input_handler import get_title_bar_height
+from acine.runtime.check_image import ImageBmpType
 from numpy import ndarray, uint8
 from windows_capture import (  # type: ignore
     Frame,
     InternalCaptureControl,
     WindowsCapture,
 )
-
-from acine.input_handler import get_title_bar_height
-from acine.runtime.check_image import ImageBmpType
 
 
 class GameCapture:  # thanks joshua

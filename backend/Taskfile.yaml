@@ -14,12 +14,12 @@ includes:
 
 tasks:
   prepare:
-    deps: [proto:py:build]
+    deps: ['proto:py:build']
     cmd: uv sync
     sources:
       - pyproject.toml
   dev:
-    deps: [dev:ws, dev:http]
+    deps: ['dev:ws', 'dev:http']
   dev:ws:
     deps: [prepare]
     cmd: uv run main.py

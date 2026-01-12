@@ -4,11 +4,10 @@ functions for checking conditions
 
 from typing import Awaitable, Callable, Optional, Tuple, TypeAlias
 
-from acine_proto_dist.routine_pb2 import Routine
-from acine_proto_dist.runtime_pb2 import Action
-
 from acine.runtime.check_image import ImageBmpType, check_image
 from acine.runtime.util import now, sleep
+from acine_proto_dist.routine_pb2 import Routine
+from acine_proto_dist.runtime_pb2 import Action
 
 GetImageCallableType: TypeAlias = Callable[[], Awaitable[ImageBmpType]]
 ActionResult: TypeAlias = Action.Result

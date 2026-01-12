@@ -11,11 +11,10 @@ import re
 from pathlib import Path
 from typing import Awaitable, Callable, Final, Tuple, Type
 
-from quart import Quart, Response, send_file
-from quart_cors import cors
-
 from acine.persist import PATH as DATA_PATH
 from acine.persist import PrefixedFilesystem
+from quart import Quart, Response, send_file
+from quart_cors import cors
 
 CORS: Final[str | re.Pattern] = os.environ.get(
     "FS_CORS", re.compile("https?://localhost:(4173|5173)")

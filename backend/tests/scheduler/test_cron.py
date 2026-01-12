@@ -4,9 +4,8 @@ from random import randint, random, seed, shuffle
 from typing import List
 
 import pytest
-from acine_proto_dist.routine_pb2 import Routine
-
 from acine.scheduler.cron import TZ, next
+from acine_proto_dist.routine_pb2 import Routine
 
 SG = Routine.SchedulingGroup
 

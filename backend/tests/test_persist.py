@@ -4,7 +4,6 @@ import shutil
 from typing import Awaitable, Callable, Generator, List
 
 import pytest
-
 from acine.persist import PrefixedFilesystem, mkdir, resolve
 
 

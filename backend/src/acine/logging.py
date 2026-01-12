@@ -11,6 +11,7 @@ from random import random
 from types import TracebackType
 from typing import Optional, Sequence, TypeAlias
 
+from acine.runtime.util import now
 from acine_proto_dist.routine_pb2 import Routine
 from acine_proto_dist.runtime_pb2 import (
     Action,
@@ -19,8 +20,6 @@ from acine_proto_dist.runtime_pb2 import (
     RuntimeData,
     RuntimeState,
 )
-
-from acine.runtime.util import now
 
 
 def mark_failure(info: ExecutionInfo) -> ExecutionInfo:

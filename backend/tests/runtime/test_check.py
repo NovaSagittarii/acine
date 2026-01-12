@@ -2,10 +2,9 @@ from typing import cast
 
 import numpy as np
 import pytest
+from acine.runtime.check import ImageBmpType, Routine, check_once
 from acine_proto_dist.position_pb2 import Rect
 from pytest_mock import MockerFixture
-
-from acine.runtime.check import ImageBmpType, Routine, check_once
 
 
 class TestCheck:

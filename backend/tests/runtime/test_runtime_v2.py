@@ -8,8 +8,6 @@ from typing import AsyncIterator, Iterator
 
 import pytest
 import pytest_asyncio
-from pytest_mock import MockerFixture
-
 from acine.runtime.runtime import (
     AcineNavigationError,
     ExecResult,
@@ -17,6 +15,7 @@ from acine.runtime.runtime import (
     Routine,
     Runtime,
 )
+from pytest_mock import MockerFixture
 
 from .util import chain, create_from_edge_list, forest  # type: ignore
 

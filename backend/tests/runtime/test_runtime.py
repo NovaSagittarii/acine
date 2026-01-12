@@ -4,11 +4,10 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
+from acine.runtime.runtime import ActionResult, IController, Routine, Runtime
 from acine_proto_dist.input_event_pb2 import InputEvent, InputReplay
 from acine_proto_dist.position_pb2 import Point
 from pytest_mock import MockerFixture
-
-from acine.runtime.runtime import ActionResult, IController, Routine, Runtime
 
 NodeType = Routine.Node.NodeType
 EdgeType = Routine.Edge.EdgeTriggerType

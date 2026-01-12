@@ -3,15 +3,14 @@ from typing import Any, List, Sequence, Tuple
 from unittest.mock import AsyncMock, Mock, call
 
 import pytest
-from acine_proto_dist.routine_pb2 import Routine
-from pytest_mock import AsyncMockType
-
 from acine.scheduler.scheduler import Scheduler
 from acine.scheduler.typing import (
     ExecResult,
     ISchedulerRoutineInterface,
     OnScheduledCallbackType,
 )
+from acine_proto_dist.routine_pb2 import Routine
+from pytest_mock import AsyncMockType
 
 
 class AlwaysOk(ISchedulerRoutineInterface):
