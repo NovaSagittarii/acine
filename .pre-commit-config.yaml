@@ -44,3 +44,4 @@ repos:
     rev: "21ca5323a9c87ee37a434e0ca908efc0a89daa07" # v0.21.0
     hooks:
       - id: yamlfmt
+        args: ["-formatter", "retain_line_breaks_single=true"]

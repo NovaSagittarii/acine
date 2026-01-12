@@ -1,7 +1,9 @@
 version: "3"
 output: prefixed
+
 vars:
   ACTIONS: [build, dev, test]
+
 includes:
   backend:
     taskfile: backend
@@ -15,6 +17,7 @@ includes:
     taskfile: proto
     dir: proto
     internal: true
+
 tasks:
   prepare:
     desc: Setup pre-commit (dev tools).
