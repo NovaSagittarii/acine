@@ -16,10 +16,7 @@ tasks:
     deps: [prepare]
     cmds:
       - >-
-        {{if eq OS "windows"}}.venv\\Scripts\\activate.bat
-        {{else}}.venv/bin/activate{{end}}
-      - >-
-        protol
+        uv run protol
         --create-package
         --in-place
         -o acine_proto_dist
@@ -38,7 +35,4 @@ tasks:
   test:
     deps: [build]
     cmds:
-      - >-
-        {{if eq OS "windows"}}.venv\\Scripts\\activate.bat
-        {{else}}.venv/bin/activate{{end}}
-      - pytest
+      - uv run pytest
