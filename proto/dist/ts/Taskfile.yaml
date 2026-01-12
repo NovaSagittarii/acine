@@ -4,6 +4,8 @@ vars:
   NPX: '{{.NPX | default "npx"}}'
   NPM: '{{.NPM | default "pnpm"}}'
 
+run: when_changed
+
 tasks:
   prepare:
     cmds:
