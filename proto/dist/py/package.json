@@ -4,9 +4,7 @@
   "description": "protobuf generation script for acine python",
   "main": "",
   "scripts": {
-    "prepare:win32": "python -m uv venv --seed --python 3.12 & .venv\\Scripts\\activate && pip install -r requirements.txt && pip install -e .",
-    "prepare:nix": "python -m uv venv --seed --python 3.12 ; . .venv\\bin\\activate && pip install -r requirements.txt && pip install -e .",
-    "prepare": "run-script-os",
+    "prepare": "uv sync",
     "build:win32": ".venv\\Scripts\\activate.bat && protol --create-package --in-place -o acine_proto_dist protoc --protoc-path protoc-shim.bat -p ../../src --python_out=acine_proto_dist --grpc_python_out=acine_proto_dist --mypy_out=acine_proto_dist ../../src/*.proto",
     "build:nix": "echo NOT WORKING; exit; . .venv\\bin\\activate && protol --create-package --in-place -o acine_proto_dist protoc -p ../../src --python_out=acine_proto_dist --grpc_python_out=acine_proto_dist --mypy_out=acine_proto_dist ../../src/*.proto",
     "build": "run-script-os",
