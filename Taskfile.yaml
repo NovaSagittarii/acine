@@ -1,9 +1,7 @@
 version: "3"
 output: prefixed
-
 vars:
   ACTIONS: [build, dev, test]
-
 includes:
   backend:
     taskfile: backend
@@ -17,13 +15,13 @@ includes:
     taskfile: proto
     dir: proto
     internal: true
-
 tasks:
   prepare:
     desc: Setup pre-commit (dev tools).
     preconditions:
       - command -v uv
     cmds:
+      - uv tool run pre-commit
       - uv tool run pre-commit install
     sources:
       - .pre-commit-config.yaml
@@ -39,7 +37,7 @@ tasks:
         task: "{{.ITEM}}:test"
   dev:
     desc: Run in development mode.
-    deps: [backend:dev, frontend:dev]
+    deps: ['backend:dev', 'frontend:dev']
   preview:
     desc: Run in production mode (will re-build if there are changes).
     deps:

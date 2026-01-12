@@ -20,6 +20,7 @@ repos:
     hooks:
       - id: flake8
         # ignore E203 for whitespace around ':' issues
+
         # see https://github.com/PyCQA/pycodestyle/issues/373
         # ignore W503 due to how black formats (related is W504)
         args: [--max-line-length=88, "--ignore=E203,W503"]
@@ -39,3 +40,7 @@ repos:
     rev: "2b5aa8cab0ebe1877fcba15d6714fb662dc9dce8" # v0.53.0
     hooks:
       - id: protolint
+  - repo: https://github.com/google/yamlfmt
+    rev: "21ca5323a9c87ee37a434e0ca908efc0a89daa07" # v0.21.0
+    hooks:
+      - id: yamlfmt
