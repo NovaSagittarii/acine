@@ -68,7 +68,9 @@ export default function Edge({
           <Select
             label={'destination'}
             value={edge.to}
-            values={Object.values(routine.nodes).map((n) => [n.name, n.id])}
+            values={[['<empty>', ''] as [string, string]].concat(
+              Object.values(routine.nodes).map((n) => [n.name, n.id]),
+            )}
             onChange={(v) => {
               edge.to = v;
               forceUpdate();
