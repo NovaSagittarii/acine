@@ -45,7 +45,7 @@ class RoutineInstance:
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         self.__add_runtime(time.time() - self.time_opened)
-        self.close()
+        await self.close()
         if exc_type and exc_val:
             raise exc_val
         return None
@@ -53,9 +53,9 @@ class RoutineInstance:
     async def queue_edge(self, edge: Routine.Edge) -> None:
         await self.rt.queue_edge(edge.id)
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self.gc.close()
-        self.ih.close()
+        await self.ih.close()
         write_runtime_data(self.routine, self.rt.data)
 
     def __add_runtime(self, duration: float) -> None:
