@@ -31,11 +31,12 @@ class RoutineInstance:
             routine, self.controller, get_runtime_data(routine), enable_logs=True
         )
 
-    def __enter__(self) -> RoutineInstance:
+    async def __aenter__(self) -> RoutineInstance:
+        await self.init()
         self.time_opened = time.time()
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
@@ -114,7 +115,7 @@ class ManagedRuntime:
         if self.next_time() > t:
             return  # nothing ready to run
 
-        with RoutineInstance(self.routine) as instance:
+        async with RoutineInstance(self.routine) as instance:
             await instance.init()  # TODO: __aenter__/__aexit__ ??
             sri = BuiltinSchedulerRoutineInterface(self.routine, instance.rt)
             scheduler = Scheduler(sri)
