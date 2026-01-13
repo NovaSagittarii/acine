@@ -24,6 +24,7 @@ class RoutineInstance:
         self.ih = InputHandler(
             routine.launch_config.window_name, cmd=routine.launch_config.start_command
         )
+        await self.ih.init()
         pos = routine.launch_config.initial_position
         await self.ih.resize(pos.width, pos.height)  # TODO: self.ih takes a Position?
         self.gc = GameCapture(await self.ih.win.title)

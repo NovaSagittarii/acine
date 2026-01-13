@@ -88,7 +88,7 @@ class InputHandler:
         self.y = 0
         print(f"y-offset(titlebar)={self.y_offset}")
 
-    async def init(self):
+    async def init(self) -> None:
         if self._init_completed:
             return
         self._init_completed = True
@@ -127,7 +127,9 @@ class InputHandler:
     async def resize(self, w: int, h: int) -> None:
         if self.win:
             pos = await self.win.get_position()
-            await self.win.move(x=pos.x, y=pos.y, width=w, height=h)
+            await self.win.move(
+                x=pos.x, y=pos.y, width=w or pos.width, height=h or pos.height
+            )
 
     async def mouse_move(self, x: int, y: int) -> None:
         self.x = x
