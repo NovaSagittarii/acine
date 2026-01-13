@@ -44,7 +44,7 @@ tasks:
     cmd: "{{.NPX}} eslint --cache ."
   preview:
     deps: [build]
-    cmd: "{{.NPX}} vite preview -- --host {{ .WEB_HOST }}:{{ .WEB_PORT }}"
+    cmd: "{{.NPX}} vite preview --host {{ .WEB_HOST }} --port {{ .WEB_PORT }}"
     env:
       CI: true
   test:
